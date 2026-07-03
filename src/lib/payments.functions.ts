@@ -1,11 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const BASE = () => (process.env.UDDOKTAPAY_BASE_URL ?? "").replace(/\/+$/, "");
 const KEY = () => process.env.UDDOKTAPAY_API_KEY ?? "";
-const APP_URL = () =>
-  process.env.APP_URL ?? process.env.PUBLIC_URL ?? "http://localhost:8080";
+function appUrlFromRequest() {
+  try {
+    const req = getRequest();
+    const u = new URL(req.url);
+    const proto = req.headers.get("x-forwarded-proto") ?? u.protocol.replace(":", "");
+    const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? u.host;
+    return `${proto}://${host}`;
+  } catch {
+    return process.env.APP_URL ?? "http://localhost:8080";
+  }
+}
 
 type UPCharge = { status: boolean; message?: string; payment_url?: string; invoice_id?: string };
 type UPVerify = {
@@ -90,7 +100,7 @@ export const createCourseCharge = createServerFn({ method: "POST" })
       .single();
     if (oErr) throw new Error(oErr.message);
 
-    const appUrl = APP_URL().replace(/\/+$/, "");
+    const appUrl = appUrlFromRequest().replace(/\/+$/, "");
     const charge = await upFetch<UPCharge>("checkout-v2", {
       full_name: profile?.name || profile?.email || "Student",
       email: profile?.email || `user-${userId.slice(0, 8)}@example.com`,
