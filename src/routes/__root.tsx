@@ -88,7 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
       },
     ],
   }),
@@ -124,33 +124,33 @@ function Header() {
     return () => sub.subscription.unsubscribe();
   }, []);
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-ink/80 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-brand-gradient text-brand-foreground font-bold">
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-lime text-ink font-mono font-bold">
             শি
           </span>
-          <span className="text-lg font-semibold tracking-tight">{bn.brand}</span>
+          <span className="font-display text-lg font-extrabold text-terminal">{bn.brand}</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">{bn.nav.home}</Link>
-          <Link to="/courses" className="hover:text-foreground">{bn.nav.courses}</Link>
+        <nav className="hidden md:flex items-center gap-7 text-sm font-body text-terminal/80">
+          <Link to="/" className="hover:text-lime transition-colors">{bn.nav.home}</Link>
+          <Link to="/courses" className="hover:text-lime transition-colors">{bn.nav.courses}</Link>
           {signedIn && (
-            <Link to="/dashboard" className="hover:text-foreground">{bn.nav.dashboard}</Link>
+            <Link to="/dashboard" className="hover:text-lime transition-colors">{bn.nav.dashboard}</Link>
           )}
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
             <Link
               to="/dashboard"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+              className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
             >
               {bn.nav.dashboard}
             </Link>
           ) : (
             <Link
               to="/auth"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+              className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
             >
               {bn.nav.login}
             </Link>
@@ -163,12 +163,14 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="mt-24 border-t border-border/60 bg-cream/50">
-      <div className="container-page py-10 text-sm text-muted-foreground flex flex-col md:flex-row justify-between gap-4">
-        <p>© {new Date().getFullYear()} {bn.brand} — {bn.footer.rights}</p>
+    <footer className="mt-24 border-t border-border/70 bg-code-gray/60">
+      <div className="container-page py-10 text-sm font-mono text-terminal/60 flex flex-col md:flex-row justify-between gap-4">
+        <p>
+          <span className="text-lime">$</span> © {new Date().getFullYear()} {bn.brand} — {bn.footer.rights}
+        </p>
         <div className="flex gap-6">
-          <Link to="/courses" className="hover:text-foreground">{bn.nav.courses}</Link>
-          <Link to="/auth" className="hover:text-foreground">{bn.nav.login}</Link>
+          <Link to="/courses" className="hover:text-lime">{bn.nav.courses}</Link>
+          <Link to="/auth" className="hover:text-lime">{bn.nav.login}</Link>
         </div>
       </div>
     </footer>
