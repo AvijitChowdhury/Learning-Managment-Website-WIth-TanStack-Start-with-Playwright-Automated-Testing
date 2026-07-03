@@ -23,3 +23,4 @@ export function formatBnNumber(n: number | string): string {
 export function formatBnDate(d: string | Date): string {
   return bnDate.format(typeof d === "string" ? new Date(d) : d);
 }
+export const fmtBDT = formatBDT;
