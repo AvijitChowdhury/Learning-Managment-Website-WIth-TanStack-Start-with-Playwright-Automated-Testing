@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listMyEnrollments } from "@/lib/learning.functions";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({ meta: [{ title: "ড্যাশবোর্ড — শিখো" }, { name: "robots", content: "noindex" }] }),
   component: DashboardPage,
 });
