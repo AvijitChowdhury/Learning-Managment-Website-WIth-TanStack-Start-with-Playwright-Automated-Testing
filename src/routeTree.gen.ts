@@ -13,6 +13,7 @@ import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CheckoutCancelledRouteImport } from './routes/checkout.cancelled'
@@ -48,6 +49,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesIndexRoute = CoursesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CoursesRoute,
 } as any)
 const CoursesSlugRoute = CoursesSlugRouteImport.update({
   id: '/$slug',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/checkout/cancelled': typeof CheckoutCancelledRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
+  '/courses/': typeof CoursesIndexRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -164,10 +171,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/courses': typeof CoursesRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
+  '/courses': typeof CoursesIndexRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -191,6 +198,7 @@ export interface FileRoutesById {
   '/checkout/cancelled': typeof CheckoutCancelledRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
+  '/courses/': typeof CoursesIndexRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -214,6 +222,7 @@ export interface FileRouteTypes {
     | '/checkout/cancelled'
     | '/checkout/return'
     | '/courses/$slug'
+    | '/courses/'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
@@ -229,10 +238,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/courses'
     | '/checkout/cancelled'
     | '/checkout/return'
     | '/courses/$slug'
+    | '/courses'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/checkout/cancelled'
     | '/checkout/return'
     | '/courses/$slug'
+    | '/courses/'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/reviews'
@@ -307,6 +317,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/courses/': {
+      id: '/courses/'
+      path: '/'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof CoursesRoute
     }
     '/courses/$slug': {
       id: '/courses/$slug'
@@ -491,10 +508,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface CoursesRouteChildren {
   CoursesSlugRoute: typeof CoursesSlugRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
 const CoursesRouteChildren: CoursesRouteChildren = {
   CoursesSlugRoute: CoursesSlugRoute,
+  CoursesIndexRoute: CoursesIndexRoute,
 }
 
 const CoursesRouteWithChildren =

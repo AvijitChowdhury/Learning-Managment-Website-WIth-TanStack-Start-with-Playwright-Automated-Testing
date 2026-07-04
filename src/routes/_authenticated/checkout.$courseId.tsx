@@ -37,7 +37,14 @@ function CheckoutPage() {
         navigate({ to: "/dashboard/courses/$id", params: { id: courseId } });
         return;
       }
-      window.location.href = res.payment_url!;
+      // Break out of the Lovable preview iframe — payment gateways send
+      // X-Frame-Options: DENY, so navigating the iframe shows "refused to connect".
+      const target = res.payment_url!;
+      try {
+        (window.top ?? window).location.href = target;
+      } catch {
+        window.open(target, "_blank", "noopener,noreferrer");
+      }
     } catch (e: any) {
       setErr(e?.message ?? "কিছু ভুল হয়েছে");
       setLoading(false);

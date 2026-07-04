@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Bengali LMS — dark terminal + lime aesthetic. */
+/* Midnight Indigo — deep navy + electric indigo. Sora display, Manrope body. */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -35,62 +35,67 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
 
-  /* Brand tokens */
+  /* Brand tokens (kept for backward class compatibility) */
   --color-ink: var(--ink);
-  --color-lime: var(--lime);
-  --color-lime-soft: var(--lime-soft);
+  --color-lime: var(--indigo);
+  --color-lime-soft: var(--indigo-soft);
   --color-terminal: var(--terminal);
   --color-wire: var(--wire);
   --color-amber: var(--amber);
   --color-code-gray: var(--code-gray);
   --color-cream: var(--cream);
+  --color-indigo: var(--indigo);
+  --color-indigo-soft: var(--indigo-soft);
+  --color-navy: var(--navy);
 
-  --font-display: "Baloo Da 2", "Tiro Bangla", system-ui, sans-serif;
+  --font-display: "Sora", "Baloo Da 2", "Tiro Bangla", system-ui, sans-serif;
   --font-bn-serif: "Tiro Bangla", serif;
-  --font-body: "Hind Siliguri", system-ui, sans-serif;
-  --font-sans: "Hind Siliguri", system-ui, sans-serif;
+  --font-body: "Manrope", "Hind Siliguri", system-ui, sans-serif;
+  --font-sans: "Manrope", "Hind Siliguri", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
-  /* Brand palette */
-  --ink: #0B0F0E;
-  --lime: #C8FF4D;
-  --lime-soft: #E4FF9E;
-  --terminal: #F4F6F2;
-  --wire: #3A5F3F;
-  --amber: #FFB23D;
-  --code-gray: #1A211F;
-  --cream: #F4F6F2;
+  /* Midnight Indigo palette */
+  --ink: #0a0a1a;
+  --navy: #141432;
+  --deep: #1e1e5a;
+  --indigo: #6366f1;
+  --indigo-soft: #a5b4fc;
+  --terminal: #f4f5ff;
+  --wire: #2a2a55;
+  --amber: #fbbf24;
+  --code-gray: #14142e;
+  --cream: #f4f5ff;
 
   --background: var(--ink);
-  --foreground: var(--terminal);
+  --foreground: #ffffff;
   --card: var(--code-gray);
-  --card-foreground: var(--terminal);
+  --card-foreground: #ffffff;
   --popover: var(--code-gray);
-  --popover-foreground: var(--terminal);
-  --primary: var(--lime);
-  --primary-foreground: var(--ink);
-  --brand: var(--lime);
-  --brand-foreground: var(--ink);
-  --secondary: #141918;
-  --secondary-foreground: var(--terminal);
-  --muted: #141918;
-  --muted-foreground: #9CA8A0;
-  --accent: var(--wire);
-  --accent-foreground: var(--terminal);
-  --destructive: #ff5a5a;
-  --destructive-foreground: var(--terminal);
-  --border: #23302A;
-  --input: #23302A;
-  --ring: var(--lime);
+  --popover-foreground: #ffffff;
+  --primary: var(--indigo);
+  --primary-foreground: #ffffff;
+  --brand: var(--indigo);
+  --brand-foreground: #ffffff;
+  --secondary: #1c1c3a;
+  --secondary-foreground: #ffffff;
+  --muted: #1c1c3a;
+  --muted-foreground: #b8bce0;
+  --accent: var(--deep);
+  --accent-foreground: #ffffff;
+  --destructive: #ff5a7a;
+  --destructive-foreground: #ffffff;
+  --border: #2a2a55;
+  --input: #2a2a55;
+  --ring: var(--indigo);
 }
 
 .dark {
   --background: var(--ink);
-  --foreground: var(--terminal);
+  --foreground: #ffffff;
 }
 
 @layer base {
@@ -105,11 +110,13 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    font-weight: 700;
   }
   ::selection {
-    background: var(--lime);
-    color: var(--ink);
+    background: var(--indigo);
+    color: #ffffff;
   }
 }
 
@@ -121,8 +128,8 @@
 
 @utility terminal-grid {
   background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--wire) 18%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--wire) 18%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in oklab, var(--indigo) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--indigo) 12%, transparent) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
@@ -131,33 +138,53 @@
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(200, 255, 77, 0.04) 3px,
+    rgba(99, 102, 241, 0.05) 3px,
     transparent 4px
   );
 }
 
 @utility glow-lime {
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--lime) 40%, transparent),
-              0 20px 60px -20px color-mix(in oklab, var(--lime) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--indigo) 45%, transparent),
+              0 20px 60px -20px color-mix(in oklab, var(--indigo) 55%, transparent);
+}
+
+@utility glow-indigo {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--indigo) 45%, transparent),
+              0 20px 60px -20px color-mix(in oklab, var(--indigo) 55%, transparent);
 }
 
 @utility shadow-soft {
-  box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.6);
 }
 
 @utility shadow-lift {
-  box-shadow: 0 20px 60px -20px rgba(200, 255, 77, 0.25);
+  box-shadow: 0 20px 60px -20px rgba(99, 102, 241, 0.4);
 }
 
 @utility bg-hero {
   background:
-    radial-gradient(circle at 20% 10%, rgba(200,255,77,0.10), transparent 50%),
-    radial-gradient(circle at 80% 90%, rgba(58,95,63,0.25), transparent 55%),
+    radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.28), transparent 55%),
+    radial-gradient(circle at 85% 90%, rgba(30, 30, 90, 0.6), transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(20, 20, 50, 0.4), transparent 70%),
     var(--ink);
 }
 
 @utility bg-brand-gradient {
-  background-image: linear-gradient(135deg, var(--lime) 0%, var(--lime-soft) 100%);
+  background-image: linear-gradient(135deg, var(--indigo) 0%, #8b5cf6 60%, var(--indigo-soft) 100%);
+}
+
+@utility bento-card {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--indigo) 6%, var(--code-gray)) 0%, var(--code-gray) 100%);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+@utility bento-card-hover {
+  &:hover {
+    border-color: color-mix(in oklab, var(--indigo) 55%, transparent);
+    box-shadow: 0 20px 60px -20px rgba(99, 102, 241, 0.35);
+    transform: translateY(-2px);
+  }
 }
 
 @keyframes blink {
@@ -166,7 +193,7 @@
 }
 .caret::after {
   content: "▍";
-  color: var(--lime);
+  color: var(--indigo);
   margin-left: 2px;
   animation: blink 1s steps(1) infinite;
 }
