@@ -155,15 +155,12 @@ function CourseDetail() {
 
           <aside className="lg:sticky lg:top-24 h-fit rounded-2xl border border-border bg-card p-5 shadow-lift">
             <div className="relative mb-4 overflow-hidden rounded-lg">
-              {course.thumbnail_url ? (
-                <img
-                  src={course.thumbnail_url}
-                  alt={course.title}
-                  className="aspect-video w-full object-cover"
-                />
-              ) : (
-                <div className="aspect-video w-full bg-muted" />
-              )}
+              <img
+                src={course.thumbnail_url ?? fallbackThumb}
+                alt={course.title}
+                className="aspect-video w-full object-cover"
+                loading="lazy"
+              />
               {freePreview && (
                 <button className="absolute inset-0 grid place-items-center bg-black/30 text-white transition hover:bg-black/40">
                   <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-brand shadow-lg">
