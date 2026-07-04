@@ -38,6 +38,13 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!course) return null;
 
+    // Curriculum metadata (title/duration/free-preview flag) is public even for
+    // locked lessons, but content_url/text_content must NOT be exposed via the
+    // Data API. RLS on `lessons` now restricts anon reads to free-preview rows
+    // only, so load the full curriculum through the admin client here and
+    // sanitize sensitive fields server-side below.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const moduleIdsRes = await sb.from("modules").select("id").eq("course_id", course.id);
     const moduleIds = moduleIdsRes.data?.map((m) => m.id) ?? [];
 
@@ -51,7 +58,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     ] = await Promise.all([
       sb.from("modules").select("id,title,order").eq("course_id", course.id).order("order"),
       moduleIds.length
-        ? sb
+        ? supabaseAdmin
             .from("lessons")
             .select(
               "id,module_id,title,type,duration_sec,order,is_free_preview,content_url,text_content",
@@ -59,6 +66,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
             .in("module_id", moduleIds)
             .order("order")
         : Promise.resolve({ data: [] as never[] }),
+
       sb
         .from("reviews")
         .select("id,rating,comment,created_at,user_id")
