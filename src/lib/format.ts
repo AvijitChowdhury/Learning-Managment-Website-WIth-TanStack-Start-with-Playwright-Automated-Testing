@@ -9,6 +9,7 @@ const bnDate = new Intl.DateTimeFormat("bn-BD", {
   day: "numeric",
   month: "long",
   year: "numeric",
+  timeZone: "Asia/Dhaka",
 });
 
 export function formatBDT(n: number | string | null | undefined): string {
