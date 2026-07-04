@@ -30,7 +30,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     const { data: course, error } = await sb
       .from("courses")
       .select(
-        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,category_id,instructor_id",
+        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,updated_at,category_id,instructor_id",
       )
       .eq("slug", data.slug)
       .eq("is_published", true)
@@ -38,36 +38,54 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!course) return null;
 
-    const [{ data: modules }, { data: lessons }, { data: reviews }, { data: instructor }] =
-      await Promise.all([
-        sb.from("modules").select("id,title,order").eq("course_id", course.id).order("order"),
-        sb
-          .from("lessons")
-          .select("id,module_id,title,type,duration_sec,order,is_free_preview,content_url,text_content")
-          .in(
-            "module_id",
-            (
-              await sb.from("modules").select("id").eq("course_id", course.id)
-            ).data?.map((m) => m.id) ?? [],
-          )
-          .order("order"),
-        sb
-          .from("reviews")
-          .select("id,rating,comment,created_at,user_id")
-          .eq("course_id", course.id)
-          .eq("is_hidden", false)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        course.instructor_id
-          ? sb
-              .from("profiles")
-              .select("id,name,avatar_url")
-              .eq("id", course.instructor_id)
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
+    const moduleIdsRes = await sb.from("modules").select("id").eq("course_id", course.id);
+    const moduleIds = moduleIdsRes.data?.map((m) => m.id) ?? [];
 
-    // Redact non-free lesson content from public payload.
+    const [
+      { data: modules },
+      { data: lessons },
+      { data: reviews },
+      { data: instructor },
+      { count: studentCount },
+      { data: related },
+    ] = await Promise.all([
+      sb.from("modules").select("id,title,order").eq("course_id", course.id).order("order"),
+      moduleIds.length
+        ? sb
+            .from("lessons")
+            .select(
+              "id,module_id,title,type,duration_sec,order,is_free_preview,content_url,text_content",
+            )
+            .in("module_id", moduleIds)
+            .order("order")
+        : Promise.resolve({ data: [] as never[] }),
+      sb
+        .from("reviews")
+        .select("id,rating,comment,created_at,user_id")
+        .eq("course_id", course.id)
+        .eq("is_hidden", false)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      course.instructor_id
+        ? sb
+            .from("profiles")
+            .select("id,name,avatar_url")
+            .eq("id", course.instructor_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      sb
+        .from("enrollments")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", course.id),
+      sb
+        .from("courses")
+        .select("id,title,slug,thumbnail_url,price,discount_price,level")
+        .eq("is_published", true)
+        .neq("id", course.id)
+        .eq("category_id", course.category_id ?? "")
+        .limit(4),
+    ]);
+
     const sanitizedLessons = (lessons ?? []).map((l) => ({
       ...l,
       content_url: l.is_free_preview ? l.content_url : null,
@@ -79,6 +97,15 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
         ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
         : 0;
 
+    const dist = [0, 0, 0, 0, 0];
+    (reviews ?? []).forEach((r) => {
+      if (r.rating >= 1 && r.rating <= 5) dist[5 - r.rating]++;
+    });
+
+    // Parse structured sections from description (optional markers).
+    // Format: "## What you'll learn\n- item\n- item\n## Requirements\n- ...\n## FAQ\n### Q\nA"
+    const parsed = parseSections(course.description);
+
     return {
       course,
       modules: modules ?? [],
@@ -87,5 +114,52 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
       instructor: instructor ?? null,
       rating,
       reviewCount: reviews?.length ?? 0,
+      studentCount: studentCount ?? 0,
+      ratingDist: dist,
+      related: related ?? [],
+      outcomes: parsed.outcomes,
+      requirements: parsed.requirements,
+      faq: parsed.faq,
+      cleanDescription: parsed.body,
     };
   });
+
+function parseSections(desc: string) {
+  const outcomes: string[] = [];
+  const requirements: string[] = [];
+  const faq: { q: string; a: string }[] = [];
+  let body = desc;
+
+  const grab = (label: RegExp) => {
+    const m = body.match(label);
+    if (!m) return null;
+    const start = m.index! + m[0].length;
+    const rest = body.slice(start);
+    const nextHeader = rest.search(/\n##\s+/);
+    const chunk = nextHeader === -1 ? rest : rest.slice(0, nextHeader);
+    body = body.slice(0, m.index).trim() + "\n" + body.slice(start + chunk.length);
+    return chunk.trim();
+  };
+
+  const outChunk = grab(/##\s*(What you'?ll learn|যা শিখবেন|শেখার বিষয়)\s*\n/i);
+  const reqChunk = grab(/##\s*(Requirements|প্রয়োজনীয়তা|পূর্বশর্ত)\s*\n/i);
+  const faqChunk = grab(/##\s*(FAQ|প্রশ্নোত্তর|জিজ্ঞাসা)\s*\n/i);
+
+  const bullets = (s: string) =>
+    s
+      .split("\n")
+      .map((l) => l.replace(/^[-*•]\s*/, "").trim())
+      .filter(Boolean);
+
+  if (outChunk) outcomes.push(...bullets(outChunk));
+  if (reqChunk) requirements.push(...bullets(reqChunk));
+  if (faqChunk) {
+    const parts = faqChunk.split(/\n###\s+/).filter(Boolean);
+    for (const p of parts) {
+      const [q, ...a] = p.split("\n");
+      faq.push({ q: q.trim(), a: a.join("\n").trim() });
+    }
+  }
+
+  return { outcomes, requirements, faq, body: body.trim() };
+}
