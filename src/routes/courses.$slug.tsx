@@ -250,18 +250,37 @@ function CourseDetail() {
               defaultValue={modules.slice(0, 1).map((m) => m.id)}
               className="mt-4 rounded-xl border border-border bg-card"
             >
-              {modules.map((m) => {
+              {modules.map((m, idx) => {
                 const items = lessons.filter((l) => l.module_id === m.id);
                 const modSecs = items.reduce((s, l) => s + (l.duration_sec ?? 0), 0);
+                const freeCount = items.filter((l) => l.is_free_preview).length;
+                const previewTitles = items.slice(0, 2).map((l) => l.title).join(" · ");
                 return (
                   <AccordionItem key={m.id} value={m.id} className="px-5 last:border-0">
                     <AccordionTrigger className="hover:no-underline">
-                      <div className="flex flex-1 items-center justify-between gap-4 pr-2">
-                        <span className="font-medium">{m.title}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">
-                          {formatBnNumber(items.length)} {bn.courses.lessons}
-                          {modSecs > 0 && ` · ${fmtDur(modSecs)}`}
-                        </span>
+                      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-4 pr-2 text-left">
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {formatBnNumber(idx + 1).padStart(2, "০")}
+                            </span>
+                            <span className="truncate font-semibold text-foreground">{m.title}</span>
+                            {freeCount > 0 && (
+                              <span className="shrink-0 rounded-full border border-brand/40 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                                {formatBnNumber(freeCount)} ফ্রি প্রিভিউ
+                              </span>
+                            )}
+                          </div>
+                          {previewTitles && (
+                            <p className="truncate text-xs text-muted-foreground">{previewTitles}</p>
+                          )}
+                        </div>
+                        <div className="shrink-0 text-right text-xs text-muted-foreground">
+                          <div className="font-medium text-foreground/80">
+                            {formatBnNumber(items.length)} {bn.courses.lessons}
+                          </div>
+                          {modSecs > 0 && <div>{fmtDur(modSecs)}</div>}
+                        </div>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
