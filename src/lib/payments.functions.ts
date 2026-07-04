@@ -112,16 +112,18 @@ export const createCourseCharge = createServerFn({ method: "POST" })
       webhook_url: `${appUrl}/api/public/webhooks/uddoktapay`,
     });
 
-    if (!charge.payment_url || !charge.invoice_id) {
+    if (!charge.payment_url) {
       // rollback order
       await supabase.from("orders").update({ status: "FAILED" }).eq("id", order.id);
       throw new Error(charge.message || "UddoktaPay charge failed");
     }
 
-    await supabase
-      .from("orders")
-      .update({ payment_ref: charge.invoice_id })
-      .eq("id", order.id);
+    if (charge.invoice_id) {
+      await supabase
+        .from("orders")
+        .update({ payment_ref: charge.invoice_id })
+        .eq("id", order.id);
+    }
 
     return { alreadyEnrolled: false as const, payment_url: charge.payment_url };
   });
