@@ -107,7 +107,7 @@ function CourseDetail() {
             <p className="text-sm text-muted-foreground">
               {bn.courses.level[course.level as keyof typeof bn.courses.level]}
             </p>
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight text-ink">
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight text-foreground">
               {course.title}
             </h1>
             {course.subtitle && (
