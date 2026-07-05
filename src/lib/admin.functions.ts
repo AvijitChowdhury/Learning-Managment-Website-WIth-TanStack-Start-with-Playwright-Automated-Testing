@@ -231,6 +231,9 @@ export const adminSaveLesson = createServerFn({ method: "POST" })
         duration_sec: z.number().int().min(0).nullable().optional(),
         order: z.number().int().min(0),
         is_free_preview: z.boolean(),
+        description: z.string().max(5000).nullable().optional(),
+        assignment: z.string().max(5000).nullable().optional(),
+        resource_url: z.string().max(1000).nullable().optional(),
       })
       .parse(d),
   )
