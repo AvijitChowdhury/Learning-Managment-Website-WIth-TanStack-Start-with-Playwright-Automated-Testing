@@ -77,6 +77,8 @@ function AdminCourses() {
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<any>({
     title: "",
     slug: "",
