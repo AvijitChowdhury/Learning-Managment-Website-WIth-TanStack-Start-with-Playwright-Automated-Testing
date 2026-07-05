@@ -6,7 +6,7 @@ import { adminListCourses, adminSaveCourse, adminListCategories } from "@/lib/ad
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/admin/courses")({
+export const Route = createFileRoute("/_authenticated/admin/courses/")({
   component: AdminCourses,
 });
 

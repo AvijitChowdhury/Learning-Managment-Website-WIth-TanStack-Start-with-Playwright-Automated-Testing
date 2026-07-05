@@ -29,9 +29,9 @@ import { Route as AuthenticatedDashboardOrdersRouteImport } from './routes/_auth
 import { Route as AuthenticatedCheckoutCourseIdRouteImport } from './routes/_authenticated/checkout.$courseId'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated/admin.reviews'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
-import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin.courses'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin.categories'
+import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin.courses.index'
 import { Route as ApiPublicWebhooksUddoktapayRouteImport } from './routes/api/public/webhooks/uddoktapay'
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard.courses.$id'
 import { Route as AuthenticatedAdminCoursesIdEditRouteImport } from './routes/_authenticated/admin.courses.$id.edit'
@@ -142,12 +142,6 @@ const AuthenticatedAdminOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminCoursesRoute =
-  AuthenticatedAdminCoursesRouteImport.update({
-    id: '/courses',
-    path: '/courses',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminCouponsRoute =
   AuthenticatedAdminCouponsRouteImport.update({
     id: '/coupons',
@@ -158,6 +152,12 @@ const AuthenticatedAdminCategoriesRoute =
   AuthenticatedAdminCategoriesRouteImport.update({
     id: '/categories',
     path: '/categories',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCoursesIndexRoute =
+  AuthenticatedAdminCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const ApiPublicWebhooksUddoktapayRoute =
@@ -174,9 +174,9 @@ const AuthenticatedDashboardCoursesIdRoute =
   } as any)
 const AuthenticatedAdminCoursesIdEditRoute =
   AuthenticatedAdminCoursesIdEditRouteImport.update({
-    id: '/$id/edit',
-    path: '/$id/edit',
-    getParentRoute: () => AuthenticatedAdminCoursesRoute,
+    id: '/courses/$id/edit',
+    path: '/courses/$id/edit',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -193,7 +193,6 @@ export interface FileRoutesByFullPath {
   '/courses/': typeof CoursesIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
-  '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
@@ -204,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/api/public/webhooks/uddoktapay': typeof ApiPublicWebhooksUddoktapayRoute
+  '/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
   '/admin/courses/$id/edit': typeof AuthenticatedAdminCoursesIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -217,7 +217,6 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
-  '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
@@ -228,6 +227,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/api/public/webhooks/uddoktapay': typeof ApiPublicWebhooksUddoktapayRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesIndexRoute
   '/admin/courses/$id/edit': typeof AuthenticatedAdminCoursesIdEditRoute
 }
 export interface FileRoutesById {
@@ -246,7 +246,6 @@ export interface FileRoutesById {
   '/courses/': typeof CoursesIndexRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
-  '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/_authenticated/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
@@ -257,6 +256,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/api/public/webhooks/uddoktapay': typeof ApiPublicWebhooksUddoktapayRoute
+  '/_authenticated/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
   '/_authenticated/admin/courses/$id/edit': typeof AuthenticatedAdminCoursesIdEditRoute
 }
 export interface FileRouteTypes {
@@ -275,7 +275,6 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/admin/categories'
     | '/admin/coupons'
-    | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
     | '/checkout/$courseId'
@@ -286,6 +285,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/courses/$id'
     | '/api/public/webhooks/uddoktapay'
+    | '/admin/courses/'
     | '/admin/courses/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -299,7 +299,6 @@ export interface FileRouteTypes {
     | '/courses'
     | '/admin/categories'
     | '/admin/coupons'
-    | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
     | '/checkout/$courseId'
@@ -310,6 +309,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/courses/$id'
     | '/api/public/webhooks/uddoktapay'
+    | '/admin/courses'
     | '/admin/courses/$id/edit'
   id:
     | '__root__'
@@ -327,7 +327,6 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/_authenticated/admin/categories'
     | '/_authenticated/admin/coupons'
-    | '/_authenticated/admin/courses'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/reviews'
     | '/_authenticated/checkout/$courseId'
@@ -338,6 +337,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/courses/$id'
     | '/api/public/webhooks/uddoktapay'
+    | '/_authenticated/admin/courses/'
     | '/_authenticated/admin/courses/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -495,13 +495,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/courses': {
-      id: '/_authenticated/admin/courses'
-      path: '/courses'
-      fullPath: '/admin/courses'
-      preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/coupons': {
       id: '/_authenticated/admin/coupons'
       path: '/coupons'
@@ -514,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/courses/': {
+      id: '/_authenticated/admin/courses/'
+      path: '/courses'
+      fullPath: '/admin/courses/'
+      preLoaderRoute: typeof AuthenticatedAdminCoursesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/api/public/webhooks/uddoktapay': {
@@ -532,44 +532,32 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/courses/$id/edit': {
       id: '/_authenticated/admin/courses/$id/edit'
-      path: '/$id/edit'
+      path: '/courses/$id/edit'
       fullPath: '/admin/courses/$id/edit'
       preLoaderRoute: typeof AuthenticatedAdminCoursesIdEditRouteImport
-      parentRoute: typeof AuthenticatedAdminCoursesRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
   }
 }
 
-interface AuthenticatedAdminCoursesRouteChildren {
-  AuthenticatedAdminCoursesIdEditRoute: typeof AuthenticatedAdminCoursesIdEditRoute
-}
-
-const AuthenticatedAdminCoursesRouteChildren: AuthenticatedAdminCoursesRouteChildren =
-  {
-    AuthenticatedAdminCoursesIdEditRoute: AuthenticatedAdminCoursesIdEditRoute,
-  }
-
-const AuthenticatedAdminCoursesRouteWithChildren =
-  AuthenticatedAdminCoursesRoute._addFileChildren(
-    AuthenticatedAdminCoursesRouteChildren,
-  )
-
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
-  AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminCoursesIndexRoute: typeof AuthenticatedAdminCoursesIndexRoute
+  AuthenticatedAdminCoursesIdEditRoute: typeof AuthenticatedAdminCoursesIdEditRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
-  AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminCoursesIndexRoute: AuthenticatedAdminCoursesIndexRoute,
+  AuthenticatedAdminCoursesIdEditRoute: AuthenticatedAdminCoursesIdEditRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -639,13 +627,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
