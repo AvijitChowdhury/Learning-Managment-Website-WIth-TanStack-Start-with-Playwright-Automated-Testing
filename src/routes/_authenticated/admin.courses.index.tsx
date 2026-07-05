@@ -8,32 +8,48 @@ import { fmtBDT } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const httpUrl = z.string().trim().url().refine((v) => /^https?:\/\//i.test(v), "");
+const httpUrl = z
+  .string({ message: "লিংক দিন" })
+  .trim()
+  .min(1, "লিংক দিন")
+  .refine((v) => /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
 const optionalHttpUrl = z
   .string()
   .trim()
   .optional()
-  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "");
+  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
 
 const courseSchema = z.object({
-  title: z.string().trim().min(3).max(120),
-  slug: z
-    .string()
+  title: z
+    .string({ message: "শিরোনাম লিখুন" })
     .trim()
-    .min(3)
-    .max(80)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, ""),
-  subtitle: z.string().trim().max(160).optional().or(z.literal("")),
+    .min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(120, "শিরোনাম সর্বোচ্চ ১২০ অক্ষর"),
+  slug: z
+    .string({ message: "স্লাগ লিখুন" })
+    .trim()
+    .min(3, "স্লাগ কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(80, "স্লাগ সর্বোচ্চ ৮০ অক্ষর")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)"),
+  subtitle: z.string().trim().max(160, "সাবটাইটেল সর্বোচ্চ ১৬০ অক্ষর").optional().or(z.literal("")),
   thumbnail_url: httpUrl,
-  price: z.coerce.number().int().min(0).max(1_000_000),
+  price: z.coerce
+    .number({ message: "মূল্য একটি সংখ্যা হতে হবে" })
+    .int("পূর্ণসংখ্যা লিখুন")
+    .min(0, "মূল্য ঋণাত্মক হতে পারবে না")
+    .max(1_000_000, "মূল্য অনেক বড়"),
   discount_price: z
-    .union([z.coerce.number().int().min(0).max(1_000_000), z.literal("").transform(() => null), z.null()])
+    .union([
+      z.coerce.number().int("পূর্ণসংখ্যা লিখুন").min(0, "ঋণাত্মক হতে পারবে না").max(1_000_000, "অনেক বড়"),
+      z.literal("").transform(() => null),
+      z.null(),
+    ])
     .optional(),
   intro_video_url: optionalHttpUrl.or(z.literal("")),
-  total_duration: z.string().trim().max(40).optional().or(z.literal("")),
-  description: z.string().trim().max(4000).optional().or(z.literal("")),
-  what_you_learn: z.string().trim().max(2000).optional().or(z.literal("")),
-  gift_resources: z.string().trim().max(1000).optional().or(z.literal("")),
+  total_duration: z.string().trim().max(40, "সর্বোচ্চ ৪০ অক্ষর").optional().or(z.literal("")),
+  description: z.string().trim().max(4000, "সর্বোচ্চ ৪০০০ অক্ষর").optional().or(z.literal("")),
+  what_you_learn: z.string().trim().max(2000, "সর্বোচ্চ ২০০০ অক্ষর").optional().or(z.literal("")),
+  gift_resources: z.string().trim().max(1000, "সর্বোচ্চ ১০০০ অক্ষর").optional().or(z.literal("")),
 });
 
 type FieldDef = {
