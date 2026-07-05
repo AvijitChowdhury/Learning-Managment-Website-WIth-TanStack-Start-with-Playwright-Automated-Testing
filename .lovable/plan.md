@@ -1,88 +1,89 @@
-# Bengali LMS — Build Plan
+# LMS Wireframe Implementation Plan
 
-A phased build for a Bengali-first LMS (BDT, UddoktaPay) using TanStack Start + Lovable Cloud (Postgres, Auth, Storage). Prisma schema is translated to SQL migrations; RLS enforces access rules.
+Below is a gap analysis of your wireframe vs. what already exists, followed by grouped work to complete it.
 
----
+## What already exists
 
-## Stack decisions
+- **Landing page** (`src/routes/index.tsx`) with hero + CTAs
+- **Course catalog** (`courses.index.tsx`) and **detail page** (`courses.$slug.tsx`) with curriculum / reviews / FAQ / registration cards
+- **Checkout** (`_authenticated/checkout.$courseId.tsx`) + `checkout.return.tsx` / `checkout.cancelled.tsx`
+- **Student dashboard**: `dashboard.index.tsx`, `dashboard.courses.$id.tsx` (module/lesson viewer with search/filters/tabs), `dashboard.orders.tsx`, `dashboard.profile.tsx`
+- **Admin**: `admin.index.tsx` (overview), `admin.courses.tsx`, `admin.courses.$id.edit.tsx`, `admin.orders.tsx`, `admin.reviews.tsx`
+- **DB tables**: categories, courses, modules, lessons, enrollments, lesson_progress, orders, reviews, profiles, user_roles
 
-- **Framework:** TanStack Start (this template) instead of Next.js from the PRD — same SSR/SEO capabilities, native to Lovable.
-- **Backend:** Lovable Cloud (Postgres + Auth + Storage). NodeJS or Python with prisma ORM.
-- **Payments:** UddoktaPay via a TanStack server route (`/api/public/webhooks/uddoktapay`) + a `createServerFn` to create charges and verify.
-- **Video:** Supabase Storage with signed URLs (v1). Mux/Bunny can slot in later.
-- **i18n:** Bengali-first copy in `src/lib/i18n/bn.ts`. `Noto Sans Bengali` + `Hind Siliguri` via `<link>` in `__root.tsx`. `Intl.NumberFormat('bn-BD', { style:'currency', currency:'BDT' })`.
-- **Roles:** `app_role` enum + `user_roles` table + `has_role()` security-definer function (never store role on profile).
+## Gaps to close
 
----
+### 1. Landing page CTAs → correct destinations
+Wire the three hero CTAs on `index.tsx`:
+- **Checkout CTA** → `/courses` (or featured course → `/checkout/$courseId`)
+- **Course Module CTA** → `/courses` catalog
+- **Free Class CTA** → new `/free-class` route showing a free demo lesson
 
-## Phase 1 — Foundation
+### 2. Free Demo Class section (missing)
+- New route `src/routes/free-class.tsx` with an embedded YouTube demo, benefits copy, and a "Start free" CTA
+- Add `is_free_demo` boolean on `lessons` OR pick a designated demo lesson id in site config
 
-1. Enable Lovable Cloud.
-2. Design system in `src/styles.css` — warm/clean Bengali edu palette, Bangla display + body fonts, custom `Button`/`Card` variants.
-3. Root layout: header (logo, কোর্স, ড্যাশবোর্ড, লগইন), footer, Bengali meta.
-4. Migrations (single batch, with GRANTs + RLS):
-  - Enums: `course_level`, `lesson_type`, `order_status`, `app_role`.
-  - Tables: `profiles`, `user_roles`, `categories`, `courses`, `modules`, `lessons`, `enrollments`, `lesson_progress`, `orders`, `reviews`.
-  - `handle_new_user()` trigger on `auth.users` → inserts profile + default `STUDENT` role.
-  - `has_role(uuid, app_role)` security-definer.
-  - RLS policies per PRD §6 (students read own orders/enrollments/progress; anyone reads published courses; only admins write course content; reviews only by enrolled buyers).
-  - Storage buckets: `course-thumbnails` (public), `course-videos` (private, signed).
-5. Auth pages `/auth` (Bengali signup/login/reset) — email/password only in v1.
-6. Seed one admin via SQL migration granting `ADMIN` role to a specified email.
+### 3. Incomplete Order tracking (partial)
+Orders table exists but wireframe wants "abandoning payment = incomplete order":
+- Ensure `orders` row is created on checkout submit with `status = 'pending'` BEFORE redirecting to UddoktaPay
+- Rows stay `pending` if user never returns; success webhook flips to `paid`
+- Admin "Incomplete Orders" view filters `status = 'pending'` and shows name / phone (tel:) / email (mailto:)
 
-## Phase 2 — Public site (SEO/SSR)
+### 4. Payment Error page (missing)
+- New route `src/routes/checkout.error.tsx` with error message, retry button, and support link
+- UddoktaPay failure webhook / return handler routes here
 
-Routes: `/`, `/courses`, `/courses/$slug`. Each with per-page `head()` (title, description, og, canonical). Loader-driven data via public server fn using publishable key + narrow `TO anon` SELECT policies on published courses/modules/lessons (preview-only)/reviews.
+### 5. Support Forum (missing)
+- New route `src/routes/_authenticated/dashboard.support.tsx`
+- Minimal Q&A: `support_threads` + `support_replies` tables with RLS (students see own threads; admins see all)
+- Sidebar link in student dashboard
 
-- `/` — hero, featured courses, categories, trust bar.
-- `/courses` — category filter, search (Postgres `ilike` + `pg_trgm`), rating sort.
-- `/courses/$slug` — hero, curriculum (free-preview lessons playable), instructor, reviews, sticky "কিনুন ৳" CTA.
+### 6. Downloadable resources (partial)
+- `lessons` has fields; ensure `resource_url` renders as a download button in `dashboard.courses.$id.tsx` curriculum
+- Course-level "Gift Resources" from `courses.gift_resources` shown on dashboard course header
 
-## Phase 3 — Commerce (UddoktaPay)
+### 7. Admin Overview metrics (verify/extend)
+Confirm `admin.index.tsx` shows all six KPIs from wireframe:
+- Total enrolments, Total sale amount, Today's enrolments, Today's sale, Today's incomplete orders
+- Date-range filter + **Export CSV** button (server fn returning CSV of filtered orders/enrolments)
 
-- `/checkout/$courseId` (under `_authenticated/`) — server fn creates `PENDING` order (server-computed price), calls UddoktaPay `checkout-v2`, returns `payment_url`, client redirects.
-- Return route `/checkout/return` and `/checkout/cancelled` — re-verify via `verify-payment`, show live status.
-- Webhook `src/routes/api/public/webhooks/uddoktapay.ts` — verify `RT-UDDOKTAPAY-API-KEY` header, re-call `verify-payment`, idempotent by `invoice_id` (unique constraint on `orders.payment_ref`), on `COMPLETED` set `PAID` + create `enrollment`.
-- Secrets: `UDDOKTAPAY_API_KEY`, `UDDOKTAPAY_BASE_URL`, `UDDOKTAPAY_WEBHOOK_SECRET`.
+### 8. Categories management (missing UI)
+- New route `src/routes/_authenticated/admin.categories.tsx`
+- CRUD list + add/delete + sub-category support (add `parent_id uuid references categories(id)` via migration)
 
-## Phase 4 — Learning experience
+### 9. Add-a-Course form structure (verify tabs)
+`admin.courses.$id.edit.tsx` must present two tabs matching wireframe:
+- **Tab 1 – Basic Info**: name, description, difficulty, categories (create-or-select), price, intro video URL, featured image upload, "what you'll learn" (list), total duration, gift resources
+- **Tab 2 – Curriculum**: add module (name + description) → add class (name, YouTube URL, duration, description, assignment textarea, resources link)
 
-Under `src/routes/_authenticated/`:
+Add any missing DB columns via migration: `courses.what_you_learn text[]`, `courses.gift_resources text`, `lessons.assignment text`, `lessons.resource_url text` (only those not present).
 
-- `/dashboard` — my courses grid + progress bars.
-- `/dashboard/courses/$id` — course player: sidebar curriculum, video/text/attachment renderer, "সম্পন্ন" button → upserts `lesson_progress`, recomputes `enrollments.progress_pct` via trigger.
-- `/dashboard/orders` — order history + downloadable receipt.
-- `/dashboard/profile` — name/avatar/password.
-- Signed-URL server fn gates protected video access to enrolled users only.
+### 10. Coupons (missing)
+- New table `coupons` (code, discount_type, discount_value, starts_at, ends_at, max_uses, used_count, active) + GRANTs + RLS (admin-only writes, authenticated read active by code)
+- Apply-coupon field in checkout form
+- Admin route `admin.coupons.tsx` for CRUD + rules
 
-## Phase 5 — Admin + trust
+### 11. All Orders tab (verify)
+`admin.orders.tsx` should have two tabs: **Incomplete** (pending) and **All Orders** (paid/refunded/etc).
 
-Under `/_authenticated/admin/` gated by `has_role(uid,'ADMIN')`:
+## Technical section
 
-- `/admin` — revenue, orders, students, top courses (SQL views).
-- `/admin/orders` — filter/search, mark refunded/cancelled, view gateway details.
-- `/admin/courses` — CRUD + publish toggle.
-- `/admin/courses/$id/edit` — module/lesson editor (drag-reorder, free-preview toggle, thumbnail + video upload to Storage).
-- `/admin/reviews` — hide/unhide.
-- Reviews on course detail + submit form (enrolled users, one per course).
+- **Routes to add**: `free-class.tsx`, `checkout.error.tsx`, `_authenticated/dashboard.support.tsx`, `_authenticated/admin.categories.tsx`, `_authenticated/admin.coupons.tsx`
+- **Migrations**:
+  - `categories.parent_id uuid` (self-FK, nullable)
+  - `coupons` table + `orders.coupon_code text` + `orders.discount_amount numeric`
+  - `support_threads`, `support_replies` (+ GRANTs + RLS + `has_role('ADMIN')`-gated admin policies)
+  - Any missing `courses` / `lessons` columns from §9
+- **Server functions** (`src/lib/*.functions.ts`): `createIncompleteOrder`, `exportOrdersCsv`, `listCategories/upsertCategory/deleteCategory`, `applyCoupon`, `listSupportThreads/postSupportMessage`, `getAdminOverview`
+- **UI**: reuse existing shadcn cards/tables and terminal design tokens; tabs via existing `<Tabs>` primitives
 
----
+## Proposed execution order
 
-## Technical notes
+1. Migrations (categories.parent_id, coupons, support tables, missing columns)
+2. Landing CTAs + Free Class page + Payment Error page
+3. Incomplete-order write-on-submit + Admin overview KPIs + CSV export
+4. Admin Categories + Coupons pages
+5. Verify/fix Admin Add-Course tab structure
+6. Support Forum (student + admin views)
 
-- Every route with a loader defines `errorComponent` + `notFoundComponent`; root has `defaultErrorComponent`.
-- Public loaders use the server publishable client; authed reads via `requireSupabaseAuth`; only webhooks/admin ops use `supabaseAdmin`.
-- `functionMiddleware` in `src/start.ts` attaches the Supabase bearer.
-- Sitemap + robots.txt with all public + `/courses/$slug` entries generated from DB.
-- Currency & dates via `Intl` helpers in `src/lib/format.ts`.
-
-## Deliverables per phase
-
-Each phase ends with a working, deployable slice. I'll pause after Phase 1 for review before proceeding, unless you tell me to run straight through.
-
-## Open questions from the PRD (§11) — please confirm
-
-1. Single-instructor (you) or multi-instructor from day one? Ans: Single
-2. Drip content or full access on purchase? Ans: yes
-3. Sandbox UddoktaPay key ready, or start with mock and wire real keys later? Ans: ok
-4. Video hosting for v1 — Supabase Storage (simple) or Mux/Bunny (better streaming). ?Ans: ok
+This is a multi-turn build. Approve the plan and I will start with step 1 (migrations), or tell me which slice to prioritize first.

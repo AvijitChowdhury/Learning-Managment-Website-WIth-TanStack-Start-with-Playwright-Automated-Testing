@@ -43,11 +43,19 @@ function DashboardPage() {
             অর্ডার
           </Link>
           <Link
+
+            to="/dashboard/support"
+            className="rounded-md border border-border px-4 py-2 font-mono text-xs text-terminal hover:border-lime hover:text-lime"
+          >
+            সাপোর্ট
+          </Link>
+          <Link
             to="/dashboard/profile"
             className="rounded-md border border-border px-4 py-2 font-mono text-xs text-terminal hover:border-lime hover:text-lime"
           >
             প্রোফাইল
           </Link>
+
           <button
             onClick={handleSignOut}
             className="rounded-md border border-border px-4 py-2 font-mono text-xs text-terminal hover:border-red-400 hover:text-red-400"

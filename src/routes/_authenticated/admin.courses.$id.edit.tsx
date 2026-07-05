@@ -129,53 +129,108 @@ function LessonRow({
   onDelete: () => void;
 }) {
   const [local, setLocal] = useState(lesson);
+  const [expanded, setExpanded] = useState(false);
   const dirty = JSON.stringify(local) !== JSON.stringify(lesson);
+  const set = (patch: any) => setLocal({ ...local, ...patch });
+
   return (
-    <div className="rounded-md border border-border bg-ink p-3 grid gap-2 md:grid-cols-[1fr_120px_1fr_auto_auto]">
-      <input
-        value={local.title}
-        onChange={(e) => setLocal({ ...local, title: e.target.value })}
-        className="rounded border border-border bg-code-gray px-2 py-1 text-terminal text-sm"
-      />
-      <select
-        value={local.type}
-        onChange={(e) => setLocal({ ...local, type: e.target.value })}
-        className="rounded border border-border bg-code-gray px-2 py-1 text-terminal font-mono text-xs"
-      >
-        <option value="VIDEO">VIDEO</option>
-        <option value="TEXT">TEXT</option>
-        <option value="ATTACHMENT">ATTACHMENT</option>
-      </select>
-      <input
-        value={local.content_url ?? ""}
-        onChange={(e) => setLocal({ ...local, content_url: e.target.value })}
-        placeholder="URL বা স্টোরেজ path"
-        className="rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-mono"
-      />
-      <label className="flex items-center gap-1 font-mono text-[10px] text-terminal/70">
+    <div className="rounded-md border border-border bg-ink p-3 space-y-2">
+      <div className="grid gap-2 md:grid-cols-[1fr_120px_1fr_auto_auto_auto]">
         <input
-          type="checkbox"
-          checked={local.is_free_preview}
-          onChange={(e) => setLocal({ ...local, is_free_preview: e.target.checked })}
+          value={local.title}
+          onChange={(e) => set({ title: e.target.value })}
+          className="rounded border border-border bg-code-gray px-2 py-1 text-terminal text-sm"
         />
-        ফ্রি
-      </label>
-      <div className="flex gap-1">
-        {dirty && (
-          <button
-            onClick={() => onSave(local)}
-            className="rounded bg-lime px-2 py-1 font-mono text-[10px] font-bold text-ink"
-          >
-            সেভ
-          </button>
-        )}
-        <button
-          onClick={() => confirm("ডিলিট?") && onDelete()}
-          className="rounded border border-red-400/40 text-red-300 px-2 py-1 font-mono text-[10px]"
+        <select
+          value={local.type}
+          onChange={(e) => set({ type: e.target.value })}
+          className="rounded border border-border bg-code-gray px-2 py-1 text-terminal font-mono text-xs"
         >
-          ✕
+          <option value="VIDEO">VIDEO</option>
+          <option value="TEXT">TEXT</option>
+          <option value="ATTACHMENT">ATTACHMENT</option>
+        </select>
+        <input
+          value={local.content_url ?? ""}
+          onChange={(e) => set({ content_url: e.target.value })}
+          placeholder="YouTube URL বা স্টোরেজ path"
+          className="rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-mono"
+        />
+        <label className="flex items-center gap-1 font-mono text-[10px] text-terminal/70">
+          <input
+            type="checkbox"
+            checked={local.is_free_preview}
+            onChange={(e) => set({ is_free_preview: e.target.checked })}
+          />
+          ফ্রি
+        </label>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="rounded border border-border px-2 py-1 font-mono text-[10px] text-terminal/70 hover:text-lime"
+        >
+          {expanded ? "▲" : "▼"}
         </button>
+        <div className="flex gap-1">
+          {dirty && (
+            <button
+              onClick={() => onSave(local)}
+              className="rounded bg-lime px-2 py-1 font-mono text-[10px] font-bold text-ink"
+            >
+              সেভ
+            </button>
+          )}
+          <button
+            onClick={() => confirm("ডিলিট?") && onDelete()}
+            className="rounded border border-red-400/40 text-red-300 px-2 py-1 font-mono text-[10px]"
+          >
+            ✕
+          </button>
+        </div>
       </div>
+
+      {expanded && (
+        <div className="grid gap-2 pt-2 border-t border-border">
+          <label className="block">
+            <span className="font-mono text-[10px] text-terminal/60">সময় (সেকেন্ড)</span>
+            <input
+              type="number"
+              min={0}
+              value={local.duration_sec ?? ""}
+              onChange={(e) =>
+                set({ duration_sec: e.target.value ? Number(e.target.value) : null })
+              }
+              className="mt-1 w-32 rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-mono"
+            />
+          </label>
+          <label className="block">
+            <span className="font-mono text-[10px] text-terminal/60">বিবরণ</span>
+            <textarea
+              rows={2}
+              value={local.description ?? ""}
+              onChange={(e) => set({ description: e.target.value })}
+              className="mt-1 w-full rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-body"
+            />
+          </label>
+          <label className="block">
+            <span className="font-mono text-[10px] text-terminal/60">অ্যাসাইনমেন্ট</span>
+            <textarea
+              rows={2}
+              value={local.assignment ?? ""}
+              onChange={(e) => set({ assignment: e.target.value })}
+              className="mt-1 w-full rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-body"
+            />
+          </label>
+          <label className="block">
+            <span className="font-mono text-[10px] text-terminal/60">রিসোর্স লিংক</span>
+            <input
+              value={local.resource_url ?? ""}
+              onChange={(e) => set({ resource_url: e.target.value })}
+              placeholder="https://…"
+              className="mt-1 w-full rounded border border-border bg-code-gray px-2 py-1 text-terminal text-xs font-mono"
+            />
+          </label>
+        </div>
+      )}
     </div>
   );
 }

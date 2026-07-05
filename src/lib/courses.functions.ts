@@ -30,7 +30,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     const { data: course, error } = await sb
       .from("courses")
       .select(
-        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,updated_at,category_id,instructor_id",
+        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,updated_at,category_id,instructor_id,what_you_learn,gift_resources,intro_video_url,total_duration",
       )
       .eq("slug", data.slug)
       .eq("is_published", true)

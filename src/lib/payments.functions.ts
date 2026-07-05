@@ -54,7 +54,14 @@ async function upFetch<T>(path: string, body: unknown): Promise<T> {
 /** Create a PENDING order + UddoktaPay charge, return payment URL for redirect. */
 export const createCourseCharge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ courseId: z.string().uuid() }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        courseId: z.string().uuid(),
+        couponCode: z.string().trim().min(1).max(40).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
@@ -76,8 +83,37 @@ export const createCourseCharge = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) return { alreadyEnrolled: true as const, courseId: course.id };
 
-    const amount = Number(course.discount_price ?? course.price ?? 0);
-    if (!(amount > 0)) throw new Error("Invalid amount");
+    const baseAmount = Number(course.discount_price ?? course.price ?? 0);
+    if (!(baseAmount > 0)) throw new Error("Invalid amount");
+
+    // Server-side coupon re-validation (never trust the client discount)
+    let amount = baseAmount;
+    let discountAmount = 0;
+    let couponCode: string | null = null;
+    if (data.couponCode) {
+      const code = data.couponCode.toUpperCase();
+      const { data: c } = await supabase
+        .from("coupons")
+        .select("code, discount_type, discount_value, starts_at, ends_at, max_uses, used_count, active")
+        .eq("code", code)
+        .maybeSingle();
+      const now = new Date();
+      const valid =
+        c &&
+        c.active &&
+        (!c.starts_at || new Date(c.starts_at) <= now) &&
+        (!c.ends_at || new Date(c.ends_at) >= now) &&
+        (c.max_uses == null || (c.used_count ?? 0) < c.max_uses);
+      if (!valid) throw new Error("কুপনটি বৈধ নয়");
+      const raw =
+        c!.discount_type === "PERCENT"
+          ? (baseAmount * Number(c!.discount_value)) / 100
+          : Number(c!.discount_value);
+      discountAmount = Math.min(Math.max(0, Math.round(raw * 100) / 100), baseAmount);
+      amount = Math.max(0, Math.round((baseAmount - discountAmount) * 100) / 100);
+      couponCode = c!.code;
+      if (!(amount > 0)) throw new Error("ডিসকাউন্টের পর মূল্য শূন্য");
+    }
 
     const { data: profile } = await supabase
       .from("profiles")
@@ -95,6 +131,8 @@ export const createCourseCharge = createServerFn({ method: "POST" })
         currency: "BDT",
         status: "PENDING",
         payment_provider: "uddoktapay",
+        coupon_code: couponCode,
+        discount_amount: discountAmount,
       })
       .select("id")
       .single();

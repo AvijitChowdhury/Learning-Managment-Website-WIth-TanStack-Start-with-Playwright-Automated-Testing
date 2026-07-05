@@ -17,21 +17,77 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
+          parent_id?: string | null
           slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          discount_type: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value: number
+          ends_at: string | null
+          id: string
+          max_uses: number | null
+          starts_at: string | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          discount_type?: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value: number
+          ends_at?: string | null
+          id?: string
+          max_uses?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          discount_type?: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          max_uses?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
         }
         Relationships: []
       }
@@ -41,8 +97,10 @@ export type Database = {
           created_at: string
           description: string
           discount_price: number | null
+          gift_resources: string | null
           id: string
           instructor_id: string | null
+          intro_video_url: string | null
           is_published: boolean
           language: string
           level: Database["public"]["Enums"]["course_level"]
@@ -52,15 +110,19 @@ export type Database = {
           subtitle: string | null
           thumbnail_url: string | null
           title: string
+          total_duration: string | null
           updated_at: string
+          what_you_learn: string[]
         }
         Insert: {
           category_id?: string | null
           created_at?: string
           description: string
           discount_price?: number | null
+          gift_resources?: string | null
           id?: string
           instructor_id?: string | null
+          intro_video_url?: string | null
           is_published?: boolean
           language?: string
           level?: Database["public"]["Enums"]["course_level"]
@@ -70,15 +132,19 @@ export type Database = {
           subtitle?: string | null
           thumbnail_url?: string | null
           title: string
+          total_duration?: string | null
           updated_at?: string
+          what_you_learn?: string[]
         }
         Update: {
           category_id?: string | null
           created_at?: string
           description?: string
           discount_price?: number | null
+          gift_resources?: string | null
           id?: string
           instructor_id?: string | null
+          intro_video_url?: string | null
           is_published?: boolean
           language?: string
           level?: Database["public"]["Enums"]["course_level"]
@@ -88,7 +154,9 @@ export type Database = {
           subtitle?: string | null
           thumbnail_url?: string | null
           title?: string
+          total_duration?: string | null
           updated_at?: string
+          what_you_learn?: string[]
         }
         Relationships: [
           {
@@ -189,39 +257,48 @@ export type Database = {
       }
       lessons: {
         Row: {
+          assignment: string | null
           content_url: string | null
           created_at: string
+          description: string | null
           duration_sec: number | null
           id: string
           is_free_preview: boolean
           module_id: string
           order: number
+          resource_url: string | null
           text_content: string | null
           title: string
           type: Database["public"]["Enums"]["lesson_type"]
           updated_at: string
         }
         Insert: {
+          assignment?: string | null
           content_url?: string | null
           created_at?: string
+          description?: string | null
           duration_sec?: number | null
           id?: string
           is_free_preview?: boolean
           module_id: string
           order?: number
+          resource_url?: string | null
           text_content?: string | null
           title: string
           type?: Database["public"]["Enums"]["lesson_type"]
           updated_at?: string
         }
         Update: {
+          assignment?: string | null
           content_url?: string | null
           created_at?: string
+          description?: string | null
           duration_sec?: number | null
           id?: string
           is_free_preview?: boolean
           module_id?: string
           order?: number
+          resource_url?: string | null
           text_content?: string | null
           title?: string
           type?: Database["public"]["Enums"]["lesson_type"]
@@ -275,9 +352,11 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          coupon_code: string | null
           course_id: string
           created_at: string
           currency: string
+          discount_amount: number
           gateway_fee: number | null
           id: string
           payment_method: string | null
@@ -291,9 +370,11 @@ export type Database = {
         }
         Insert: {
           amount: number
+          coupon_code?: string | null
           course_id: string
           created_at?: string
           currency?: string
+          discount_amount?: number
           gateway_fee?: number | null
           id?: string
           payment_method?: string | null
@@ -307,9 +388,11 @@ export type Database = {
         }
         Update: {
           amount?: number
+          coupon_code?: string | null
           course_id?: string
           created_at?: string
           currency?: string
+          discount_amount?: number
           gateway_fee?: number | null
           id?: string
           payment_method?: string | null
@@ -399,6 +482,79 @@ export type Database = {
           },
         ]
       }
+      support_replies: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          thread_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          thread_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_replies_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "support_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_threads: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_threads_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -435,6 +591,7 @@ export type Database = {
     }
     Enums: {
       app_role: "ADMIN" | "STUDENT"
+      coupon_discount_type: "PERCENT" | "FLAT"
       course_level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
       lesson_type: "VIDEO" | "TEXT" | "ATTACHMENT"
       order_status: "PENDING" | "PAID" | "FAILED" | "REFUNDED" | "CANCELLED"
@@ -566,6 +723,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["ADMIN", "STUDENT"],
+      coupon_discount_type: ["PERCENT", "FLAT"],
       course_level: ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
       lesson_type: ["VIDEO", "TEXT", "ATTACHMENT"],
       order_status: ["PENDING", "PAID", "FAILED", "REFUNDED", "CANCELLED"],

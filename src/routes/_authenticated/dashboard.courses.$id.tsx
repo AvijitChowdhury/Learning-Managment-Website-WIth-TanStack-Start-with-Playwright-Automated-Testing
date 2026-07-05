@@ -13,13 +13,19 @@ import {
   Menu,
   X,
   Search,
+  ListTree,
+  Info,
+  Star,
+  HelpCircle,
 } from "lucide-react";
 import {
   getCoursePlayer,
   markLessonComplete,
   getLessonVideoUrl,
+  submitReview,
 } from "@/lib/learning.functions";
 import { formatBnNumber } from "@/lib/format";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/courses/$id")({
   head: () => ({
@@ -76,6 +82,20 @@ function PlayerPage() {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "todo" | "done" | "video" | "text">("all");
+  const [tab, setTab] = useState<"curriculum" | "info" | "reviews" | "faq">("curriculum");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const reviewFn = useServerFn(submitReview);
+  const reviewMut = useMutation({
+    mutationFn: (v: { rating: number; comment: string }) =>
+      reviewFn({ data: { courseId: id, ...v } }),
+    onSuccess: () => {
+      toast.success("রিভিউ জমা হয়েছে");
+      setComment("");
+      setRating(0);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "রিভিউ জমা হয়নি"),
+  });
 
   useEffect(() => {
     if (!activeId && orderedLessons.length) setActiveId(orderedLessons[0].id);
@@ -285,6 +305,36 @@ function PlayerPage() {
                   </button>
                 </div>
 
+                {(active.description || active.assignment || active.resource_url) && (
+                  <div className="mt-5 space-y-4 border-t border-border pt-4 font-body text-sm text-terminal/90">
+                    {active.description && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">বিবরণ</div>
+                        <p className="whitespace-pre-line">{active.description}</p>
+                      </div>
+                    )}
+                    {active.assignment && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">অ্যাসাইনমেন্ট</div>
+                        <p className="whitespace-pre-line rounded-md border border-indigo/30 bg-indigo/5 p-3">{active.assignment}</p>
+                      </div>
+                    )}
+                    {active.resource_url && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">রিসোর্স</div>
+                        <a
+                          href={active.resource_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-lime/50 bg-lime/10 px-3 py-1.5 font-mono text-xs text-lime hover:bg-lime hover:text-ink"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" /> ডাউনলোড / দেখুন
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Prev / Next */}
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
                   <button
@@ -325,164 +375,348 @@ function PlayerPage() {
             } lg:static lg:block lg:z-auto`}
           >
             <div className="lg:sticky lg:top-20 rounded-2xl border border-border bg-code-gray max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
-              <div className="px-4 py-3 border-b border-border space-y-3">
-                <div>
-                  <div className="font-display text-sm font-bold text-terminal">
-                    কোর্স কারিকুলাম
+              {/* Tab bar */}
+              <div className="flex border-b border-border">
+                {(
+                  [
+                    ["curriculum", "কারিকুলাম", ListTree],
+                    ["info", "তথ্য", Info],
+                    ["reviews", "রিভিউ", Star],
+                    ["faq", "প্রশ্ন", HelpCircle],
+                  ] as const
+                ).map(([k, label, Icon]) => (
+                  <button
+                    key={k}
+                    onClick={() => setTab(k)}
+                    className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 font-mono text-[10px] transition border-b-2 ${
+                      tab === k
+                        ? "border-indigo-soft text-indigo-soft bg-indigo/5"
+                        : "border-transparent text-terminal/60 hover:text-terminal hover:bg-white/5"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {tab === "curriculum" && (
+                <>
+                  <div className="px-4 py-3 border-b border-border space-y-3">
+                    <div>
+                      <div className="font-display text-sm font-bold text-terminal">
+                        কোর্স কারিকুলাম
+                      </div>
+                      <div className="mt-0.5 font-mono text-[10px] text-terminal/60">
+                        {formatBnNumber(data.modules.length)} মডিউল ·{" "}
+                        {formatBnNumber(totalLessons)} পাঠ
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-terminal/40" />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="পাঠ খুঁজুন…"
+                        className="w-full rounded-md border border-border bg-navy pl-8 pr-7 py-1.5 font-body text-sm text-terminal placeholder:text-terminal/40 focus:outline-none focus:border-indigo/60"
+                      />
+                      {query && (
+                        <button
+                          onClick={() => setQuery("")}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 text-terminal/50 hover:text-terminal"
+                          aria-label="clear"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {(
+                        [
+                          ["all", "সব"],
+                          ["todo", "বাকি"],
+                          ["done", "সম্পন্ন"],
+                          ["video", "ভিডিও"],
+                          ["text", "টেক্সট"],
+                        ] as const
+                      ).map(([k, label]) => (
+                        <button
+                          key={k}
+                          onClick={() => setFilter(k)}
+                          className={`rounded-full px-2.5 py-1 font-mono text-[10px] transition ${
+                            filter === k
+                              ? "bg-indigo/20 text-indigo-soft border border-indigo/50"
+                              : "border border-border text-terminal/60 hover:text-terminal hover:border-indigo/30"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="mt-0.5 font-mono text-[10px] text-terminal/60">
-                    {formatBnNumber(data.modules.length)} মডিউল ·{" "}
-                    {formatBnNumber(totalLessons)} পাঠ
+
+                  <div className="flex-1 overflow-y-auto p-2">
+                    {(() => {
+                      const q = query.trim().toLowerCase();
+                      const matches = (l: any) => {
+                        if (q && !String(l.title ?? "").toLowerCase().includes(q))
+                          return false;
+                        if (filter === "todo" && progressSet.has(l.id)) return false;
+                        if (filter === "done" && !progressSet.has(l.id)) return false;
+                        if (filter === "video" && l.type !== "VIDEO") return false;
+                        if (filter === "text" && l.type !== "TEXT") return false;
+                        return true;
+                      };
+                      const searching = q.length > 0 || filter !== "all";
+                      const modulesRendered = data.modules
+                        .map((m: any, mi: number) => {
+                          const items = orderedLessons.filter(
+                            (l: any) => l.module_id === m.id && matches(l),
+                          );
+                          return { m, mi, items };
+                        })
+                        .filter(({ items }) => !searching || items.length > 0);
+
+                      if (modulesRendered.length === 0)
+                        return (
+                          <div className="px-3 py-8 text-center font-body text-sm text-terminal/50">
+                            কোনো পাঠ পাওয়া যায়নি
+                          </div>
+                        );
+
+                      return modulesRendered.map(({ m, mi, items }) => {
+                        const allItems = orderedLessons.filter(
+                          (l: any) => l.module_id === m.id,
+                        );
+                        const modDone = allItems.filter((l: any) =>
+                          progressSet.has(l.id),
+                        ).length;
+                        const isOpen = searching
+                          ? true
+                          : (openModules[m.id] ?? true);
+                        return (
+                          <div key={m.id} className="mb-2">
+                            <button
+                              onClick={() =>
+                                setOpenModules((s) => ({ ...s, [m.id]: !isOpen }))
+                              }
+                              className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-white/5"
+                            >
+                              <span className="font-mono text-[10px] text-indigo-soft w-6 shrink-0">
+                                {formatBnNumber(mi + 1).padStart(2, "০")}
+                              </span>
+                              <span className="flex-1 min-w-0">
+                                <span className="block font-body text-sm font-semibold text-terminal truncate">
+                                  {m.title}
+                                </span>
+                                <span className="block font-mono text-[10px] text-terminal/50">
+                                  {formatBnNumber(modDone)}/
+                                  {formatBnNumber(allItems.length)} সম্পন্ন
+                                </span>
+                              </span>
+                              <ChevronRight
+                                className={`h-4 w-4 text-terminal/40 transition-transform ${
+                                  isOpen ? "rotate-90" : ""
+                                }`}
+                              />
+                            </button>
+                            {isOpen && (
+                              <div className="mt-1 space-y-0.5 pl-2">
+                                {items.map((l: any) => {
+                                  const done = progressSet.has(l.id);
+                                  const activeLesson = l.id === activeId;
+                                  return (
+                                    <button
+                                      key={l.id}
+                                      onClick={() => goto(l.id)}
+                                      className={`w-full text-left rounded-md px-2 py-2 font-body text-sm flex items-center gap-2 transition ${
+                                        activeLesson
+                                          ? "bg-indigo/15 text-terminal border border-indigo/40"
+                                          : "text-terminal/80 hover:bg-white/5 border border-transparent"
+                                      }`}
+                                    >
+                                      {done ? (
+                                        <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-soft" />
+                                      ) : activeLesson ? (
+                                        <LessonIcon type={l.type} active />
+                                      ) : (
+                                        <Circle className="h-4 w-4 shrink-0 text-terminal/30" />
+                                      )}
+                                      <span className="flex-1 min-w-0 truncate">
+                                        {l.title}
+                                      </span>
+                                      {l.duration_sec ? (
+                                        <span className="font-mono text-[10px] text-terminal/40 shrink-0">
+                                          {fmtDur(l.duration_sec)}
+                                        </span>
+                                      ) : null}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-terminal/40" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="পাঠ খুঁজুন…"
-                    className="w-full rounded-md border border-border bg-navy pl-8 pr-7 py-1.5 font-body text-sm text-terminal placeholder:text-terminal/40 focus:outline-none focus:border-indigo/60"
-                  />
-                  {query && (
-                    <button
-                      onClick={() => setQuery("")}
-                      className="absolute right-1.5 top-1/2 -translate-y-1/2 text-terminal/50 hover:text-terminal"
-                      aria-label="clear"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+                </>
+              )}
+
+              {tab === "info" && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <div>
+                    <div className="font-display text-sm font-bold text-terminal">
+                      {data.course.title}
+                    </div>
+                    {data.course.subtitle && (
+                      <p className="mt-1 font-body text-sm text-terminal/70">
+                        {data.course.subtitle}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-md border border-border bg-navy p-3">
+                      <div className="font-mono text-[10px] text-terminal/50">মডিউল</div>
+                      <div className="mt-1 font-display text-lg font-bold text-terminal">
+                        {formatBnNumber(data.modules.length)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border bg-navy p-3">
+                      <div className="font-mono text-[10px] text-terminal/50">পাঠ</div>
+                      <div className="mt-1 font-display text-lg font-bold text-terminal">
+                        {formatBnNumber(totalLessons)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border bg-navy p-3">
+                      <div className="font-mono text-[10px] text-terminal/50">সম্পন্ন</div>
+                      <div className="mt-1 font-display text-lg font-bold text-indigo-soft">
+                        {formatBnNumber(doneCount)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border bg-navy p-3">
+                      <div className="font-mono text-[10px] text-terminal/50">অগ্রগতি</div>
+                      <div className="mt-1 font-display text-lg font-bold text-indigo-soft">
+                        {formatBnNumber(pct)}%
+                      </div>
+                    </div>
+                  </div>
+                  {data.course.description && (
+                    <div>
+                      <div className="font-mono text-[10px] uppercase text-terminal/50 mb-1">
+                        বিবরণ
+                      </div>
+                      <p className="font-body text-sm text-terminal/80 whitespace-pre-line leading-relaxed">
+                        {data.course.description}
+                      </p>
+                    </div>
                   )}
+                  <div className="rounded-md border border-indigo/30 bg-indigo/5 p-3">
+                    <div className="font-mono text-[10px] uppercase text-indigo-soft">
+                      রেজিস্ট্রেশন
+                    </div>
+                    <div className="mt-1 font-body text-sm text-terminal/80">
+                      আপনি এই কোর্সে এনরোল্ড আছেন। আজীবন অ্যাক্সেস উপভোগ করুন।
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1">
-                  {(
-                    [
-                      ["all", "সব"],
-                      ["todo", "বাকি"],
-                      ["done", "সম্পন্ন"],
-                      ["video", "ভিডিও"],
-                      ["text", "টেক্সট"],
-                    ] as const
-                  ).map(([k, label]) => (
-                    <button
-                      key={k}
-                      onClick={() => setFilter(k)}
-                      className={`rounded-full px-2.5 py-1 font-mono text-[10px] transition ${
-                        filter === k
-                          ? "bg-indigo/20 text-indigo-soft border border-indigo/50"
-                          : "border border-border text-terminal/60 hover:text-terminal hover:border-indigo/30"
-                      }`}
+              )}
+
+              {tab === "reviews" && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <div>
+                    <div className="font-display text-sm font-bold text-terminal">
+                      রিভিউ লিখুন
+                    </div>
+                    <p className="mt-1 font-mono text-[10px] text-terminal/50">
+                      আপনার অভিজ্ঞতা শেয়ার করুন
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setRating(n)}
+                        className="transition hover:scale-110"
+                        aria-label={`${n} star`}
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            n <= rating
+                              ? "fill-amber text-amber"
+                              : "text-terminal/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="আপনার মতামত লিখুন…"
+                    rows={4}
+                    className="w-full rounded-md border border-border bg-navy p-2 font-body text-sm text-terminal placeholder:text-terminal/40 focus:outline-none focus:border-indigo/60 resize-none"
+                  />
+                  <button
+                    onClick={() =>
+                      rating > 0 && reviewMut.mutate({ rating, comment })
+                    }
+                    disabled={rating === 0 || reviewMut.isPending}
+                    className="w-full rounded-md bg-brand-gradient px-4 py-2 font-mono text-xs font-bold text-white disabled:opacity-40 hover:brightness-110 transition"
+                  >
+                    {reviewMut.isPending ? "জমা হচ্ছে…" : "রিভিউ জমা দিন"}
+                  </button>
+                  <Link
+                    to="/courses/$slug"
+                    params={{ slug: data.course.slug }}
+                    className="block text-center font-mono text-[11px] text-indigo-soft hover:text-indigo underline underline-offset-4"
+                  >
+                    সব রিভিউ দেখুন →
+                  </Link>
+                </div>
+              )}
+
+              {tab === "faq" && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {[
+                    {
+                      q: "কোর্স কতদিন দেখতে পাবো?",
+                      a: "একবার এনরোল করলে আজীবন অ্যাক্সেস — যেকোনো ডিভাইসে যেকোনো সময়।",
+                    },
+                    {
+                      q: "সার্টিফিকেট পাবো কি?",
+                      a: "সকল পাঠ সম্পন্ন করলে ডিজিটাল সার্টিফিকেট পাওয়া যাবে।",
+                    },
+                    {
+                      q: "মোবাইলে দেখা যাবে?",
+                      a: "হ্যাঁ, মোবাইল, ট্যাবলেট, ল্যাপটপ — যেকোনো ডিভাইসে চলবে।",
+                    },
+                    {
+                      q: "সাপোর্ট কীভাবে পাবো?",
+                      a: "প্রশ্ন থাকলে support@shikho.app এ ইমেইল করুন — ২৪ ঘণ্টার মধ্যে উত্তর।",
+                    },
+                    {
+                      q: "রিফান্ড পলিসি কী?",
+                      a: "প্রথম ৭ দিনের মধ্যে সন্তুষ্ট না হলে সম্পূর্ণ রিফান্ড।",
+                    },
+                  ].map((f, i) => (
+                    <details
+                      key={i}
+                      className="group rounded-md border border-border bg-navy p-3 open:border-indigo/40"
                     >
-                      {label}
-                    </button>
+                      <summary className="cursor-pointer list-none flex items-start justify-between gap-2">
+                        <span className="font-body text-sm font-semibold text-terminal">
+                          {f.q}
+                        </span>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-terminal/50 transition group-open:rotate-90" />
+                      </summary>
+                      <p className="mt-2 font-body text-sm text-terminal/70 leading-relaxed">
+                        {f.a}
+                      </p>
+                    </details>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-2">
-                {(() => {
-                  const q = query.trim().toLowerCase();
-                  const matches = (l: any) => {
-                    if (q && !String(l.title ?? "").toLowerCase().includes(q))
-                      return false;
-                    if (filter === "todo" && progressSet.has(l.id)) return false;
-                    if (filter === "done" && !progressSet.has(l.id)) return false;
-                    if (filter === "video" && l.type !== "VIDEO") return false;
-                    if (filter === "text" && l.type !== "TEXT") return false;
-                    return true;
-                  };
-                  const searching = q.length > 0 || filter !== "all";
-                  const modulesRendered = data.modules
-                    .map((m: any, mi: number) => {
-                      const items = orderedLessons.filter(
-                        (l: any) => l.module_id === m.id && matches(l),
-                      );
-                      return { m, mi, items };
-                    })
-                    .filter(({ items }) => !searching || items.length > 0);
-
-                  if (modulesRendered.length === 0)
-                    return (
-                      <div className="px-3 py-8 text-center font-body text-sm text-terminal/50">
-                        কোনো পাঠ পাওয়া যায়নি
-                      </div>
-                    );
-
-                  return modulesRendered.map(({ m, mi, items }) => {
-                    const allItems = orderedLessons.filter(
-                      (l: any) => l.module_id === m.id,
-                    );
-                    const modDone = allItems.filter((l: any) =>
-                      progressSet.has(l.id),
-                    ).length;
-                    const isOpen = searching
-                      ? true
-                      : (openModules[m.id] ?? true);
-                    return (
-                      <div key={m.id} className="mb-2">
-                        <button
-                          onClick={() =>
-                            setOpenModules((s) => ({ ...s, [m.id]: !isOpen }))
-                          }
-                          className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-white/5"
-                        >
-                          <span className="font-mono text-[10px] text-indigo-soft w-6 shrink-0">
-                            {formatBnNumber(mi + 1).padStart(2, "০")}
-                          </span>
-                          <span className="flex-1 min-w-0">
-                            <span className="block font-body text-sm font-semibold text-terminal truncate">
-                              {m.title}
-                            </span>
-                            <span className="block font-mono text-[10px] text-terminal/50">
-                              {formatBnNumber(modDone)}/
-                              {formatBnNumber(allItems.length)} সম্পন্ন
-                            </span>
-                          </span>
-                          <ChevronRight
-                            className={`h-4 w-4 text-terminal/40 transition-transform ${
-                              isOpen ? "rotate-90" : ""
-                            }`}
-                          />
-                        </button>
-                        {isOpen && (
-                          <div className="mt-1 space-y-0.5 pl-2">
-                            {items.map((l: any) => {
-                              const done = progressSet.has(l.id);
-                              const activeLesson = l.id === activeId;
-                              return (
-                                <button
-                                  key={l.id}
-                                  onClick={() => goto(l.id)}
-                                  className={`w-full text-left rounded-md px-2 py-2 font-body text-sm flex items-center gap-2 transition ${
-                                    activeLesson
-                                      ? "bg-indigo/15 text-terminal border border-indigo/40"
-                                      : "text-terminal/80 hover:bg-white/5 border border-transparent"
-                                  }`}
-                                >
-                                  {done ? (
-                                    <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-soft" />
-                                  ) : activeLesson ? (
-                                    <LessonIcon type={l.type} active />
-                                  ) : (
-                                    <Circle className="h-4 w-4 shrink-0 text-terminal/30" />
-                                  )}
-                                  <span className="flex-1 min-w-0 truncate">
-                                    {l.title}
-                                  </span>
-                                  {l.duration_sec ? (
-                                    <span className="font-mono text-[10px] text-terminal/40 shrink-0">
-                                      {fmtDur(l.duration_sec)}
-                                    </span>
-                                  ) : null}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
+              )}
             </div>
           </aside>
         </div>

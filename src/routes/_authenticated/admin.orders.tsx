@@ -1,21 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminListOrders, adminSetOrderStatus } from "@/lib/admin.functions";
+import { useMemo, useState } from "react";
+import { adminListOrders, adminSetOrderStatus, adminExportOrdersCsv } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
+import { Mail, Phone, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
 });
 
 const STATUSES = ["PAID", "PENDING", "FAILED", "REFUNDED", "CANCELLED"] as const;
+type Tab = "ALL" | "INCOMPLETE" | "PAID";
 
 function AdminOrders() {
   const list = useServerFn(adminListOrders);
   const setStatus = useServerFn(adminSetOrderStatus);
+  const exportCsv = useServerFn(adminExportOrdersCsv);
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["admin-orders"], queryFn: () => list() });
+  const [tab, setTab] = useState<Tab>("ALL");
+
   const mut = useMutation({
     mutationFn: (v: { orderId: string; status: any }) => setStatus({ data: v }),
     onSuccess: () => {
@@ -25,19 +31,79 @@ function AdminOrders() {
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
   });
 
+  const filtered = useMemo(() => {
+    const all = data ?? [];
+    if (tab === "INCOMPLETE") return all.filter((o: any) => ["PENDING", "FAILED", "CANCELLED"].includes(o.status));
+    if (tab === "PAID") return all.filter((o: any) => o.status === "PAID");
+    return all;
+  }, [data, tab]);
+
+  const counts = useMemo(() => {
+    const all = data ?? [];
+    return {
+      all: all.length,
+      incomplete: all.filter((o: any) => ["PENDING", "FAILED", "CANCELLED"].includes(o.status)).length,
+      paid: all.filter((o: any) => o.status === "PAID").length,
+    };
+  }, [data]);
+
+  async function handleExport() {
+    try {
+      const { csv, filename } = await exportCsv();
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      toast.error(e?.message ?? "এক্সপোর্ট ব্যর্থ");
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-border bg-code-gray overflow-hidden">
-      <div className="p-4 font-mono text-xs text-terminal/60">$ orders --all</div>
+      <div className="flex items-center justify-between p-4 border-b border-border gap-3 flex-wrap">
+        <div className="flex gap-1">
+          {(
+            [
+              ["ALL", `সব (${counts.all})`],
+              ["INCOMPLETE", `অসম্পূর্ণ (${counts.incomplete})`],
+              ["PAID", `পেইড (${counts.paid})`],
+            ] as const
+          ).map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setTab(k as Tab)}
+              className={`rounded-md px-3 py-1.5 font-mono text-xs transition ${
+                tab === k
+                  ? "bg-lime text-ink font-bold"
+                  : "border border-border text-terminal/70 hover:text-lime hover:border-lime/40"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleExport}
+          className="inline-flex items-center gap-1 rounded-md border border-lime px-3 py-1.5 font-mono text-xs text-lime hover:bg-lime hover:text-ink"
+        >
+          <Download className="h-3.5 w-3.5" /> CSV
+        </button>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm font-body">
           <thead className="text-left text-terminal/60 font-mono text-xs uppercase">
             <tr className="border-t border-border">
               <th className="p-3">তারিখ</th>
               <th className="p-3">ইউজার</th>
+              <th className="p-3">যোগাযোগ</th>
               <th className="p-3">কোর্স</th>
               <th className="p-3">অ্যামাউন্ট</th>
               <th className="p-3">মেথড</th>
-              <th className="p-3">Txn</th>
               <th className="p-3">স্ট্যাটাস</th>
             </tr>
           </thead>
@@ -45,16 +111,42 @@ function AdminOrders() {
             {isLoading && (
               <tr><td colSpan={7} className="p-4 text-terminal/50">লোড…</td></tr>
             )}
-            {data?.map((o: any) => (
-              <tr key={o.id} className="border-t border-border/50 text-terminal/90">
+            {!isLoading && filtered.length === 0 && (
+              <tr><td colSpan={7} className="p-6 text-center text-terminal/50 font-mono text-xs">কোনো অর্ডার নেই</td></tr>
+            )}
+            {filtered.map((o: any) => (
+              <tr key={o.id} className="border-t border-border/50 text-terminal/90 align-top">
                 <td className="p-3 font-mono text-xs text-terminal/70">
                   {new Date(o.created_at).toLocaleString("bn-BD")}
                 </td>
                 <td className="p-3">{o.profiles?.name ?? o.profiles?.email ?? "—"}</td>
+                <td className="p-3 space-y-1">
+                  {o.profiles?.email && (
+                    <a
+                      href={`mailto:${o.profiles.email}`}
+                      className="inline-flex items-center gap-1 font-mono text-[11px] text-terminal/80 hover:text-lime"
+                    >
+                      <Mail className="h-3 w-3" /> {o.profiles.email}
+                    </a>
+                  )}
+                  {o.sender_number && (
+                    <a
+                      href={`tel:${o.sender_number}`}
+                      className="block inline-flex items-center gap-1 font-mono text-[11px] text-terminal/80 hover:text-lime"
+                    >
+                      <Phone className="h-3 w-3" /> {o.sender_number}
+                    </a>
+                  )}
+                  {!o.profiles?.email && !o.sender_number && <span className="text-terminal/40">—</span>}
+                </td>
                 <td className="p-3">{o.courses?.title ?? "—"}</td>
                 <td className="p-3 font-mono">{fmtBDT(Number(o.amount))}</td>
-                <td className="p-3 font-mono text-xs">{o.payment_method ?? "—"}</td>
-                <td className="p-3 font-mono text-[10px] text-terminal/60">{o.transaction_id ?? "—"}</td>
+                <td className="p-3 font-mono text-xs">
+                  {o.payment_method ?? "—"}
+                  {o.transaction_id && (
+                    <div className="text-[10px] text-terminal/50">{o.transaction_id}</div>
+                  )}
+                </td>
                 <td className="p-3">
                   <select
                     value={o.status}

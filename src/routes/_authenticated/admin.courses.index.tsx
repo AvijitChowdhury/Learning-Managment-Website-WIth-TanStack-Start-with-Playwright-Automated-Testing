@@ -6,7 +6,7 @@ import { adminListCourses, adminSaveCourse, adminListCategories } from "@/lib/ad
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/admin/courses")({
+export const Route = createFileRoute("/_authenticated/admin/courses/")({
   component: AdminCourses,
 });
 
@@ -28,6 +28,11 @@ function AdminCourses() {
     subtitle: "",
     thumbnail_url: "",
     category_id: null,
+    description: "",
+    what_you_learn: "",
+    gift_resources: "",
+    intro_video_url: "",
+    total_duration: "",
   });
 
   const mut = useMutation({
@@ -36,7 +41,11 @@ function AdminCourses() {
       toast.success("সংরক্ষিত");
       qc.invalidateQueries({ queryKey: ["admin-courses"] });
       setOpen(false);
-      setForm({ title: "", slug: "", price: 0, discount_price: null, level: "BEGINNER", is_published: false, subtitle: "", thumbnail_url: "", category_id: null });
+      setForm({
+        title: "", slug: "", price: 0, discount_price: null, level: "BEGINNER",
+        is_published: false, subtitle: "", thumbnail_url: "", category_id: null,
+        description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
+      });
     },
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
   });
@@ -57,11 +66,16 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const wyl = (form.what_you_learn ?? "")
+              .split("\n")
+              .map((s: string) => s.trim())
+              .filter(Boolean);
             mut.mutate({
               ...form,
               price: Number(form.price),
               discount_price: form.discount_price ? Number(form.discount_price) : null,
               category_id: form.category_id || null,
+              what_you_learn: wyl.length ? wyl : null,
             });
           }}
           className="rounded-2xl border border-border bg-code-gray p-6 grid gap-3 md:grid-cols-2"
@@ -73,10 +87,27 @@ function AdminCourses() {
             ["thumbnail_url", "থাম্বনেইল URL"],
             ["price", "মূল্য (BDT)"],
             ["discount_price", "ডিসকাউন্ট মূল্য"],
+            ["intro_video_url", "ইন্ট্রো ভিডিও URL"],
+            ["total_duration", "মোট সময় (উদা: ১২ ঘণ্টা)"],
           ].map(([k, l]) => (
             <label key={k} className="block">
               <span className="font-mono text-xs text-terminal/60">{l}</span>
               <input
+                value={form[k as string] ?? ""}
+                onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
+                className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"
+              />
+            </label>
+          ))}
+          {[
+            ["description", "কোর্স বিবরণ"],
+            ["what_you_learn", "কী শিখবেন (প্রতি লাইনে একটি)"],
+            ["gift_resources", "উপহার রিসোর্স"],
+          ].map(([k, l]) => (
+            <label key={k} className="block md:col-span-2">
+              <span className="font-mono text-xs text-terminal/60">{l}</span>
+              <textarea
+                rows={3}
                 value={form[k as string] ?? ""}
                 onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
                 className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"

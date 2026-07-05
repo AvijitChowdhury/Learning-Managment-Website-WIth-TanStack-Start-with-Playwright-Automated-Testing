@@ -12,6 +12,18 @@ import {
   AnimatedText,
   fadeUp,
 } from "@/components/motion-primitives";
+import {
+  Code2,
+  Palette,
+  Languages,
+  Sheet,
+  Search,
+  Megaphone,
+  Briefcase,
+  Sparkles,
+  Atom,
+  LayoutDashboard,
+} from "lucide-react";
 
 const coursesQO = queryOptions({
   queryKey: ["home", "courses"],
@@ -90,7 +102,18 @@ function ScrollProgress() {
 function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
-  const tags = ["Python", "Design", "IELTS", "Excel", "SEO", "Marketing", "Freelancing", "AI", "React", "UI/UX"];
+  const tags = [
+    { label: "Python", Icon: Code2 },
+    { label: "Design", Icon: Palette },
+    { label: "IELTS", Icon: Languages },
+    { label: "Excel", Icon: Sheet },
+    { label: "SEO", Icon: Search },
+    { label: "Marketing", Icon: Megaphone },
+    { label: "Freelancing", Icon: Briefcase },
+    { label: "AI", Icon: Sparkles },
+    { label: "React", Icon: Atom },
+    { label: "UI/UX", Icon: LayoutDashboard },
+  ];
 
   return (
     <>
@@ -116,16 +139,16 @@ function HomePage() {
           aria-hidden
         />
 
-        <div className="relative container-page grid gap-10 py-20 md:py-28 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+        <div className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
             <Prompt>$ boot shikho.sh</Prompt>
-            <h1 className="mt-6 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
+            <h1 className="mt-3 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
               <AnimatedText text={bn.home.heroTitle} />
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1, duration: 0.7 }}
-                className="block mt-4 font-display text-xl md:text-2xl font-semibold text-terminal/80"
+                className="block mt-2 font-display text-xl md:text-2xl font-semibold text-terminal/80"
               >
                 এখন শিখছি <TypingHeadline />
               </motion.span>
@@ -135,31 +158,39 @@ function HomePage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.2, duration: 0.7 }}
-              className="mt-6 max-w-xl font-body text-lg leading-8 text-terminal/75"
+              className="mt-3 max-w-xl font-body text-lg leading-8 text-terminal/75"
             >
               {bn.home.heroSubtitle}
             </motion.p>
+
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4, duration: 0.7 }}
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-8 flex flex-wrap gap-3"
             >
               <Link
                 to="/courses"
                 className="group inline-flex items-center gap-2 rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime hover:brightness-95"
               >
-                <span>./browse --courses</span>
+                <span>চেকআউট শুরু করুন</span>
                 <motion.span aria-hidden animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
               </Link>
               <Link
-                to="/auth"
+                to="/courses"
                 className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime transition-colors"
               >
-                {bn.home.ctaLogin}
+                কোর্স মডিউল দেখুন
+              </Link>
+              <Link
+                to="/free-class"
+                className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 transition-colors"
+              >
+                ফ্রি ক্লাস
               </Link>
             </motion.div>
+
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -213,12 +244,18 @@ function HomePage() {
         </div>
 
         {/* Marquee */}
-        <div className="relative border-y border-border bg-code-gray/60 py-4 overflow-hidden">
-          <div className="marquee-track flex gap-12 whitespace-nowrap font-mono text-sm text-terminal/60">
+        <div className="relative border-y border-border bg-code-gray/60 py-1.5 overflow-hidden">
+          <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
             {Array.from({ length: 2 }).map((_, k) => (
-              <div key={k} className="flex gap-12 pr-12">
-                {tags.map((t) => (
-                  <span key={t} className="hover:text-lime transition-colors">◇ {t}</span>
+              <div key={k} className="flex gap-6 pr-6">
+                {tags.map(({ label, Icon }) => (
+                  <span
+                    key={`${k}-${label}`}
+                    className="inline-flex items-center gap-1.5 hover:text-lime transition-colors"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </span>
                 ))}
               </div>
             ))}

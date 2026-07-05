@@ -14,12 +14,32 @@ export const adminOverview = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [orders, students, courses, revenueRes] = await Promise.all([
-      supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("status", "PAID"),
-      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("courses").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("orders").select("amount, course_id, courses(title)").eq("status", "PAID"),
-    ]);
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+    const [orders, students, courses, revenueRes, todayPaidRes, todayIncompleteRes, todayEnrolRes] =
+      await Promise.all([
+        supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("status", "PAID"),
+        supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("courses").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("orders").select("amount, course_id, courses(title)").eq("status", "PAID"),
+        supabaseAdmin
+          .from("orders")
+          .select("amount")
+          .eq("status", "PAID")
+          .gte("created_at", startOfToday),
+        supabaseAdmin
+          .from("orders")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "PENDING")
+          .gte("created_at", startOfToday),
+        supabaseAdmin
+          .from("enrollments")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", startOfToday),
+      ]);
+
     const rows = revenueRes.data ?? [];
     const revenue = rows.reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const perCourse = new Map<string, { title: string; total: number; count: number }>();
@@ -31,14 +51,24 @@ export const adminOverview = createServerFn({ method: "GET" })
       perCourse.set(key, cur);
     });
     const topCourses = [...perCourse.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+
+    const todayPaidRows = todayPaidRes.data ?? [];
+    const todaySale = todayPaidRows.reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+    const todayPaidCount = todayPaidRows.length;
+
     return {
       orderCount: orders.count ?? 0,
       studentCount: students.count ?? 0,
       courseCount: courses.count ?? 0,
       revenue,
+      todaySale,
+      todayPaidCount,
+      todayIncomplete: todayIncompleteRes.count ?? 0,
+      todayEnrolCount: todayEnrolRes.count ?? 0,
       topCourses,
     };
   });
+
 
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -48,12 +78,23 @@ export const adminListOrders = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, amount, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+        "id, user_id, amount, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title)",
       )
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    const orders = data ?? [];
+    const userIds = Array.from(new Set(orders.map((o) => o.user_id).filter(Boolean))) as string[];
+    let profilesById: Record<string, { email: string | null; name: string | null }> = {};
+    if (userIds.length) {
+      const { data: profs, error: pErr } = await supabaseAdmin
+        .from("profiles")
+        .select("id, email, name")
+        .in("id", userIds);
+      if (pErr) throw new Error(pErr.message);
+      profilesById = Object.fromEntries((profs ?? []).map((p) => [p.id, { email: p.email, name: p.name }]));
+    }
+    return orders.map((o) => ({ ...o, profiles: o.user_id ? profilesById[o.user_id] ?? null : null }));
   });
 
 export const adminSetOrderStatus = createServerFn({ method: "POST" })
@@ -103,6 +144,10 @@ export const adminSaveCourse = createServerFn({ method: "POST" })
         level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
         is_published: z.boolean(),
         category_id: z.string().uuid().nullable().optional(),
+        what_you_learn: z.array(z.string().max(500)).max(50).nullable().optional(),
+        gift_resources: z.string().max(2000).nullable().optional(),
+        intro_video_url: z.string().max(500).nullable().optional(),
+        total_duration: z.string().max(50).nullable().optional(),
       })
       .parse(d),
   )
@@ -197,6 +242,9 @@ export const adminSaveLesson = createServerFn({ method: "POST" })
         duration_sec: z.number().int().min(0).nullable().optional(),
         order: z.number().int().min(0),
         is_free_preview: z.boolean(),
+        description: z.string().max(5000).nullable().optional(),
+        assignment: z.string().max(5000).nullable().optional(),
+        resource_url: z.string().max(1000).nullable().optional(),
       })
       .parse(d),
   )
@@ -267,4 +315,68 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin.from("categories").select("id, name, slug").order("name");
     return data ?? [];
+  });
+
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export const adminExportOrdersCsv = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(10000);
+    if (error) throw new Error(error.message);
+
+    const rows = data ?? [];
+    const header = [
+      "id",
+      "created_at",
+      "status",
+      "amount",
+      "discount",
+      "coupon",
+      "currency",
+      "course",
+      "student_name",
+      "student_email",
+      "payment_method",
+      "transaction_id",
+      "sender_number",
+      "invoice_ref",
+    ];
+    const lines = [header.join(",")];
+    for (const r of rows as any[]) {
+      lines.push(
+        [
+          r.id,
+          r.created_at,
+          r.status,
+          r.amount,
+          r.discount_amount ?? 0,
+          r.coupon_code ?? "",
+          r.currency,
+          r.courses?.title ?? "",
+          r.profiles?.name ?? "",
+          r.profiles?.email ?? "",
+          r.payment_method ?? "",
+          r.transaction_id ?? "",
+          r.sender_number ?? "",
+          r.payment_ref ?? "",
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    }
+    return { csv: lines.join("\n"), filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
   });

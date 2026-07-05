@@ -332,7 +332,53 @@ function CourseDetail() {
             </Accordion>
           </div>
 
+          {/* WHAT YOU'LL LEARN */}
+          {course.what_you_learn && course.what_you_learn.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="text-2xl font-semibold">কী শিখবেন</h2>
+              <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                {course.what_you_learn.map((item: string, i: number) => (
+                  <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                    <span className="mt-0.5 text-brand">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* GIFT / BONUS RESOURCES */}
+          {course.gift_resources && (
+            <div className="rounded-2xl border border-lime/40 bg-lime/5 p-6">
+              <div className="font-mono text-xs uppercase tracking-wider text-lime">🎁 বোনাস উপহার</div>
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                {course.gift_resources}
+              </p>
+            </div>
+          )}
+
+          {/* INTRO VIDEO */}
+          {course.intro_video_url && (
+            <div>
+              <h2 className="text-2xl font-semibold">ইন্ট্রো ভিডিও</h2>
+              <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-border bg-black">
+                {/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(course.intro_video_url) ? (
+                  <iframe
+                    src={course.intro_video_url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
+                    title="Intro"
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video src={course.intro_video_url} controls className="h-full w-full" />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* REQUIREMENTS */}
+
           {requirements.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold">{bn.courses.requirements}</h2>
@@ -387,7 +433,7 @@ function CourseDetail() {
           )}
 
           {/* REVIEWS */}
-          <div>
+          <div id="reviews" className="scroll-mt-24">
             <h2 className="text-2xl font-semibold">{bn.courses.reviews}</h2>
             {reviewCount > 0 ? (
               <div className="mt-5 grid gap-6 md:grid-cols-[240px_1fr]">
@@ -449,7 +495,7 @@ function CourseDetail() {
 
           {/* FAQ */}
           {faq.length > 0 && (
-            <div>
+            <div id="faq" className="scroll-mt-24">
               <h2 className="text-2xl font-semibold">{bn.courses.faq}</h2>
               <Accordion type="single" collapsible className="mt-4 rounded-xl border border-border bg-card">
                 {faq.map((f, i) => (
@@ -463,8 +509,84 @@ function CourseDetail() {
           )}
         </div>
 
-        {/* right rail spacer for large screens (sticky card already in hero) */}
-        <div className="hidden lg:block" />
+        {/* Sticky enrollment / info rail beside curriculum */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 space-y-4">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-lift">
+              <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                রেজিস্ট্রেশন
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-brand">{formatBDT(price)}</span>
+                {course.discount_price && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatBDT(course.price)}
+                  </span>
+                )}
+              </div>
+              <Link
+                to="/checkout/$courseId"
+                params={{ courseId: course.id }}
+                className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+              >
+                {bn.courses.buy}
+              </Link>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {formatBnNumber(modules.length)} {bn.courses.modules} ·{" "}
+                  {formatBnNumber(totalLessons)} {bn.courses.lessons}
+                </li>
+                {totalSeconds > 0 && (
+                  <li className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {totalHours > 0 && `${formatBnNumber(totalHours)} ${bn.courses.hours} `}
+                    {totalMinutes > 0 && `${formatBnNumber(totalMinutes)} ${bn.courses.minutes}`}
+                  </li>
+                )}
+                <li>✓ আজীবন অ্যাক্সেস</li>
+                <li>✓ মোবাইল ও ল্যাপটপে</li>
+              </ul>
+            </div>
+
+            {reviewCount > 0 && (
+              <a
+                href="#reviews"
+                className="block rounded-2xl border border-border bg-card p-5 hover:border-indigo/50 transition"
+              >
+                <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                  রিভিউ
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{rating.toFixed(1)}</span>
+                  <span className="text-amber-400 text-sm">
+                    {"★".repeat(Math.round(rating))}
+                    <span className="text-muted-foreground">
+                      {"★".repeat(5 - Math.round(rating))}
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatBnNumber(reviewCount)} জন শিক্ষার্থীর মতামত
+                </p>
+              </a>
+            )}
+
+            {faq.length > 0 && (
+              <a
+                href="#faq"
+                className="block rounded-2xl border border-border bg-card p-5 hover:border-indigo/50 transition"
+              >
+                <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                  সাধারণ জিজ্ঞাসা
+                </div>
+                <p className="mt-2 text-sm text-foreground">
+                  {formatBnNumber(faq.length)}টি প্রশ্নের উত্তর
+                </p>
+              </a>
+            )}
+          </div>
+        </aside>
       </section>
 
       {/* RELATED */}

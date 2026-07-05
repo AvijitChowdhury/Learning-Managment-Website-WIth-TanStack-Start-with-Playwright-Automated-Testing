@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { createCourseCharge } from "@/lib/payments.functions";
+import { previewCoupon } from "@/lib/lms-admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtBDT } from "@/lib/format";
 
@@ -13,10 +14,15 @@ export const Route = createFileRoute("/_authenticated/checkout/$courseId")({
 function CheckoutPage() {
   const { courseId } = Route.useParams();
   const charge = useServerFn(createCourseCharge);
+  const preview = useServerFn(previewCoupon);
   const navigate = useNavigate();
   const [course, setCourse] = useState<any>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [applied, setApplied] = useState<{ code: string; discount: number; final: number } | null>(null);
+  const [couponMsg, setCouponMsg] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     supabase
@@ -28,17 +34,42 @@ function CheckoutPage() {
       .then(({ data }) => setCourse(data));
   }, [courseId]);
 
+  const baseAmount = Number(course?.discount_price ?? course?.price ?? 0);
+  const finalAmount = applied ? applied.final : baseAmount;
+
+  async function applyCoupon() {
+    if (!couponInput.trim()) return;
+    setCouponMsg(null);
+    setCouponLoading(true);
+    try {
+      const res = await preview({ data: { code: couponInput.trim(), amount: baseAmount } });
+      setApplied({ code: res.code, discount: res.discount, final: res.final });
+      setCouponMsg(`কুপন প্রয়োগ হয়েছে — ${fmtBDT(res.discount)} ছাড়`);
+    } catch (e: any) {
+      setApplied(null);
+      setCouponMsg(e?.message ?? "কুপন যাচাই ব্যর্থ");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setApplied(null);
+    setCouponInput("");
+    setCouponMsg(null);
+  }
+
   async function pay() {
     setErr(null);
     setLoading(true);
     try {
-      const res = await charge({ data: { courseId } });
+      const res = await charge({
+        data: { courseId, couponCode: applied?.code },
+      });
       if (res.alreadyEnrolled) {
         navigate({ to: "/dashboard/courses/$id", params: { id: courseId } });
         return;
       }
-      // Break out of the Lovable preview iframe — payment gateways send
-      // X-Frame-Options: DENY, so navigating the iframe shows "refused to connect".
       const target = res.payment_url!;
       try {
         (window.top ?? window).location.href = target;
@@ -54,7 +85,6 @@ function CheckoutPage() {
   if (!course) {
     return <div className="container-page py-16 font-body text-terminal/70">লোড হচ্ছে…</div>;
   }
-  const amount = Number(course.discount_price ?? course.price ?? 0);
 
   return (
     <div className="container-page py-16 max-w-2xl">
@@ -72,10 +102,61 @@ function CheckoutPage() {
             )}
           </div>
         </div>
-        <div className="mt-6 flex justify-between border-t border-border pt-6 font-body">
-          <span className="text-terminal/70">মোট</span>
-          <span className="font-display text-2xl font-bold text-lime">{fmtBDT(amount)}</span>
+
+        {/* Coupon */}
+        <div className="mt-6 border-t border-border pt-6">
+          <div className="font-mono text-xs text-terminal/60 mb-2">কুপন কোড</div>
+          {applied ? (
+            <div className="flex items-center justify-between rounded-md border border-lime/40 bg-lime/10 px-3 py-2">
+              <div className="font-mono text-sm text-lime">{applied.code}</div>
+              <button
+                onClick={removeCoupon}
+                className="font-mono text-[11px] text-terminal/70 hover:text-red-300"
+              >
+                সরান
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                placeholder="COUPON20"
+                className="flex-1 rounded-md border border-border bg-ink px-3 py-2 font-mono text-sm text-terminal focus:border-lime focus:outline-none"
+              />
+              <button
+                onClick={applyCoupon}
+                disabled={couponLoading || !couponInput.trim()}
+                className="rounded-md border border-lime px-4 font-mono text-xs font-bold text-lime hover:bg-lime hover:text-ink disabled:opacity-50"
+              >
+                {couponLoading ? "…" : "প্রয়োগ"}
+              </button>
+            </div>
+          )}
+          {couponMsg && (
+            <p className={`mt-2 font-mono text-[11px] ${applied ? "text-lime" : "text-red-300"}`}>
+              {couponMsg}
+            </p>
+          )}
         </div>
+
+        <div className="mt-6 border-t border-border pt-6 space-y-2 font-body">
+          <div className="flex justify-between text-terminal/70">
+            <span>সাবটোটাল</span>
+            <span className="font-mono">{fmtBDT(baseAmount)}</span>
+          </div>
+          {applied && (
+            <div className="flex justify-between text-lime">
+              <span>ছাড় ({applied.code})</span>
+              <span className="font-mono">− {fmtBDT(applied.discount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between pt-2 border-t border-border">
+            <span className="text-terminal/70">মোট</span>
+            <span className="font-display text-2xl font-bold text-lime">{fmtBDT(finalAmount)}</span>
+          </div>
+        </div>
+
         <p className="mt-4 text-xs text-terminal/60 font-mono">
           bKash · Nagad · Rocket · Card — powered by UddoktaPay
         </p>
@@ -89,7 +170,7 @@ function CheckoutPage() {
           disabled={loading}
           className="mt-6 w-full rounded-md bg-lime px-6 py-4 font-mono text-sm font-bold text-ink hover:brightness-95 disabled:opacity-50"
         >
-          {loading ? "প্রক্রিয়াকরণ…" : `${fmtBDT(amount)} — পেমেন্ট করুন →`}
+          {loading ? "প্রক্রিয়াকরণ…" : `${fmtBDT(finalAmount)} — পেমেন্ট করুন →`}
         </button>
         <Link
           to="/courses/$slug"

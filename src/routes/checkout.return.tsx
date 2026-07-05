@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { verifyPaymentByInvoice } from "@/lib/payments.functions";
+
 
 export const Route = createFileRoute("/checkout/return")({
   head: () => ({ meta: [{ title: "পেমেন্ট যাচাই — শিখো" }, { name: "robots", content: "noindex" }] }),
@@ -14,23 +15,25 @@ export const Route = createFileRoute("/checkout/return")({
 function ReturnPage() {
   const { invoice_id } = Route.useSearch();
   const verify = useServerFn(verifyPaymentByInvoice);
+  const navigate = useNavigate();
   const [state, setState] = useState<
     { s: "loading" } | { s: "paid"; courseId?: string } | { s: "pending" } | { s: "failed"; msg?: string }
   >({ s: "loading" });
 
   useEffect(() => {
     if (!invoice_id) {
-      setState({ s: "failed", msg: "invoice_id missing" });
+      navigate({ to: "/checkout/error" });
       return;
     }
     verify({ data: { invoice_id } })
       .then((r) => {
         if (r.status === "PAID") setState({ s: "paid", courseId: r.courseId });
         else if (r.status === "PENDING") setState({ s: "pending" });
-        else setState({ s: "failed" });
+        else navigate({ to: "/checkout/error" });
       })
-      .catch((e) => setState({ s: "failed", msg: e?.message }));
-  }, [invoice_id, verify]);
+      .catch(() => navigate({ to: "/checkout/error" }));
+  }, [invoice_id, verify, navigate]);
+
 
   return (
     <div className="container-page py-24 max-w-xl text-center">
