@@ -437,10 +437,16 @@ function HomePage() {
             </StaggerGroup>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA band */}
-      <section className="border-b border-border bg-lime text-ink relative overflow-hidden">
+      <motion.section
+        initial={{ opacity: 0, y: 60, scale: 0.98 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
+        className="border-b border-border bg-lime text-ink relative overflow-hidden"
+      >
         <motion.div
           aria-hidden
           className="absolute inset-0 opacity-20"
