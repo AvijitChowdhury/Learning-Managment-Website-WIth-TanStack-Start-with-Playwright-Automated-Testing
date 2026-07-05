@@ -102,11 +102,14 @@ def _write_allure_result(
             {"name": f"{name} screenshot", "source": att_name, "type": "image/png"}
         )
 
+    meta = SUITE_META.get(suite, {"epic": "Other", "feature": suite, "severity": "normal"})
+    story = name.split(".", 1)[-1]
     result = {
         "uuid": result_uuid,
         "historyId": name,
         "name": name,
         "fullName": f"tests.e2e.{name}",
+        "description": detail or f"Playwright E2E for {name}",
         "status": "passed" if passed else "failed",
         "statusDetails": {} if passed else {"message": detail, "trace": trace},
         "stage": "finished",
@@ -114,6 +117,12 @@ def _write_allure_result(
         "stop": stop_ms,
         "labels": [
             {"name": "suite", "value": suite},
+            {"name": "parentSuite", "value": meta["epic"]},
+            {"name": "subSuite", "value": meta["feature"]},
+            {"name": "epic", "value": meta["epic"]},
+            {"name": "feature", "value": meta["feature"]},
+            {"name": "story", "value": story},
+            {"name": "severity", "value": meta["severity"]},
             {"name": "framework", "value": "playwright-python"},
             {"name": "language", "value": "python"},
             {"name": "host", "value": "sandbox"},
@@ -122,6 +131,35 @@ def _write_allure_result(
     }
     with (ALLURE_DIR / f"{result_uuid}-result.json").open("w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
+
+
+def _write_categories() -> None:
+    """Custom defect categories for the Allure 'Categories' widget."""
+    categories = [
+        {"name": "Auth / session failures", "matchedStatuses": ["failed"],
+         "messageRegex": ".*(/auth|Unauthorized|session|token).*"},
+        {"name": "Missing UI selectors", "matchedStatuses": ["failed"],
+         "messageRegex": ".*(Timeout|not visible|selector|wait_for).*"},
+        {"name": "Assertion failures", "matchedStatuses": ["failed"],
+         "messageRegex": ".*AssertionError.*"},
+        {"name": "Network / 5xx", "matchedStatuses": ["failed", "broken"],
+         "messageRegex": ".*(5\\d\\d|ECONN|fetch).*"},
+    ]
+    (ALLURE_DIR / "categories.json").write_text(
+        json.dumps(categories, indent=2), encoding="utf-8"
+    )
+
+
+def _write_executor() -> None:
+    executor = {
+        "name": "Local Sandbox",
+        "type": "shell",
+        "buildName": f"E2E run {time.strftime('%Y-%m-%d %H:%M:%S')}",
+        "reportName": "Shikho LMS — Playwright E2E",
+    }
+    (ALLURE_DIR / "executor.json").write_text(
+        json.dumps(executor, indent=2), encoding="utf-8"
+    )
 
 
 def _write_environment_properties(status: str) -> None:
