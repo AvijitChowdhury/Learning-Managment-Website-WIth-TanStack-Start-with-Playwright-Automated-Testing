@@ -150,7 +150,7 @@ function Header() {
       <div className="container-page flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-md bg-lime text-ink font-mono font-bold">
-            শি
+            প্রো
           </span>
           <span className="font-display text-lg font-extrabold text-terminal">{bn.brand}</span>
         </Link>
