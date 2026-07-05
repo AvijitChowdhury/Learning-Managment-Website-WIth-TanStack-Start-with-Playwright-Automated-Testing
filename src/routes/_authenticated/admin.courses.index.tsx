@@ -107,7 +107,7 @@ function AdminCourses() {
       setOpen(false);
       setForm({
         title: "", slug: "", price: 0, discount_price: null, level: "BEGINNER",
-        is_published: false, subtitle: "", thumbnail_url: "", category_id: null,
+        is_published: false, subtitle: "", thumbnail_url: "", category_id: null, instructor_profile_id: null,
         description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
       });
     },
