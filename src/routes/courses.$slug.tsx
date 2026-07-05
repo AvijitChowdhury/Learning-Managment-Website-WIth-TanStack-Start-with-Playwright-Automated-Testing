@@ -798,7 +798,8 @@ function CourseDetail() {
           </Link>
         </div>
       </div>
-      <div className="h-20 lg:hidden" />
+      )}
+      {!isAdmin && <div className="h-20 lg:hidden" />}
       {preview && (
         <PreviewModal
           title={preview.title}
