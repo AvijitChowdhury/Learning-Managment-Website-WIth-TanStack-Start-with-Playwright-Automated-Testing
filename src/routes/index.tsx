@@ -134,9 +134,22 @@ function HomePage() {
       <ScrollProgress />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section
+        ref={heroRef}
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          mx.set(((e.clientX - r.left) / r.width) * 100);
+          my.set(((e.clientY - r.top) / r.height) * 100);
+        }}
+        className="relative overflow-hidden border-b border-border"
+      >
         <div className="absolute inset-0 terminal-grid opacity-40" aria-hidden />
         <div className="absolute inset-0 scanlines pointer-events-none" aria-hidden />
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[1]"
+          style={{ background: spotlight }}
+          aria-hidden
+        />
 
         <motion.div
           className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full opacity-30 blur-3xl"
