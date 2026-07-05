@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { adminListCourses, adminSaveCourse, adminListCategories } from "@/lib/admin.functions";
+import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin/courses/")({
   component: AdminCourses,
@@ -14,7 +15,9 @@ function AdminCourses() {
   const list = useServerFn(adminListCourses);
   const cats = useServerFn(adminListCategories);
   const save = useServerFn(adminSaveCourse);
+  const del = useServerFn(adminDeleteCourse);
   const qc = useQueryClient();
+
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
   const [open, setOpen] = useState(false);
@@ -49,6 +52,28 @@ function AdminCourses() {
     },
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
   });
+
+  const delMut = useMutation({
+    mutationFn: (id: string) => del({ data: { id } }),
+    onSuccess: () => {
+      toast.success("কোর্স ডিলিট হয়েছে");
+      qc.invalidateQueries({ queryKey: ["admin-courses"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+
+  function confirmDelete(c: any) {
+    toast(`"${c.title}" ডিলিট করবেন?`, {
+      description: "পুরো কোর্স, মডিউল, পাঠ, এনরোলমেন্ট ও রিভিউ মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না।",
+      duration: 10000,
+      action: {
+        label: "হ্যাঁ, ডিলিট",
+        onClick: () => delMut.mutate(c.id),
+      },
+      cancel: { label: "বাতিল", onClick: () => {} },
+    });
+  }
+
 
   return (
     <div className="space-y-4">
@@ -176,6 +201,14 @@ function AdminCourses() {
             >
               এডিট
             </Link>
+            <button
+              onClick={() => confirmDelete(c)}
+              disabled={delMut.isPending}
+              className="rounded-md border border-red-400/40 px-3 py-1 font-mono text-xs text-red-300 hover:border-red-400 hover:bg-red-500/10 disabled:opacity-50"
+            >
+              ডিলিট
+            </button>
+
           </div>
         ))}
       </div>

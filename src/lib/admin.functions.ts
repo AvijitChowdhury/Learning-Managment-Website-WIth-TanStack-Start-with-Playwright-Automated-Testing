@@ -169,6 +169,45 @@ export const adminListCourses = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const adminDeleteCourse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const courseId = data.id;
+
+    // Delete lessons + lesson_progress via modules
+    const { data: mods } = await supabaseAdmin
+      .from("modules")
+      .select("id")
+      .eq("course_id", courseId);
+    const moduleIds = (mods ?? []).map((m) => m.id);
+    if (moduleIds.length) {
+      const { data: lessons } = await supabaseAdmin
+        .from("lessons")
+        .select("id")
+        .in("module_id", moduleIds);
+      const lessonIds = (lessons ?? []).map((l) => l.id);
+      if (lessonIds.length) {
+        await supabaseAdmin.from("lesson_progress").delete().in("lesson_id", lessonIds);
+        await supabaseAdmin.from("lessons").delete().in("id", lessonIds);
+      }
+      await supabaseAdmin.from("modules").delete().in("id", moduleIds);
+    }
+
+    // Wipe related course-scoped records. Orders and support_threads are
+    // left as historical records (no FK enforces referential integrity).
+    await supabaseAdmin.from("enrollments").delete().eq("course_id", courseId);
+    await supabaseAdmin.from("reviews").delete().eq("course_id", courseId);
+
+
+    const { error } = await supabaseAdmin.from("courses").delete().eq("id", courseId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const adminListUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
