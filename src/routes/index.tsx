@@ -195,30 +195,52 @@ function HomePage() {
 
 
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4, duration: 0.7 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ delay: 0.1, duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
               className="mt-8 flex flex-wrap gap-3"
             >
-              <Link
-                to="/courses"
-                className="group inline-flex items-center gap-2 rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime hover:brightness-95"
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                <span>চেকআউট শুরু করুন</span>
-                <motion.span aria-hidden animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
-              </Link>
-              <Link
-                to="/courses"
-                className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime transition-colors"
+                <Link
+                  to="/courses"
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime"
+                >
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" aria-hidden />
+                  <span className="relative">চেকআউট শুরু করুন</span>
+                  <motion.span aria-hidden className="relative" animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                কোর্স মডিউল দেখুন
-              </Link>
-              <Link
-                to="/free-class"
-                className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 transition-colors"
+                <Link
+                  to="/courses"
+                  className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime hover:shadow-[0_10px_30px_-12px_rgba(200,255,77,0.35)] transition-all"
+                >
+                  কোর্স মডিউল দেখুন
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                ফ্রি ক্লাস
-              </Link>
+                <Link
+                  to="/free-class"
+                  className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 hover:shadow-[0_10px_30px_-12px_rgba(245,158,11,0.35)] transition-all"
+                >
+                  ফ্রি ক্লাস
+                </Link>
+              </motion.div>
             </motion.div>
 
 
