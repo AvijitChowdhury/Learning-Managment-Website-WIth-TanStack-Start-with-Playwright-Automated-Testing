@@ -1,13 +1,13 @@
 {
-  "uuid": "b8f2e459-5c72-42c4-84ca-cd8682dd649b",
-  "historyId": "public.checkout_error",
-  "name": "public.checkout_error",
-  "fullName": "tests.e2e.public.checkout_error",
+  "uuid": "dca0298d-38ea-4c11-bb9c-23a6bfcb7c54",
+  "historyId": "public.courses_list",
+  "name": "public.courses_list",
+  "fullName": "tests.e2e.public.courses_list",
   "status": "passed",
   "statusDetails": {},
   "stage": "finished",
-  "start": 1783276972084,
-  "stop": 1783276972356,
+  "start": 1783277140960,
+  "stop": 1783277143031,
   "labels": [
     {
       "name": "suite",
@@ -28,8 +28,8 @@
   ],
   "attachments": [
     {
-      "name": "public.checkout_error screenshot",
-      "source": "2a9d7bf3-eb63-449e-9d6f-aaaa906db206-attachment.png",
+      "name": "public.courses_list screenshot",
+      "source": "22842490-18c0-4201-8e86-c03ab3c6e5d6-attachment.png",
       "type": "image/png"
     }
   ]

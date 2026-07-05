@@ -1,5 +1,5 @@
 {
-  "uuid": "64adc099-40c4-49ed-8f0c-d841f0b4bb75",
+  "uuid": "bd9f501b-1b9f-42f9-8d57-61e7e2088bb9",
   "historyId": "admin.instructor_create",
   "name": "admin.instructor_create",
   "fullName": "tests.e2e.admin.instructor_create",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 143, in admin_instructor_create\n    await page.locator(\"button:has-text('নতুন ইন্সট্রাক্টর')\").first.click()\n  File \"/nix/store/lwin0ipgy2zdnzgxj2b4dyl5ihgwgagv-sandbox-python-env/lib/python3.13/site-packages/playwright/async_api/_generated.py\", line 15527, in click\n    await self._impl_obj.click(\n    ...<9 lines>...\n    )\n  File \"/nix/store/lwin0ipgy2zdnzgxj2b4dyl5ihgwgagv-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/nix/store/lwin0ipgy2zdnzgxj2b4dyl5ihgwgagv-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 549, in click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/nix/store/lwin0ipgy2zdnzgxj2b4dyl5ihgwgagv-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/nix/store/lwin0ipgy2zdnzgxj2b4dyl5ihgwgagv-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('নতুন ইন্সট্রাক্টর')\").first\n\n"
   },
   "stage": "finished",
-  "start": 1783277060796,
-  "stop": 1783277091657,
+  "start": 1783277234038,
+  "stop": 1783277264858,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
   "attachments": [
     {
       "name": "admin.instructor_create screenshot",
-      "source": "40872823-6504-470c-a941-6db5ac3e5686-attachment.png",
+      "source": "a491ff0e-84a8-4099-8d32-1c5bcdb1d7bc-attachment.png",
       "type": "image/png"
     }
   ]

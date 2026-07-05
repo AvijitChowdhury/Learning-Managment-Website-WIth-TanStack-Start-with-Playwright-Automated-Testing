@@ -1,5 +1,5 @@
 {
-  "uuid": "2012661d-ca5e-4ede-a705-f9a5c0ed8b31",
+  "uuid": "0c7be993-8f60-438f-852d-9ef45a6bc587",
   "historyId": "dashboard.overview",
   "name": "dashboard.overview",
   "fullName": "tests.e2e.dashboard.overview",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_dashboard.py\", line 11, in dashboard\n    assert \"/auth\" not in page.url, \"unexpected redirect to /auth — session missing?\"\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: unexpected redirect to /auth — session missing?\n"
   },
   "stage": "finished",
-  "start": 1783276972358,
-  "stop": 1783276973324,
+  "start": 1783277146569,
+  "stop": 1783277147467,
   "labels": [
     {
       "name": "suite",
@@ -29,5 +29,11 @@
       "value": "sandbox"
     }
   ],
-  "attachments": []
+  "attachments": [
+    {
+      "name": "dashboard.overview screenshot",
+      "source": "53bf6ab0-4208-4b4e-abf3-c305a341de44-attachment.png",
+      "type": "image/png"
+    }
+  ]
 }

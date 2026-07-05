@@ -1,5 +1,5 @@
 {
-  "uuid": "85b81d7c-777b-430b-a95d-23b13b037198",
+  "uuid": "53ce4cc0-0ca2-4d7a-85c6-e4b194e5528b",
   "historyId": "admin.course_editor",
   "name": "admin.course_editor",
   "fullName": "tests.e2e.admin.course_editor",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 92, in admin_course_editor\n    assert edit, \"no course to edit\"\n           ^^^^\nAssertionError: no course to edit\n"
   },
   "stage": "finished",
-  "start": 1783277044489,
-  "stop": 1783277059633,
+  "start": 1783277217915,
+  "stop": 1783277233039,
   "labels": [
     {
       "name": "suite",

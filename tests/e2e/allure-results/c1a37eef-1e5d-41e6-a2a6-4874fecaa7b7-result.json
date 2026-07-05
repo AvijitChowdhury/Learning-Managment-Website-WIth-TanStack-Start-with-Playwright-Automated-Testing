@@ -1,5 +1,5 @@
 {
-  "uuid": "7230619b-300a-4a00-9aff-3eea815aa1ce",
+  "uuid": "c1a37eef-1e5d-41e6-a2a6-4874fecaa7b7",
   "historyId": "admin.courses_list",
   "name": "admin.courses_list",
   "fullName": "tests.e2e.admin.courses_list",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 74, in admin_courses_list\n    assert edits, \"no edit links visible\"\n           ^^^^^\nAssertionError: no edit links visible\n"
   },
   "stage": "finished",
-  "start": 1783277043447,
-  "stop": 1783277044486,
+  "start": 1783277216969,
+  "stop": 1783277217914,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
   "attachments": [
     {
       "name": "admin.courses_list screenshot",
-      "source": "6f8e5b6e-cd11-4391-b645-c5434f16b364-attachment.png",
+      "source": "2d0c337a-3c48-49d8-95c8-363b12b076d5-attachment.png",
       "type": "image/png"
     }
   ]

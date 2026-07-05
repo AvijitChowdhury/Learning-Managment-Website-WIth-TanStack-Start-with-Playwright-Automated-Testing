@@ -1,5 +1,5 @@
 {
-  "uuid": "52d01d7f-b630-479a-b0ef-4eb218fab75f",
+  "uuid": "a24a5ee2-5e28-409d-9750-73dcba6b7690",
   "historyId": "dashboard.support",
   "name": "dashboard.support",
   "fullName": "tests.e2e.dashboard.support",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_dashboard.py\", line 19, in support_forum\n    assert \"/auth\" not in page.url\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
   },
   "stage": "finished",
-  "start": 1783276973329,
-  "stop": 1783276974278,
+  "start": 1783277147471,
+  "stop": 1783277148386,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
   "attachments": [
     {
       "name": "dashboard.support screenshot",
-      "source": "11747204-3c3b-4a45-a2e9-7dcb7197b12f-attachment.png",
+      "source": "db875ca0-f06b-4f3b-9b2d-b69b645669c6-attachment.png",
       "type": "image/png"
     }
   ]

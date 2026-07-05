@@ -1,17 +1,17 @@
 {
-  "uuid": "0c1063c3-f126-467f-88f4-5da017409af4",
-  "historyId": "admin.orders_join",
-  "name": "admin.orders_join",
-  "fullName": "tests.e2e.admin.orders_join",
+  "uuid": "2014533c-c030-41fe-925f-7c379e03bcea",
+  "historyId": "public.landing_ctas",
+  "name": "public.landing_ctas",
+  "fullName": "tests.e2e.public.landing_ctas",
   "status": "passed",
   "statusDetails": {},
   "stage": "finished",
-  "start": 1783276976605,
-  "stop": 1783276977627,
+  "start": 1783277138976,
+  "stop": 1783277140958,
   "labels": [
     {
       "name": "suite",
-      "value": "admin"
+      "value": "public"
     },
     {
       "name": "framework",

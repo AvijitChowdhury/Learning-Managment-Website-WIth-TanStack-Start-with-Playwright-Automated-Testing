@@ -1,13 +1,13 @@
 {
-  "uuid": "42dac002-0ffb-459f-bb1b-23353769a443",
+  "uuid": "fd06dab5-4feb-45c4-ae1e-c8f7badf50bd",
   "historyId": "public.free_class",
   "name": "public.free_class",
   "fullName": "tests.e2e.public.free_class",
   "status": "passed",
   "statusDetails": {},
   "stage": "finished",
-  "start": 1783276971798,
-  "stop": 1783276972080,
+  "start": 1783277146007,
+  "stop": 1783277146300,
   "labels": [
     {
       "name": "suite",
@@ -29,7 +29,7 @@
   "attachments": [
     {
       "name": "public.free_class screenshot",
-      "source": "fc29c539-147f-4d99-8b09-554a779515fe-attachment.png",
+      "source": "cec56e0a-a0dc-42bd-9bd1-0de93fab2e9c-attachment.png",
       "type": "image/png"
     }
   ]

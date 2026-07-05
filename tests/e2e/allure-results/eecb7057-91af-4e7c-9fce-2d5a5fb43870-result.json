@@ -1,5 +1,5 @@
 {
-  "uuid": "5a2f8cf5-e496-4207-b706-820a65a79160",
+  "uuid": "eecb7057-91af-4e7c-9fce-2d5a5fb43870",
   "historyId": "admin.overview_cards",
   "name": "admin.overview_cards",
   "fullName": "tests.e2e.admin.overview_cards",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 116, in admin_overview_cards\n    assert not missing, f\"missing dashboard sections: {missing}\"\n           ^^^^^^^^^^^\nAssertionError: missing dashboard sections: ['সামগ্রিক', 'আজকের কার্যক্রম', 'রিভিনিউ', 'টপ কোর্স']\n"
   },
   "stage": "finished",
-  "start": 1783276975377,
-  "stop": 1783276976526,
+  "start": 1783277149424,
+  "stop": 1783277150417,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
   "attachments": [
     {
       "name": "admin.overview_cards screenshot",
-      "source": "9c85703a-4b9e-4b03-b0f5-b19ee4e3c370-attachment.png",
+      "source": "8b52cfb1-a44d-410a-8174-246f6c20bf6c-attachment.png",
       "type": "image/png"
     }
   ]

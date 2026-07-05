@@ -1,5 +1,5 @@
 {
-  "uuid": "76b77649-06ef-4445-b4ac-b7f2400a7c6e",
+  "uuid": "a1fc8edc-101b-463c-8fb5-84d522f3677b",
   "historyId": "admin.overview",
   "name": "admin.overview",
   "fullName": "tests.e2e.admin.overview",
@@ -9,8 +9,8 @@
     "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 134, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 12, in admin_overview\n    assert \"/auth\" not in page.url, \"not admin?\"\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: not admin?\n"
   },
   "stage": "finished",
-  "start": 1783276974281,
-  "stop": 1783276975374,
+  "start": 1783277148388,
+  "stop": 1783277149419,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
   "attachments": [
     {
       "name": "admin.overview screenshot",
-      "source": "83f725ea-fe67-44c5-b815-37ccd8249ec6-attachment.png",
+      "source": "7ea0e30b-09c1-4b01-9bed-56fc3f76c613-attachment.png",
       "type": "image/png"
     }
   ]
