@@ -225,6 +225,69 @@ function AdminCourses() {
             <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন — সব প্রয়োজনীয় ফিল্ড ঠিক না হলে সংরক্ষণ বাটন সক্রিয় হবে না।
           </div>
 
+          <div className="md:col-span-2 rounded-lg border border-border bg-ink/40 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-terminal/60">
+                থাম্বনেইল<span className="text-lime"> *</span>
+              </span>
+              <span className="font-mono text-[11px] text-terminal/50">16:9 · সর্বোচ্চ ৫MB</span>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-[160px_1fr]">
+              <div className="relative aspect-video overflow-hidden rounded-md border border-border bg-ink">
+                {form.thumbnail_url ? (
+                  <img src={form.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center font-mono text-[10px] text-terminal/40">
+                    কোনো ইমেজ নেই
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="rounded-md border border-lime/40 bg-lime/10 px-3 py-2 font-mono text-xs text-lime hover:bg-lime/20 disabled:opacity-40"
+                  >
+                    {uploading ? "আপলোড হচ্ছে…" : "ইমেজ আপলোড"}
+                  </button>
+                  {form.thumbnail_url && (
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, thumbnail_url: "" })}
+                      className="rounded-md border border-border px-3 py-2 font-mono text-xs text-terminal/70 hover:border-red-400 hover:text-red-300"
+                    >
+                      মুছুন
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleThumbUpload(file);
+                    }}
+                  />
+                </div>
+                <div className="font-mono text-[11px] text-terminal/50">অথবা সরাসরি ইমেজের লিংক দিন:</div>
+                <input
+                  type="url"
+                  placeholder="https://…/thumb.jpg"
+                  value={form.thumbnail_url ?? ""}
+                  onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                  className={`w-full rounded-md border bg-ink px-3 py-2 text-terminal font-body focus:outline-none ${
+                    parsed.invalidKeys.has("thumbnail_url") ? "border-border/70 focus:border-lime" : "border-border focus:border-lime"
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+
+
           {TEXT_FIELDS.map((f) => {
             const invalid = parsed.invalidKeys.has(f.key);
             return (
