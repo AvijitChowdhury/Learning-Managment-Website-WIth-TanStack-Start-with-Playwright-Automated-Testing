@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { motion, useScroll, useSpring } from "motion/react";
-import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionTemplate } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 import { listPublishedCourses } from "@/lib/courses.functions";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT } from "@/lib/format";
@@ -102,6 +102,20 @@ function ScrollProgress() {
 function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
+
+  // Cinematic: mouse spotlight on hero
+  const heroRef = useRef<HTMLElement>(null);
+  const mx = useMotionValue(50);
+  const my = useMotionValue(50);
+  const spotlight = useMotionTemplate`radial-gradient(600px circle at ${mx}% ${my}%, rgba(200,255,77,0.10), transparent 60%)`;
+
+  // Cinematic: parallax on hero content driven by page scroll
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 600], [0, -80]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0.35]);
+  const terminalY = useTransform(scrollY, [0, 600], [0, -40]);
+  const terminalRotate = useTransform(scrollY, [0, 600], [0, -2]);
+
   const tags = [
     { label: "পাইথন", Icon: Code2, color: "#3B82F6" },
     { label: "ডিজাইন", Icon: Palette, color: "#EC4899" },
@@ -120,9 +134,22 @@ function HomePage() {
       <ScrollProgress />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section
+        ref={heroRef}
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          mx.set(((e.clientX - r.left) / r.width) * 100);
+          my.set(((e.clientY - r.top) / r.height) * 100);
+        }}
+        className="relative overflow-hidden border-b border-border"
+      >
         <div className="absolute inset-0 terminal-grid opacity-40" aria-hidden />
         <div className="absolute inset-0 scanlines pointer-events-none" aria-hidden />
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[1]"
+          style={{ background: spotlight }}
+          aria-hidden
+        />
 
         <motion.div
           className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full opacity-30 blur-3xl"
@@ -139,7 +166,10 @@ function HomePage() {
           aria-hidden
         />
 
-        <div className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+        <motion.div
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center"
+        >
           <div>
             <Prompt>$ boot shikho.sh</Prompt>
             <h1 className="mt-3 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
@@ -212,6 +242,7 @@ function HomePage() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
             whileHover={{ y: -6 }}
+            style={{ y: terminalY, rotate: terminalRotate }}
             className="rounded-xl border border-border bg-code-gray shadow-2xl overflow-hidden"
           >
             <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -241,7 +272,7 @@ function HomePage() {
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Marquee */}
         <div className="relative mt-4 md:mt-6 border-y border-border bg-code-gray/60 py-0.5 overflow-hidden max-w-5xl mx-auto rounded-md">
