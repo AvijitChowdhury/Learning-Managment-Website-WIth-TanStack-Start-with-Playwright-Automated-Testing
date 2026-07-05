@@ -12,7 +12,11 @@ SCREENSHOTS.mkdir(parents=True, exist_ok=True)
 
 
 async def restore_supabase_session(context: BrowserContext, page: Page) -> str:
-    """Restore the injected Supabase session so authenticated routes work.
+    """Restore an auth session so authenticated routes work.
+
+    Priority:
+      1. Injected LOVABLE_BROWSER_SUPABASE_* env (sandbox managed session).
+      2. E2E_EMAIL + E2E_PASSWORD — signs in through /auth.
 
     Returns a short status string suitable for logging.
     """
@@ -32,7 +36,51 @@ async def restore_supabase_session(context: BrowserContext, page: Page) -> str:
         await page.evaluate(
             f"window.localStorage.setItem({json.dumps(key)}, {json.dumps(session)})"
         )
-        return "session restored"
+        return "session restored from injected vars"
+
+    email = os.environ.get("E2E_EMAIL")
+    password = os.environ.get("E2E_PASSWORD")
+    if email and password:
+        try:
+            await page.goto(f"{BASE_URL}/auth", wait_until="domcontentloaded")
+            # Try common shapes: input[type=email], input[type=password]
+            await page.locator("input[type='email']").first.fill(email)
+            await page.locator("input[type='password']").first.fill(password)
+            # Submit — either a submit button or press Enter
+            submitted = False
+            for sel in [
+                "button[type='submit']",
+                "button:has-text('Sign in')",
+                "button:has-text('Log in')",
+                "button:has-text('লগ ইন')",
+                "button:has-text('সাইন ইন')",
+                "button:has-text('প্রবেশ')",
+            ]:
+                loc = page.locator(sel).first
+                if await loc.count() > 0:
+                    try:
+                        await loc.click(timeout=3000)
+                        submitted = True
+                        break
+                    except Exception:
+                        continue
+            if not submitted:
+                await page.locator("input[type='password']").first.press("Enter")
+            # Wait for redirect away from /auth
+            try:
+                await page.wait_for_url(lambda u: "/auth" not in u, timeout=10000)
+            except Exception:
+                pass
+            # Verify session persisted
+            has_session = await page.evaluate(
+                "() => Object.keys(window.localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token'))"
+            )
+            if has_session:
+                return f"signed in via /auth as {email}"
+            return f"login attempt failed for {email} (no session in localStorage)"
+        except Exception as e:
+            return f"login error: {type(e).__name__}: {str(e)[:120]}"
+
     return "no session vars — running unauthenticated"
 
 
