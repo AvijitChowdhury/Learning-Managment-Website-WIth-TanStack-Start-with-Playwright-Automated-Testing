@@ -1,10 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { createCourseCharge } from "@/lib/payments.functions";
 import { previewCoupon } from "@/lib/lms-admin.functions";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtBDT } from "@/lib/format";
+
 
 export const Route = createFileRoute("/_authenticated/checkout/$courseId")({
   head: () => ({ meta: [{ title: "চেকআউট — শিখো" }, { name: "robots", content: "noindex" }] }),
