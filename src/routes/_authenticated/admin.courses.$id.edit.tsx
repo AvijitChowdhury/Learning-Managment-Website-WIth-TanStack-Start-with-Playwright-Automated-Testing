@@ -660,6 +660,23 @@ function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => vo
               ))}
             </select>
           </label>
+          <label className="block md:col-span-2">
+            <span className="font-mono text-xs text-terminal/60">ইন্সট্রাক্টর</span>
+            <select
+              value={form.instructor_profile_id ?? ""}
+              onChange={(e) => setForm({ ...form, instructor_profile_id: e.target.value || null })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="">— নেই —</option>
+              {(instructors ?? []).map((i: any) => (
+                <option key={i.id} value={i.id}>
+                  {i.name}
+                  {i.headline ? ` — ${i.headline}` : ""}
+                  {!i.is_published ? " (ড্রাফট)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="flex items-center gap-2 font-mono text-xs text-terminal md:col-span-2">
             <input
               type="checkbox"
