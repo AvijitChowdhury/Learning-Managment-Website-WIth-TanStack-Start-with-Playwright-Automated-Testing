@@ -90,6 +90,39 @@ function isValidUrl(u: string): boolean {
   }
 }
 
+function extractVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (!u.hostname.includes("vimeo.com")) return null;
+    const m = u.pathname.match(/\/(\d+)/);
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+const DIRECT_VIDEO_EXT = /\.(mp4|webm|ogg|ogv|mov|m4v|m3u8)(\?.*)?$/i;
+
+/**
+ * Returns { ok: true } when the URL can be embedded (YouTube, Vimeo, or a
+ * direct video file), otherwise { ok: false, reason } with a message the
+ * admin can act on.
+ */
+function checkEmbeddable(raw: string): { ok: true } | { ok: false; reason: string } {
+  const url = raw.trim();
+  if (!url) return { ok: false, reason: "ভিডিও URL দিন" };
+  if (!isValidUrl(url))
+    return { ok: false, reason: "URL অবৈধ — https:// দিয়ে শুরু হতে হবে" };
+  if (extractYouTubeId(url)) return { ok: true };
+  if (extractVimeoId(url)) return { ok: true };
+  if (DIRECT_VIDEO_EXT.test(url.split("#")[0])) return { ok: true };
+  return {
+    ok: false,
+    reason:
+      "এমবেড করা যায়নি — YouTube / Vimeo লিংক বা সরাসরি .mp4/.webm ভিডিও ফাইল দিন",
+  };
+}
+
 // ---------- video preview ----------
 
 function VideoPreview({ url }: { url: string }) {
@@ -101,6 +134,19 @@ function VideoPreview({ url }: { url: string }) {
           src={`https://www.youtube.com/embed/${yt}`}
           className="h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+  const vm = extractVimeoId(url);
+  if (vm) {
+    return (
+      <div className="aspect-video w-full max-w-md overflow-hidden rounded border border-border bg-black">
+        <iframe
+          src={`https://player.vimeo.com/video/${vm}`}
+          className="h-full w-full"
+          allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
         />
       </div>
@@ -283,8 +329,13 @@ function SortableLesson({
   const dirty = JSON.stringify(local) !== JSON.stringify(lesson);
   const set = (patch: Partial<LessonRow>) => setLocal({ ...local, ...patch });
 
-  const videoOk = !!local.content_url && isValidUrl(local.content_url);
-  const missingVideo = local.type === "VIDEO" && !local.content_url;
+  const urlRaw = (local.content_url ?? "").trim();
+  const embed = urlRaw ? checkEmbeddable(urlRaw) : null;
+  const videoOk = embed?.ok === true;
+  const videoInvalid = local.type === "VIDEO" && !!urlRaw && embed?.ok === false;
+  const missingVideo = local.type === "VIDEO" && !urlRaw;
+  const blockSave = local.type === "VIDEO" && (missingVideo || videoInvalid);
+  const canSave = dirty && !blockSave;
 
   return (
     <div
@@ -295,7 +346,11 @@ function SortableLesson({
         opacity: isDragging ? 0.4 : 1,
       }}
       className={`rounded-md border p-3 space-y-2 ${
-        missingVideo ? "border-amber-400/50 bg-amber-500/5" : "border-border bg-ink"
+        videoInvalid
+          ? "border-red-400/50 bg-red-500/5"
+          : missingVideo
+            ? "border-amber-400/50 bg-amber-500/5"
+            : "border-border bg-ink"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -336,7 +391,14 @@ function SortableLesson({
           {expanded ? "▲" : "▼"}
         </button>
         <button
-          disabled={!dirty}
+          disabled={!canSave}
+          title={
+            blockSave
+              ? videoInvalid
+                ? "ভিডিও URL ঠিক করুন"
+                : "ভিডিও URL যোগ করুন"
+              : undefined
+          }
           onClick={() => {
             const sec = mmSsToSec(durationStr);
             if (Number.isNaN(sec)) {
@@ -345,13 +407,19 @@ function SortableLesson({
             }
             onSave({ ...local, duration_sec: sec });
           }}
-          className={`rounded px-3 py-1 font-mono text-[11px] font-bold ${
-            dirty
+          className={`rounded px-3 py-1 font-mono text-[11px] font-bold transition ${
+            canSave
               ? "bg-lime text-ink hover:bg-lime/90 animate-pulse"
-              : "border border-border bg-code-gray text-terminal/40"
+              : dirty && blockSave
+                ? "border border-red-400/50 bg-red-500/10 text-red-300 cursor-not-allowed"
+                : "border border-border bg-code-gray text-terminal/40"
           }`}
         >
-          {dirty ? "💾 সেভ" : "✓ সেভড"}
+          {canSave
+            ? "💾 সেভ"
+            : dirty && blockSave
+              ? "⚠ ঠিক করুন"
+              : "✓ সেভড"}
         </button>
 
         <button
@@ -366,9 +434,10 @@ function SortableLesson({
         <input
           value={local.content_url ?? ""}
           onChange={(e) => set({ content_url: e.target.value })}
-          placeholder="Video URL (YouTube বা direct .mp4)"
+          placeholder="Video URL (YouTube, Vimeo বা direct .mp4/.webm)"
+          aria-invalid={videoInvalid || undefined}
           className={`rounded border px-2 py-1 font-mono text-xs text-terminal ${
-            local.content_url && !videoOk
+            videoInvalid
               ? "border-red-400/60 bg-red-500/5"
               : "border-border bg-code-gray"
           }`}
@@ -391,6 +460,17 @@ function SortableLesson({
 
       {missingVideo && (
         <p className="font-mono text-[10px] text-amber-400">⚠ Missing video URL</p>
+      )}
+      {videoInvalid && embed && !embed.ok && (
+        <p
+          role="alert"
+          className="font-mono text-[10px] leading-relaxed text-red-300"
+        >
+          ⚠ {embed.reason}
+          <span className="mt-0.5 block text-terminal/50">
+            উদাহরণ: https://youtu.be/xxxx · https://vimeo.com/123 · https://cdn.site.com/video.mp4
+          </span>
+        </p>
       )}
 
       {videoOk && <VideoPreview url={local.content_url!} />}
