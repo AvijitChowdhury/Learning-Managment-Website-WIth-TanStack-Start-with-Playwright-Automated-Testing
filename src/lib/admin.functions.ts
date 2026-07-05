@@ -789,3 +789,93 @@ export const adminOverviewCharts = createServerFn({ method: "GET" })
     return { days, statusBreakdown };
   });
 
+
+// ============ INSTRUCTORS ============
+
+const instructorInput = z.object({
+  id: z.string().uuid().optional(),
+  slug: z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  name: z.string().min(1).max(120),
+  headline: z.string().max(200).nullable().optional(),
+  bio: z.string().max(5000).nullable().optional(),
+  avatar_url: z.string().max(500).nullable().optional(),
+  cover_url: z.string().max(500).nullable().optional(),
+  expertise: z.array(z.string().max(80)).max(30).default([]),
+  years_experience: z.number().int().min(0).max(80).nullable().optional(),
+  website_url: z.string().max(500).nullable().optional(),
+  twitter_url: z.string().max(500).nullable().optional(),
+  linkedin_url: z.string().max(500).nullable().optional(),
+  github_url: z.string().max(500).nullable().optional(),
+  youtube_url: z.string().max(500).nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+export const adminListInstructors = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("instructors")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const ids = (data ?? []).map((i: any) => i.id);
+    let counts: Record<string, number> = {};
+    if (ids.length) {
+      const { data: crs } = await supabaseAdmin
+        .from("courses")
+        .select("id,instructor_profile_id")
+        .in("instructor_profile_id", ids);
+      counts = (crs ?? []).reduce((m: Record<string, number>, c: any) => {
+        m[c.instructor_profile_id] = (m[c.instructor_profile_id] ?? 0) + 1;
+        return m;
+      }, {});
+    }
+    return (data ?? []).map((i: any) => ({ ...i, course_count: counts[i.id] ?? 0 }));
+  });
+
+export const adminSaveInstructor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => instructorInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.id) {
+      const { id, ...upd } = data;
+      const { error } = await supabaseAdmin.from("instructors").update(upd).eq("id", id);
+      if (error) throw new Error(error.message);
+      return { id };
+    }
+    const { data: row, error } = await supabaseAdmin
+      .from("instructors")
+      .insert(data)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const adminDeleteInstructor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("instructors").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListInstructorOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("instructors")
+      .select("id,name,avatar_url,headline,is_published")
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
