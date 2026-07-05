@@ -1,0 +1,30 @@
+{
+  "uuid": "249b9052-d90b-48d6-b2b8-495945f3f33e",
+  "historyId": "admin.orders_tabs",
+  "name": "admin.orders_tabs",
+  "fullName": "tests.e2e.admin.orders_tabs",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277336367,
+  "stop": 1783277338940,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

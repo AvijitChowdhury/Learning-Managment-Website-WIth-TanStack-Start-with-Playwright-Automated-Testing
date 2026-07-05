@@ -87,20 +87,53 @@ export const Route = createFileRoute("/courses/$slug")({
     if (!data) throw notFound();
     return data;
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     if (!loaderData)
       return {
         meta: [{ title: "কোর্স পাওয়া যায়নি — শিখো" }, { name: "robots", content: "noindex" }],
       };
     const c = loaderData.course;
     const desc = c.subtitle ?? c.description.slice(0, 155);
+    const url = `https://lmsavi.lovable.app/courses/${params.slug}`;
+    const price = c.discount_price ?? c.price;
     return {
       meta: [
-        { title: `${c.title} — শিখো` },
+        { title: `${c.title} — প্রোগ্রামিং শিখো` },
         { name: "description", content: desc },
         { property: "og:title", content: c.title },
         { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "product" },
         ...(c.thumbnail_url ? [{ property: "og:image", content: c.thumbnail_url }] : []),
+        ...(c.thumbnail_url ? [{ name: "twitter:image", content: c.thumbnail_url }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Course",
+            name: c.title,
+            description: desc,
+            inLanguage: "bn-BD",
+            url,
+            ...(c.thumbnail_url ? { image: c.thumbnail_url } : {}),
+            provider: {
+              "@type": "Organization",
+              name: "প্রোগ্রামিং শিখো",
+              sameAs: "https://lmsavi.lovable.app",
+            },
+            offers: {
+              "@type": "Offer",
+              price: String(price ?? 0),
+              priceCurrency: "BDT",
+              url,
+              availability: "https://schema.org/InStock",
+              category: "Paid",
+            },
+          }),
+        },
       ],
     };
   },

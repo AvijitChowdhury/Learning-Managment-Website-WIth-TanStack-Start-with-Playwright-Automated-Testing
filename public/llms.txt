@@ -1,0 +1,9 @@
+# প্রোগ্রামিং শিখো (Programming Shikho)
+
+> Bengali online learning platform offering video courses in programming, design, IELTS, digital marketing, and career skills, with secure bKash / Nagad / Rocket / card payments and lifetime access.
+
+## Pages
+
+- [Home](/): Overview, featured courses, and platform highlights.
+- [All Courses](/courses): Browse the full course catalog with search and category filters.
+- [Free Class](/free-class): Sample a free introductory class.

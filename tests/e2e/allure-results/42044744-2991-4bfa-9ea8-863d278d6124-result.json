@@ -1,0 +1,30 @@
+{
+  "uuid": "42044744-2991-4bfa-9ea8-863d278d6124",
+  "historyId": "admin.users_search",
+  "name": "admin.users_search",
+  "fullName": "tests.e2e.admin.users_search",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277363550,
+  "stop": 1783277367284,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

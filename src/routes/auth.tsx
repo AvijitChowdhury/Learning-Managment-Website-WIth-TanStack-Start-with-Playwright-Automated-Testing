@@ -39,8 +39,18 @@ const emailSchema = z
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "লগইন — শিখো" },
-      { name: "description", content: "শিখো-তে লগইন বা নতুন অ্যাকাউন্ট তৈরি করুন।" },
+      { title: "লগইন বা রেজিস্টার — প্রোগ্রামিং শিখো" },
+      {
+        name: "description",
+        content:
+          "প্রোগ্রামিং শিখো-তে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করে বাংলায় প্রোগ্রামিং, ডিজাইন ও ক্যারিয়ার কোর্সে এনরোল করুন।",
+      },
+      { property: "og:title", content: "লগইন বা রেজিস্টার — প্রোগ্রামিং শিখো" },
+      {
+        property: "og:description",
+        content:
+          "প্রোগ্রামিং শিখো-তে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করে বাংলা কোর্সে এনরোল করুন।",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),

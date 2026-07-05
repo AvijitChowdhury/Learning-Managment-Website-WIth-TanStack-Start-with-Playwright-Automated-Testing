@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FreeClassRouteImport } from './routes/free-class'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -38,6 +39,11 @@ import { Route as ApiPublicWebhooksUddoktapayRouteImport } from './routes/api/pu
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard.courses.$id'
 import { Route as AuthenticatedAdminCoursesIdEditRouteImport } from './routes/_authenticated/admin.courses.$id.edit'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FreeClassRoute = FreeClassRouteImport.update({
   id: '/free-class',
   path: '/free-class',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
   '/free-class': typeof FreeClassRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/free-class': typeof FreeClassRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/checkout/cancelled': typeof CheckoutCancelledRoute
   '/checkout/error': typeof CheckoutErrorRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
   '/free-class': typeof FreeClassRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/free-class'
+    | '/sitemap.xml'
     | '/admin'
     | '/dashboard'
     | '/checkout/cancelled'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/free-class'
+    | '/sitemap.xml'
     | '/checkout/cancelled'
     | '/checkout/error'
     | '/checkout/return'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/free-class'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/checkout/cancelled'
@@ -372,6 +384,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CoursesRoute: typeof CoursesRouteWithChildren
   FreeClassRoute: typeof FreeClassRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CheckoutCancelledRoute: typeof CheckoutCancelledRoute
   CheckoutErrorRoute: typeof CheckoutErrorRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
@@ -380,6 +393,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/free-class': {
       id: '/free-class'
       path: '/free-class'
@@ -662,6 +682,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CoursesRoute: CoursesRouteWithChildren,
   FreeClassRoute: FreeClassRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CheckoutCancelledRoute: CheckoutCancelledRoute,
   CheckoutErrorRoute: CheckoutErrorRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,

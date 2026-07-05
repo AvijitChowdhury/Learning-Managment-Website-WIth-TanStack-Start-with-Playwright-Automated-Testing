@@ -1,0 +1,36 @@
+{
+  "uuid": "0fb4fe79-110d-4aeb-b4b4-a6e9e556a5a6",
+  "historyId": "public.courses_list",
+  "name": "public.courses_list",
+  "fullName": "tests.e2e.public.courses_list",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277318647,
+  "stop": 1783277320759,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "public.courses_list screenshot",
+      "source": "db6507c9-f6d8-4bc8-a0b7-5e44418417ac-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "uuid": "9c8c5afc-2f0e-4c37-af7d-2bcec776acdf",
+  "historyId": "public.free_class",
+  "name": "public.free_class",
+  "fullName": "tests.e2e.public.free_class",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277323926,
+  "stop": 1783277324306,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "public.free_class screenshot",
+      "source": "950a6320-3aed-4bf6-bd13-67081f62d08f-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

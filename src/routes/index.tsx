@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { motion, useScroll, useSpring } from "motion/react";
-import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionTemplate } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 import { listPublishedCourses } from "@/lib/courses.functions";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT } from "@/lib/format";
@@ -33,13 +33,22 @@ const coursesQO = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "শিখো — বাংলায় শেখার নতুন ঠিকানা" },
+      { title: "প্রোগ্রামিং শিখো — বাংলায় প্রোগ্রামিং, ডিজাইন ও ক্যারিয়ার কোর্স" },
       {
         name: "description",
         content:
-          "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।",
+          "বাংলায় প্রোগ্রামিং, ডিজাইন, IELTS ও ক্যারিয়ার স্কিলের ভিডিও কোর্স। bKash, Nagad, Rocket ও কার্ডে নিরাপদ পেমেন্ট, আজীবন অ্যাক্সেস ও সার্টিফিকেট।",
       },
+      { property: "og:title", content: "প্রোগ্রামিং শিখো — বাংলায় প্রোগ্রামিং, ডিজাইন ও ক্যারিয়ার কোর্স" },
+      {
+        property: "og:description",
+        content:
+          "বাংলায় প্রোগ্রামিং, ডিজাইন, IELTS ও ক্যারিয়ার স্কিলের ভিডিও কোর্স। নিরাপদ পেমেন্ট ও আজীবন অ্যাক্সেস।",
+      },
+      { property: "og:url", content: "https://lmsavi.lovable.app/" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://lmsavi.lovable.app/" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(coursesQO),
   component: HomePage,
@@ -102,6 +111,43 @@ function ScrollProgress() {
 function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
+
+  // Cinematic: mouse spotlight on hero (rAF-throttled + spring-smoothed)
+  const heroRef = useRef<HTMLElement>(null);
+  const mxRaw = useMotionValue(50);
+  const myRaw = useMotionValue(50);
+  const mx = useSpring(mxRaw, { stiffness: 120, damping: 20, mass: 0.4 });
+  const my = useSpring(myRaw, { stiffness: 120, damping: 20, mass: 0.4 });
+  const spotlight = useMotionTemplate`radial-gradient(600px circle at ${mx}% ${my}%, rgba(200,255,77,0.10), transparent 60%)`;
+  const rafRef = useRef<number | null>(null);
+  const pending = useRef<{ x: number; y: number } | null>(null);
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    pending.current = {
+      x: ((e.clientX - r.left) / r.width) * 100,
+      y: ((e.clientY - r.top) / r.height) * 100,
+    };
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (!pending.current) return;
+      mxRaw.set(pending.current.x);
+      myRaw.set(pending.current.y);
+      pending.current = null;
+    });
+  };
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  // Cinematic: parallax on hero content driven by page scroll (spring-smoothed)
+  const { scrollY } = useScroll();
+  const scrollSmooth = useSpring(scrollY, { stiffness: 140, damping: 26, mass: 0.35 });
+  const heroY = useTransform(scrollSmooth, [0, 600], [0, -80]);
+  const heroOpacity = useTransform(scrollSmooth, [0, 500], [1, 0.35]);
+  const terminalY = useTransform(scrollSmooth, [0, 600], [0, -40]);
+  const terminalRotate = useTransform(scrollSmooth, [0, 600], [0, -2]);
+
   const tags = [
     { label: "পাইথন", Icon: Code2, color: "#3B82F6" },
     { label: "ডিজাইন", Icon: Palette, color: "#EC4899" },
@@ -120,9 +166,18 @@ function HomePage() {
       <ScrollProgress />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section
+        ref={heroRef}
+        onMouseMove={handleMouseMove}
+        className="relative overflow-hidden border-b border-border"
+      >
         <div className="absolute inset-0 terminal-grid opacity-40" aria-hidden />
         <div className="absolute inset-0 scanlines pointer-events-none" aria-hidden />
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[1]"
+          style={{ background: spotlight }}
+          aria-hidden
+        />
 
         <motion.div
           className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full opacity-30 blur-3xl"
@@ -139,7 +194,10 @@ function HomePage() {
           aria-hidden
         />
 
-        <div className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+        <motion.div
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center"
+        >
           <div>
             <Prompt>$ boot shikho.sh</Prompt>
             <h1 className="mt-3 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
@@ -165,30 +223,52 @@ function HomePage() {
 
 
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4, duration: 0.7 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ delay: 0.1, duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
               className="mt-8 flex flex-wrap gap-3"
             >
-              <Link
-                to="/courses"
-                className="group inline-flex items-center gap-2 rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime hover:brightness-95"
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                <span>চেকআউট শুরু করুন</span>
-                <motion.span aria-hidden animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
-              </Link>
-              <Link
-                to="/courses"
-                className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime transition-colors"
+                <Link
+                  to="/courses"
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime"
+                >
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" aria-hidden />
+                  <span className="relative">চেকআউট শুরু করুন</span>
+                  <motion.span aria-hidden className="relative" animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                কোর্স মডিউল দেখুন
-              </Link>
-              <Link
-                to="/free-class"
-                className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 transition-colors"
+                <Link
+                  to="/courses"
+                  className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime hover:shadow-[0_10px_30px_-12px_rgba(200,255,77,0.35)] transition-all"
+                >
+                  কোর্স মডিউল দেখুন
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
               >
-                ফ্রি ক্লাস
-              </Link>
+                <Link
+                  to="/free-class"
+                  className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 hover:shadow-[0_10px_30px_-12px_rgba(245,158,11,0.35)] transition-all"
+                >
+                  ফ্রি ক্লাস
+                </Link>
+              </motion.div>
             </motion.div>
 
 
@@ -212,6 +292,7 @@ function HomePage() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
             whileHover={{ y: -6 }}
+            style={{ y: terminalY, rotate: terminalRotate }}
             className="rounded-xl border border-border bg-code-gray shadow-2xl overflow-hidden"
           >
             <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -241,7 +322,7 @@ function HomePage() {
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Marquee */}
         <div className="relative mt-4 md:mt-6 border-y border-border bg-code-gray/60 py-0.5 overflow-hidden max-w-5xl mx-auto rounded-md">
@@ -265,14 +346,26 @@ function HomePage() {
 
 
       {/* Why */}
-      <section className="border-b border-border">
+      <motion.section
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
+        className="border-b border-border"
+      >
         <div className="container-page py-20">
           <Reveal>
             <Prompt>$ cat features.md</Prompt>
-            <h2 className="mt-4 font-bn-serif text-4xl md:text-5xl font-bold text-terminal">
+            <motion.h2
+              initial={{ opacity: 0, y: 20, letterSpacing: "0.05em" }}
+              whileInView={{ opacity: 1, y: 0, letterSpacing: "0em" }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.9, delay: 0.15, ease: [0.2, 0.7, 0.2, 1] }}
+              className="mt-4 font-bn-serif text-4xl md:text-5xl font-bold text-terminal"
+            >
               {bn.home.whyTitle.replace(/শিখো$/, "")}
               <span className="text-lime">শিখো</span>
-            </h2>
+            </motion.h2>
           </Reveal>
           <StaggerGroup className="mt-12 grid gap-5 md:grid-cols-3">
             {bn.home.why.map((w, i) => (
@@ -290,12 +383,18 @@ function HomePage() {
             ))}
           </StaggerGroup>
         </div>
-      </section>
+      </motion.section>
 
 
 
       {/* Featured courses */}
-      <section className="border-b border-border">
+      <motion.section
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
+        className="border-b border-border"
+      >
         <div className="container-page py-20">
           <div className="flex items-end justify-between gap-6 flex-wrap">
             <Reveal>
@@ -366,10 +465,16 @@ function HomePage() {
             </StaggerGroup>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA band */}
-      <section className="border-b border-border bg-lime text-ink relative overflow-hidden">
+      <motion.section
+        initial={{ opacity: 0, y: 60, scale: 0.98 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
+        className="border-b border-border bg-lime text-ink relative overflow-hidden"
+      >
         <motion.div
           aria-hidden
           className="absolute inset-0 opacity-20"
@@ -398,7 +503,7 @@ function HomePage() {
             ফ্রি অ্যাকাউন্ট — খুলুন →
           </Magnetic>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 }

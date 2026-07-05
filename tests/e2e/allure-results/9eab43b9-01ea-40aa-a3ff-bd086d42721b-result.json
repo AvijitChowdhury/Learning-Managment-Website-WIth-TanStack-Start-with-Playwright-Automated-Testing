@@ -1,0 +1,36 @@
+{
+  "uuid": "9eab43b9-01ea-40aa-a3ff-bd086d42721b",
+  "historyId": "dashboard.overview",
+  "name": "dashboard.overview",
+  "fullName": "tests.e2e.dashboard.overview",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277324699,
+  "stop": 1783277327365,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "dashboard"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "dashboard.overview screenshot",
+      "source": "eccb9f76-ae23-4598-848b-f18a6f50f217-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

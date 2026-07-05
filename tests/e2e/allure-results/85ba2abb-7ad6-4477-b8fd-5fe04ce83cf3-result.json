@@ -1,0 +1,30 @@
+{
+  "uuid": "85ba2abb-7ad6-4477-b8fd-5fe04ce83cf3",
+  "historyId": "admin.category_create",
+  "name": "admin.category_create",
+  "fullName": "tests.e2e.admin.category_create",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277338941,
+  "stop": 1783277342954,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

@@ -1,0 +1,30 @@
+{
+  "uuid": "43e0846b-aec6-43ce-a835-ab6925c73717",
+  "historyId": "admin.coupon_create",
+  "name": "admin.coupon_create",
+  "fullName": "tests.e2e.admin.coupon_create",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277342955,
+  "stop": 1783277346170,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

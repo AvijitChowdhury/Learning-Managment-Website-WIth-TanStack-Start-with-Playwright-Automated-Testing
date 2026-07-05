@@ -1,0 +1,36 @@
+{
+  "uuid": "a109cf44-361c-44f1-8c30-0147f4865819",
+  "historyId": "admin.overview",
+  "name": "admin.overview",
+  "fullName": "tests.e2e.admin.overview",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277329114,
+  "stop": 1783277332192,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.overview screenshot",
+      "source": "226c11aa-4ec6-48d4-8fb7-13e67935cc3b-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -12,7 +12,11 @@ SCREENSHOTS.mkdir(parents=True, exist_ok=True)
 
 
 async def restore_supabase_session(context: BrowserContext, page: Page) -> str:
-    """Restore the injected Supabase session so authenticated routes work.
+    """Restore an auth session so authenticated routes work.
+
+    Priority:
+      1. Injected LOVABLE_BROWSER_SUPABASE_* env (sandbox managed session).
+      2. E2E_EMAIL + E2E_PASSWORD — signs in through /auth.
 
     Returns a short status string suitable for logging.
     """
@@ -32,7 +36,41 @@ async def restore_supabase_session(context: BrowserContext, page: Page) -> str:
         await page.evaluate(
             f"window.localStorage.setItem({json.dumps(key)}, {json.dumps(session)})"
         )
-        return "session restored"
+        return "session restored from injected vars"
+
+    email = os.environ.get("E2E_EMAIL")
+    password = os.environ.get("E2E_PASSWORD")
+    if email and password:
+        try:
+            await page.goto(f"{BASE_URL}/auth", wait_until="domcontentloaded")
+            # Wait for the login form to actually be interactive.
+            await page.wait_for_selector("input[type='password']", timeout=15000)
+            await page.wait_for_timeout(800)
+            await page.locator("input[type='email']").first.fill(email)
+            await page.locator("input[type='password']").first.fill(password)
+            # Prefer the "লগইন" submit button; fall back to first submit.
+            login_btn = page.locator("button[type='submit']:has-text('লগইন')").first
+            if await login_btn.count() == 0:
+                login_btn = page.locator("button[type='submit']").first
+            # Wait for the Supabase token response so we know when the session lands.
+            async with page.expect_response(
+                lambda r: "grant_type=password" in r.url, timeout=20000
+            ) as resp_info:
+                await login_btn.click()
+            resp = await resp_info.value
+            if resp.status >= 400:
+                return f"login rejected for {email} (HTTP {resp.status})"
+            # Give the client a moment to persist the session and redirect.
+            await page.wait_for_timeout(2000)
+            has_session = await page.evaluate(
+                "() => Object.keys(window.localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token'))"
+            )
+            if has_session:
+                return f"signed in via /auth as {email}"
+            return f"login attempt failed for {email} (no session in localStorage)"
+        except Exception as e:
+            return f"login error: {type(e).__name__}: {str(e)[:160]}"
+
     return "no session vars — running unauthenticated"
 
 
