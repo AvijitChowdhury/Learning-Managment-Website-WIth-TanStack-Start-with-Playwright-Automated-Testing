@@ -244,7 +244,7 @@ function HomePage() {
         </div>
 
         {/* Marquee */}
-        <div className="relative mt-20 md:mt-28 border-t border-border bg-code-gray/60 py-5 overflow-hidden">
+        <div className="relative mt-20 md:mt-28 border-t border-border bg-code-gray/60 py-3 overflow-hidden">
           <div className="marquee-track flex gap-8 whitespace-nowrap font-body text-sm text-terminal/80">
             {Array.from({ length: 2 }).map((_, k) => (
               <div key={k} className="flex gap-8 pr-8">
