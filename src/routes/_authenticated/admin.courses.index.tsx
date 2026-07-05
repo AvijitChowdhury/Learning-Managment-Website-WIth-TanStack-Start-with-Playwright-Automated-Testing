@@ -198,30 +198,34 @@ function AdminCourses() {
 
 
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
   const parsed = useMemo(() => {
     const candidate = {
       ...form,
       price: form.price === "" ? undefined : form.price,
       discount_price: form.discount_price === "" || form.discount_price == null ? null : form.discount_price,
     };
+    const errors: Record<string, string> = {};
     const result = courseSchema.safeParse(candidate);
     if (!result.success) {
-      const bad = new Set<string>();
       for (const issue of result.error.issues) {
         const first = issue.path[0];
-        if (typeof first === "string") bad.add(first);
+        if (typeof first === "string" && !errors[first]) {
+          errors[first] = issue.message || "সঠিকভাবে পূরণ করুন";
+        }
       }
-      // extra rule: discount must be < price when set
-      const p = Number(form.price);
-      const d = form.discount_price === "" || form.discount_price == null ? null : Number(form.discount_price);
-      if (d != null && !Number.isNaN(d) && !Number.isNaN(p) && d >= p) bad.add("discount_price");
-      return { valid: false, invalidKeys: bad };
     }
     const p = Number(form.price);
     const d = form.discount_price === "" || form.discount_price == null ? null : Number(form.discount_price);
-    if (d != null && d >= p) return { valid: false, invalidKeys: new Set(["discount_price"]) };
-    return { valid: true, invalidKeys: new Set<string>() };
+    if (d != null && !Number.isNaN(d) && !Number.isNaN(p) && d >= p) {
+      errors.discount_price = "ডিসকাউন্ট মূল্য মূল দামের কম হতে হবে";
+    }
+    return { valid: Object.keys(errors).length === 0, errors };
   }, [form]);
+
+  const shouldShow = (key: string) => (submitAttempted || touched[key]) && !!parsed.errors[key];
 
   return (
     <div className="space-y-4">
