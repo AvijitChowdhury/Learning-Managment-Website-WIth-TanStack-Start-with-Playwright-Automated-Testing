@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings, X } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -11,9 +11,68 @@ import {
 } from "@/components/ui/accordion";
 import { getCourseBySlug } from "@/lib/courses.functions";
 import { isCurrentUserAdmin } from "@/lib/admin.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT, formatBnNumber, formatBnDate } from "@/lib/format";
 import fallbackThumb from "@/assets/course-thumbnail-fallback.jpg";
+
+function toEmbed(url: string): string {
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0`;
+  const vim = url.match(/vimeo\.com\/(\d+)/);
+  if (vim) return `https://player.vimeo.com/video/${vim[1]}?autoplay=1`;
+  return url;
+}
+
+function PreviewModal({
+  title,
+  url,
+  onClose,
+}: {
+  title: string;
+  url: string;
+  onClose: () => void;
+}) {
+  const isEmbed = /(youtube\.com|youtu\.be|vimeo\.com)/.test(url);
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-black shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-2 text-white">
+          <div className="truncate text-sm font-medium">{title}</div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-md p-1 text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="aspect-video w-full bg-black">
+          {isEmbed ? (
+            <iframe
+              src={toEmbed(url)}
+              title={title}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video src={url} controls autoPlay className="h-full w-full" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 
 const qo = (slug: string) =>
