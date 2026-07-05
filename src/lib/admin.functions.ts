@@ -110,9 +110,50 @@ export const adminSetOrderStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.orderId);
+    const { data: order, error: fetchErr } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, course_id, status")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+    if (!order) throw new Error("অর্ডার পাওয়া যায়নি");
+
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.orderId);
     if (error) throw new Error(error.message);
-    return { ok: true };
+
+    let enrolled = false;
+    if (data.status === "PAID" && order.user_id && order.course_id) {
+      const { data: existing, error: exErr } = await supabaseAdmin
+        .from("enrollments")
+        .select("id")
+        .eq("user_id", order.user_id)
+        .eq("course_id", order.course_id)
+        .maybeSingle();
+      if (exErr) throw new Error(exErr.message);
+      if (!existing) {
+        const { error: insErr } = await supabaseAdmin.from("enrollments").insert({
+          user_id: order.user_id,
+          course_id: order.course_id,
+          order_id: order.id,
+        });
+        if (insErr) throw new Error(insErr.message);
+        enrolled = true;
+      }
+    }
+
+    if (data.status !== "PAID" && order.status === "PAID" && order.user_id && order.course_id) {
+      await supabaseAdmin
+        .from("enrollments")
+        .delete()
+        .eq("user_id", order.user_id)
+        .eq("course_id", order.course_id)
+        .eq("order_id", order.id);
+    }
+
+    return { ok: true, enrolled };
   });
 
 export const adminListCourses = createServerFn({ method: "GET" })
