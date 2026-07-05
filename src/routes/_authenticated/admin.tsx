@@ -26,6 +26,7 @@ function AdminLayout() {
           {[
             { to: "/admin", label: "ওভারভিউ" },
             { to: "/admin/orders", label: "অর্ডার" },
+            { to: "/admin/users", label: "ইউজার" },
             { to: "/admin/courses", label: "কোর্স" },
             { to: "/admin/categories", label: "ক্যাটেগরি" },
             { to: "/admin/coupons", label: "কুপন" },
