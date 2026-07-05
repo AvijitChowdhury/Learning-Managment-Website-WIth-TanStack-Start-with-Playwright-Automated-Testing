@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { verifyPaymentByInvoice } from "@/lib/payments.functions";
+
 
 export const Route = createFileRoute("/checkout/return")({
   head: () => ({ meta: [{ title: "পেমেন্ট যাচাই — শিখো" }, { name: "robots", content: "noindex" }] }),
