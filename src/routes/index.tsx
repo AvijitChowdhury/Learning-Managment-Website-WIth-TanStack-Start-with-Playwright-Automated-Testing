@@ -12,6 +12,18 @@ import {
   AnimatedText,
   fadeUp,
 } from "@/components/motion-primitives";
+import {
+  Code2,
+  Palette,
+  Languages,
+  Sheet,
+  Search,
+  Megaphone,
+  Briefcase,
+  Sparkles,
+  Atom,
+  LayoutDashboard,
+} from "lucide-react";
 
 const coursesQO = queryOptions({
   queryKey: ["home", "courses"],
@@ -90,7 +102,18 @@ function ScrollProgress() {
 function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
-  const tags = ["Python", "Design", "IELTS", "Excel", "SEO", "Marketing", "Freelancing", "AI", "React", "UI/UX"];
+  const tags = [
+    { label: "Python", Icon: Code2 },
+    { label: "Design", Icon: Palette },
+    { label: "IELTS", Icon: Languages },
+    { label: "Excel", Icon: Sheet },
+    { label: "SEO", Icon: Search },
+    { label: "Marketing", Icon: Megaphone },
+    { label: "Freelancing", Icon: Briefcase },
+    { label: "AI", Icon: Sparkles },
+    { label: "React", Icon: Atom },
+    { label: "UI/UX", Icon: LayoutDashboard },
+  ];
 
   return (
     <>
@@ -213,12 +236,18 @@ function HomePage() {
         </div>
 
         {/* Marquee */}
-        <div className="relative border-y border-border bg-code-gray/60 py-4 overflow-hidden">
-          <div className="marquee-track flex gap-12 whitespace-nowrap font-mono text-sm text-terminal/60">
+        <div className="relative border-y border-border bg-code-gray/60 py-1.5 overflow-hidden">
+          <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
             {Array.from({ length: 2 }).map((_, k) => (
-              <div key={k} className="flex gap-12 pr-12">
-                {tags.map((t) => (
-                  <span key={t} className="hover:text-lime transition-colors">◇ {t}</span>
+              <div key={k} className="flex gap-6 pr-6">
+                {tags.map(({ label, Icon }) => (
+                  <span
+                    key={`${k}-${label}`}
+                    className="inline-flex items-center gap-1.5 hover:text-lime transition-colors"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </span>
                 ))}
               </div>
             ))}
