@@ -1,0 +1,30 @@
+{
+  "uuid": "426d8aef-8ab4-4cfd-9602-f6b8c4421088",
+  "historyId": "admin.reviews_page",
+  "name": "admin.reviews_page",
+  "fullName": "tests.e2e.admin.reviews_page",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277360449,
+  "stop": 1783277363548,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

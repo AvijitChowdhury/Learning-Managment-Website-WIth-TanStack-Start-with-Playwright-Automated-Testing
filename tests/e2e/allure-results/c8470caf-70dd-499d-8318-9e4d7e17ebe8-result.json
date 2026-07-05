@@ -1,0 +1,36 @@
+{
+  "uuid": "c8470caf-70dd-499d-8318-9e4d7e17ebe8",
+  "historyId": "admin.instructor_create",
+  "name": "admin.instructor_create",
+  "fullName": "tests.e2e.admin.instructor_create",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277354843,
+  "stop": 1783277360425,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.instructor_create screenshot",
+      "source": "573a87b7-5bfb-4324-b46e-6ebd4e8ae893-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}
