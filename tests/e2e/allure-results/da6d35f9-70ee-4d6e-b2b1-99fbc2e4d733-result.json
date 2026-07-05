@@ -1,42 +1,42 @@
 {
-  "uuid": "c4b396f7-d175-4922-8bc7-f2909d22ecf1",
-  "historyId": "responsive.tablet_courses",
-  "name": "responsive.tablet_courses",
-  "fullName": "tests.e2e.responsive.tablet_courses",
-  "description": "no overflow",
+  "uuid": "da6d35f9-70ee-4d6e-b2b1-99fbc2e4d733",
+  "historyId": "admin.instructor_create",
+  "name": "admin.instructor_create",
+  "fullName": "tests.e2e.admin.instructor_create",
+  "description": "created E2E Instructor f9ca",
   "status": "passed",
   "statusDetails": {},
   "stage": "finished",
-  "start": 1783278702399,
-  "stop": 1783278704501,
+  "start": 1783278728545,
+  "stop": 1783278736951,
   "labels": [
     {
       "name": "suite",
-      "value": "responsive"
+      "value": "admin"
     },
     {
       "name": "parentSuite",
-      "value": "Quality"
+      "value": "Admin Console"
     },
     {
       "name": "subSuite",
-      "value": "Responsive Layout"
+      "value": "Content & Ops"
     },
     {
       "name": "epic",
-      "value": "Quality"
+      "value": "Admin Console"
     },
     {
       "name": "feature",
-      "value": "Responsive Layout"
+      "value": "Content & Ops"
     },
     {
       "name": "story",
-      "value": "tablet_courses"
+      "value": "instructor_create"
     },
     {
       "name": "severity",
-      "value": "minor"
+      "value": "blocker"
     },
     {
       "name": "framework",
@@ -53,8 +53,8 @@
   ],
   "attachments": [
     {
-      "name": "responsive.tablet_courses screenshot",
-      "source": "95efd09f-3a1d-4c0c-b2c4-f4c2efdf37ce-attachment.png",
+      "name": "admin.instructor_create screenshot",
+      "source": "9df81a3f-9406-4f32-8bdc-5a514501efa6-attachment.png",
       "type": "image/png"
     }
   ]
