@@ -2,10 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { adminListOrders, adminSetOrderStatus, adminExportOrdersCsv } from "@/lib/admin.functions";
+import {
+  adminListOrders,
+  adminSetOrderStatus,
+  adminExportOrdersCsv,
+  adminSetOrderMethod,
+  PAYMENT_METHODS,
+} from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
-import { Mail, Phone, Download } from "lucide-react";
+import { Mail, Phone, Download, Pencil, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
@@ -17,10 +23,14 @@ type Tab = "ALL" | "INCOMPLETE" | "PAID";
 function AdminOrders() {
   const list = useServerFn(adminListOrders);
   const setStatus = useServerFn(adminSetOrderStatus);
+  const setMethod = useServerFn(adminSetOrderMethod);
   const exportCsv = useServerFn(adminExportOrdersCsv);
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["admin-orders"], queryFn: () => list() });
   const [tab, setTab] = useState<Tab>("ALL");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draftMethod, setDraftMethod] = useState<string>("");
+  const [draftTxn, setDraftTxn] = useState<string>("");
 
   const mut = useMutation({
     mutationFn: (v: { orderId: string; status: any }) => setStatus({ data: v }),
@@ -29,6 +39,17 @@ function AdminOrders() {
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
+  });
+
+  const methodMut = useMutation({
+    mutationFn: (v: { orderId: string; payment_method: string | null; transaction_id: string | null }) =>
+      setMethod({ data: v }),
+    onSuccess: () => {
+      toast.success("মেথড আপডেটেড");
+      setEditing(null);
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "মেথড আপডেট ব্যর্থ"),
   });
 
   const filtered = useMemo(() => {
