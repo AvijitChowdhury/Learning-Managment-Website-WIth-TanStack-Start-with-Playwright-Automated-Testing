@@ -449,7 +449,7 @@ function CourseDetail() {
 
           {/* FAQ */}
           {faq.length > 0 && (
-            <div>
+            <div id="faq" className="scroll-mt-24">
               <h2 className="text-2xl font-semibold">{bn.courses.faq}</h2>
               <Accordion type="single" collapsible className="mt-4 rounded-xl border border-border bg-card">
                 {faq.map((f, i) => (
