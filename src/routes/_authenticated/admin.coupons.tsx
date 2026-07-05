@@ -342,6 +342,8 @@ function CouponsAdmin() {
                     : st.tone === "red"
                       ? "text-red-300 border-red-400/40 bg-red-500/10"
                       : "text-terminal/60 border-border bg-code-gray";
+              const a = byCode[c.code?.toUpperCase?.() ?? ""] ?? { redeemed: 0, revenue: 0, discount: 0 };
+              const remaining = c.max_uses != null ? Math.max(0, c.max_uses - (c.used_count ?? 0)) : null;
               return (
                 <li key={c.id} className="px-5 py-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -371,6 +373,25 @@ function CouponsAdmin() {
                             {c.used_count ?? 0}
                             {c.max_uses ? ` / ${c.max_uses}` : " (আনলিমিটেড)"}
                           </span>
+                        </span>
+                        {remaining != null && (
+                          <span>
+                            <span className="text-terminal/60">অবশিষ্ট:</span>{" "}
+                            <span className={remaining === 0 ? "text-red-300" : "text-terminal"}>
+                              {remaining}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 font-mono text-[10px]">
+                        <span className="rounded border border-lime/30 bg-lime/5 px-1.5 py-0.5 text-lime">
+                          রিডিম: {a.redeemed}
+                        </span>
+                        <span className="rounded border border-border bg-code-gray/50 px-1.5 py-0.5 text-terminal/80">
+                          রেভিনিউ: {fmtBdt(a.revenue)}
+                        </span>
+                        <span className="rounded border border-amber-400/30 bg-amber-400/5 px-1.5 py-0.5 text-amber-400">
+                          ছাড়: {fmtBdt(a.discount)}
                         </span>
                       </div>
 
