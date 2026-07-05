@@ -30,6 +30,7 @@ import { Route as AuthenticatedCheckoutCourseIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated/admin.reviews'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin.courses'
+import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin.categories'
 import { Route as ApiPublicWebhooksUddoktapayRouteImport } from './routes/api/public/webhooks/uddoktapay'
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard.courses.$id'
@@ -147,6 +148,12 @@ const AuthenticatedAdminCoursesRoute =
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCouponsRoute =
+  AuthenticatedAdminCouponsRouteImport.update({
+    id: '/coupons',
+    path: '/coupons',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCategoriesRoute =
   AuthenticatedAdminCategoriesRouteImport.update({
     id: '/categories',
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses/': typeof CoursesIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -208,6 +216,7 @@ export interface FileRoutesByTo {
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses': typeof CoursesIndexRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -236,6 +245,7 @@ export interface FileRoutesById {
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses/': typeof CoursesIndexRoute
   '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/courses/$slug'
     | '/courses/'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/courses/$slug'
     | '/courses'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
@@ -314,6 +326,7 @@ export interface FileRouteTypes {
     | '/courses/$slug'
     | '/courses/'
     | '/_authenticated/admin/categories'
+    | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/reviews'
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/coupons': {
+      id: '/_authenticated/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AuthenticatedAdminCouponsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/categories': {
       id: '/_authenticated/admin/categories'
       path: '/categories'
@@ -536,6 +556,7 @@ const AuthenticatedAdminCoursesRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
+  AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRoute
@@ -544,6 +565,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
+  AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRoute,
