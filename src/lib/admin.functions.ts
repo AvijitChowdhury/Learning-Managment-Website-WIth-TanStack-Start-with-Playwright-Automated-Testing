@@ -156,6 +156,41 @@ export const adminSetOrderStatus = createServerFn({ method: "POST" })
     return { ok: true, enrolled };
   });
 
+export const PAYMENT_METHODS = [
+  "bKash",
+  "Nagad",
+  "Rocket",
+  "Card",
+  "Bank Transfer",
+  "Manual",
+  "Other",
+] as const;
+
+export const adminSetOrderMethod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        orderId: z.string().uuid(),
+        payment_method: z.string().trim().max(40).nullable(),
+        transaction_id: z.string().trim().max(120).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: Record<string, unknown> = {
+      payment_method: data.payment_method && data.payment_method.length ? data.payment_method : null,
+    };
+    if (data.transaction_id !== undefined) {
+      patch.transaction_id = data.transaction_id && data.transaction_id.length ? data.transaction_id : null;
+    }
+    const { error } = await supabaseAdmin.from("orders").update(patch).eq("id", data.orderId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const adminListCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
