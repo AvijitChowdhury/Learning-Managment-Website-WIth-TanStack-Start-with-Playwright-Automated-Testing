@@ -43,20 +43,25 @@ async def restore_supabase_session(context: BrowserContext, page: Page) -> str:
     if email and password:
         try:
             await page.goto(f"{BASE_URL}/auth", wait_until="domcontentloaded")
-            await page.wait_for_timeout(600)
+            # Wait for the login form to actually be interactive.
+            await page.wait_for_selector("input[type='password']", timeout=15000)
+            await page.wait_for_timeout(800)
             await page.locator("input[type='email']").first.fill(email)
             await page.locator("input[type='password']").first.fill(password)
-            submit = page.locator("button[type='submit']").first
+            # Prefer the "লগইন" submit button; fall back to first submit.
+            login_btn = page.locator("button[type='submit']:has-text('লগইন')").first
+            if await login_btn.count() == 0:
+                login_btn = page.locator("button[type='submit']").first
             # Wait for the Supabase token response so we know when the session lands.
             async with page.expect_response(
-                lambda r: "grant_type=password" in r.url, timeout=15000
+                lambda r: "grant_type=password" in r.url, timeout=20000
             ) as resp_info:
-                await submit.click()
+                await login_btn.click()
             resp = await resp_info.value
             if resp.status >= 400:
                 return f"login rejected for {email} (HTTP {resp.status})"
             # Give the client a moment to persist the session and redirect.
-            await page.wait_for_timeout(1500)
+            await page.wait_for_timeout(2000)
             has_session = await page.evaluate(
                 "() => Object.keys(window.localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token'))"
             )

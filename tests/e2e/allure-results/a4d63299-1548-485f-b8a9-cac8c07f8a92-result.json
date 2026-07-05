@@ -1,0 +1,30 @@
+{
+  "uuid": "a4d63299-1548-485f-b8a9-cac8c07f8a92",
+  "historyId": "public.landing_ctas",
+  "name": "public.landing_ctas",
+  "fullName": "tests.e2e.public.landing_ctas",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277316623,
+  "stop": 1783277318630,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

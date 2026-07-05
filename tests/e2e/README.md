@@ -54,3 +54,18 @@ tests/e2e/
 Each test module exports `TESTS: list[tuple[name, async_fn(page)]]` which
 `run.py` picks up and executes sequentially against a single authenticated
 browser context.
+
+### Reports (Allure + PDF)
+
+Every `python tests/e2e/run.py` invocation:
+
+- writes Allure v2 result JSON + screenshot attachments to `tests/e2e/allure-results/`
+- (rebuild) `python tests/e2e/build_pdf_report.py` regenerates `/mnt/documents/e2e-test-report.pdf` from the last run
+
+Render the interactive HTML report with:
+
+```bash
+nix run nixpkgs#allure -- serve tests/e2e/allure-results
+```
+
+Pass `--no-allure` to `run.py` to skip result emission (e.g. when iterating on a single test).

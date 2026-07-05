@@ -1,0 +1,36 @@
+{
+  "uuid": "01b249c0-5d06-4910-bcca-394ccea6e422",
+  "historyId": "admin.courses_list",
+  "name": "admin.courses_list",
+  "fullName": "tests.e2e.admin.courses_list",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783277346171,
+  "stop": 1783277348700,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.courses_list screenshot",
+      "source": "2d84e563-1b1d-45be-9a5b-8785dfa4b76b-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

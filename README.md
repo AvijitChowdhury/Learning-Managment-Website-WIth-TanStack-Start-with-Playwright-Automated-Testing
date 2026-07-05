@@ -242,7 +242,7 @@ Checkout flow:
 
 ## Testing
 
-A comprehensive Playwright (Python) test suite lives in `tests/e2e/`. It exercises **every major surface** — landing, catalog, detail, checkout error, dashboard, support, admin overview, orders (+ tab switching), courses list, course editor, plus real category and coupon **create** mutations verified against the DB.
+A comprehensive Playwright (Python) test suite lives in `tests/e2e/`. It exercises **every major surface** — landing, catalog, detail, checkout error, dashboard, support, and the full admin CMS (overview cards + CSV export, orders join + tab switching, category/coupon/instructor **create** mutations verified against the DB, courses list + editor, reviews page, users search + role filter).
 
 ```bash
 python -m pip install --no-cache-dir playwright
@@ -251,9 +251,29 @@ python -m playwright install chromium
 python tests/e2e/run.py                 # run everything
 python tests/e2e/run.py --only admin    # substring filter
 python tests/e2e/run.py --headed        # see the browser
+python tests/e2e/run.py --no-allure     # skip Allure result emission
 ```
 
-Screenshots for every step are saved to `tests/e2e/screenshots/`. See [`tests/e2e/README.md`](./tests/e2e/README.md) for the full docs and required env vars.
+Auth: set `E2E_EMAIL` / `E2E_PASSWORD` for an admin account (the runner signs in through `/auth`), or rely on the sandbox's `LOVABLE_BROWSER_SUPABASE_*` session vars when running inside Lovable. Screenshots for every step land in `tests/e2e/screenshots/`. See [`tests/e2e/README.md`](./tests/e2e/README.md) for the full docs.
+
+### Reports
+
+Every run writes Allure v2 results (JSON + screenshot attachments) to `tests/e2e/allure-results/`, and a portable PDF summary to `/mnt/documents/e2e-test-report.pdf`.
+
+```bash
+# Interactive Allure HTML report (opens a local browser)
+nix run nixpkgs#allure -- serve tests/e2e/allure-results
+
+# Or generate static HTML into tests/e2e/allure-report/
+nix run nixpkgs#allure -- generate tests/e2e/allure-results -o tests/e2e/allure-report --clean
+
+# Rebuild the PDF summary from the last run
+python tests/e2e/build_pdf_report.py
+```
+
+The PDF ([`e2e-test-report.pdf`](/mnt/documents/e2e-test-report.pdf)) contains the run summary, environment snapshot, and per-suite pass/fail table with durations — suitable for attaching to a PR or a stakeholder update. Regenerate it any time after a run without re-executing the suite.
+
+
 
 ---
 
