@@ -84,7 +84,7 @@ function TypingHeadline() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, del, i]);
 
-  return <span className="font-mono text-lime caret">{text || "\u00A0"}</span>;
+  return <span className="font-mono text-lime caret ml-2 inline-block min-w-[12ch] align-baseline">{text || "\u00A0"}</span>;
 }
 
 function ScrollProgress() {
