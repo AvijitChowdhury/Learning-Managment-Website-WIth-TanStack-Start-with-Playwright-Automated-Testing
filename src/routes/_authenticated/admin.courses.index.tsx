@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const httpUrl = z.string().trim().url().refine((v) => /^https?:\/\//i.test(v), "");
@@ -48,7 +49,7 @@ const TEXT_FIELDS: FieldDef[] = [
   { key: "title", label: "শিরোনাম", tip: "সংক্ষিপ্ত ও স্পষ্ট নাম, ৩–১২০ অক্ষর।", required: true, placeholder: "উদা: পাইথন হাতেখড়ি" },
   { key: "slug", label: "স্লাগ", tip: "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)। URL-এ ব্যবহার হবে।", required: true, placeholder: "python-hatekhori" },
   { key: "subtitle", label: "সাবটাইটেল", tip: "এক লাইনে কোর্সের প্রতিশ্রুতি। সর্বোচ্চ ১৬০ অক্ষর।", placeholder: "শূন্য থেকে শুরু করে প্রজেক্ট পর্যন্ত" },
-  { key: "thumbnail_url", label: "থাম্বনেইল URL", tip: "https:// দিয়ে শুরু হওয়া পাবলিক ইমেজ লিংক (16:9 রেশিও)।", required: true, type: "url", placeholder: "https://…/thumb.jpg" },
+  
   { key: "price", label: "মূল্য (BDT)", tip: "পূর্ণসংখ্যা টাকায়। ফ্রি কোর্সের জন্য 0।", required: true, type: "number", placeholder: "999" },
   { key: "discount_price", label: "ডিসকাউন্ট মূল্য", tip: "ঐচ্ছিক। থাকলে মূল দামের কম হতে হবে।", type: "number", placeholder: "699" },
   { key: "intro_video_url", label: "ইন্ট্রো ভিডিও URL", tip: "ঐচ্ছিক। YouTube/Vimeo/MP4 লিংক (https://)।", type: "url", placeholder: "https://youtu.be/…" },
@@ -76,6 +77,8 @@ function AdminCourses() {
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<any>({
     title: "",
     slug: "",
@@ -128,6 +131,38 @@ function AdminCourses() {
       cancel: { label: "বাতিল", onClick: () => {} },
     });
   }
+
+  async function handleThumbUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("শুধু ইমেজ ফাইল আপলোড করুন");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("ফাইলের সর্বোচ্চ সাইজ ৫MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("course-thumbnails")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("course-thumbnails")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("URL তৈরি ব্যর্থ");
+      setForm((f: any) => ({ ...f, thumbnail_url: signed.signedUrl }));
+      toast.success("থাম্বনেইল আপলোড হয়েছে");
+    } catch (e: any) {
+      toast.error(e?.message ?? "আপলোড ব্যর্থ");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
 
 
   const parsed = useMemo(() => {
@@ -189,6 +224,69 @@ function AdminCourses() {
           <div className="md:col-span-2 rounded-lg border border-lime/30 bg-lime/5 px-4 py-3 font-body text-xs text-terminal/80">
             <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন — সব প্রয়োজনীয় ফিল্ড ঠিক না হলে সংরক্ষণ বাটন সক্রিয় হবে না।
           </div>
+
+          <div className="md:col-span-2 rounded-lg border border-border bg-ink/40 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-terminal/60">
+                থাম্বনেইল<span className="text-lime"> *</span>
+              </span>
+              <span className="font-mono text-[11px] text-terminal/50">16:9 · সর্বোচ্চ ৫MB</span>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-[160px_1fr]">
+              <div className="relative aspect-video overflow-hidden rounded-md border border-border bg-ink">
+                {form.thumbnail_url ? (
+                  <img src={form.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center font-mono text-[10px] text-terminal/40">
+                    কোনো ইমেজ নেই
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="rounded-md border border-lime/40 bg-lime/10 px-3 py-2 font-mono text-xs text-lime hover:bg-lime/20 disabled:opacity-40"
+                  >
+                    {uploading ? "আপলোড হচ্ছে…" : "ইমেজ আপলোড"}
+                  </button>
+                  {form.thumbnail_url && (
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, thumbnail_url: "" })}
+                      className="rounded-md border border-border px-3 py-2 font-mono text-xs text-terminal/70 hover:border-red-400 hover:text-red-300"
+                    >
+                      মুছুন
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleThumbUpload(file);
+                    }}
+                  />
+                </div>
+                <div className="font-mono text-[11px] text-terminal/50">অথবা সরাসরি ইমেজের লিংক দিন:</div>
+                <input
+                  type="url"
+                  placeholder="https://…/thumb.jpg"
+                  value={form.thumbnail_url ?? ""}
+                  onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                  className={`w-full rounded-md border bg-ink px-3 py-2 text-terminal font-body focus:outline-none ${
+                    parsed.invalidKeys.has("thumbnail_url") ? "border-border/70 focus:border-lime" : "border-border focus:border-lime"
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+
 
           {TEXT_FIELDS.map((f) => {
             const invalid = parsed.invalidKeys.has(f.key);
