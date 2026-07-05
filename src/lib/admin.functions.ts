@@ -14,12 +14,32 @@ export const adminOverview = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [orders, students, courses, revenueRes] = await Promise.all([
-      supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("status", "PAID"),
-      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("courses").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("orders").select("amount, course_id, courses(title)").eq("status", "PAID"),
-    ]);
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+    const [orders, students, courses, revenueRes, todayPaidRes, todayIncompleteRes, todayEnrolRes] =
+      await Promise.all([
+        supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("status", "PAID"),
+        supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("courses").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("orders").select("amount, course_id, courses(title)").eq("status", "PAID"),
+        supabaseAdmin
+          .from("orders")
+          .select("amount")
+          .eq("status", "PAID")
+          .gte("created_at", startOfToday),
+        supabaseAdmin
+          .from("orders")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "PENDING")
+          .gte("created_at", startOfToday),
+        supabaseAdmin
+          .from("enrollments")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", startOfToday),
+      ]);
+
     const rows = revenueRes.data ?? [];
     const revenue = rows.reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const perCourse = new Map<string, { title: string; total: number; count: number }>();
@@ -31,14 +51,24 @@ export const adminOverview = createServerFn({ method: "GET" })
       perCourse.set(key, cur);
     });
     const topCourses = [...perCourse.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+
+    const todayPaidRows = todayPaidRes.data ?? [];
+    const todaySale = todayPaidRows.reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+    const todayPaidCount = todayPaidRows.length;
+
     return {
       orderCount: orders.count ?? 0,
       studentCount: students.count ?? 0,
       courseCount: courses.count ?? 0,
       revenue,
+      todaySale,
+      todayPaidCount,
+      todayIncomplete: todayIncompleteRes.count ?? 0,
+      todayEnrolCount: todayEnrolRes.count ?? 0,
       topCourses,
     };
   });
+
 
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
