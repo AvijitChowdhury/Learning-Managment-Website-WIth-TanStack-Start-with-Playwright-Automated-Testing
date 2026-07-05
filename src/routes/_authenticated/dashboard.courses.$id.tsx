@@ -325,89 +325,163 @@ function PlayerPage() {
             } lg:static lg:block lg:z-auto`}
           >
             <div className="lg:sticky lg:top-20 rounded-2xl border border-border bg-code-gray max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
-              <div className="px-4 py-3 border-b border-border">
-                <div className="font-display text-sm font-bold text-terminal">
-                  কোর্স কারিকুলাম
+              <div className="px-4 py-3 border-b border-border space-y-3">
+                <div>
+                  <div className="font-display text-sm font-bold text-terminal">
+                    কোর্স কারিকুলাম
+                  </div>
+                  <div className="mt-0.5 font-mono text-[10px] text-terminal/60">
+                    {formatBnNumber(data.modules.length)} মডিউল ·{" "}
+                    {formatBnNumber(totalLessons)} পাঠ
+                  </div>
                 </div>
-                <div className="mt-0.5 font-mono text-[10px] text-terminal/60">
-                  {formatBnNumber(data.modules.length)} মডিউল ·{" "}
-                  {formatBnNumber(totalLessons)} পাঠ
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-terminal/40" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="পাঠ খুঁজুন…"
+                    className="w-full rounded-md border border-border bg-navy pl-8 pr-7 py-1.5 font-body text-sm text-terminal placeholder:text-terminal/40 focus:outline-none focus:border-indigo/60"
+                  />
+                  {query && (
+                    <button
+                      onClick={() => setQuery("")}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 text-terminal/50 hover:text-terminal"
+                      aria-label="clear"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {(
+                    [
+                      ["all", "সব"],
+                      ["todo", "বাকি"],
+                      ["done", "সম্পন্ন"],
+                      ["video", "ভিডিও"],
+                      ["text", "টেক্সট"],
+                    ] as const
+                  ).map(([k, label]) => (
+                    <button
+                      key={k}
+                      onClick={() => setFilter(k)}
+                      className={`rounded-full px-2.5 py-1 font-mono text-[10px] transition ${
+                        filter === k
+                          ? "bg-indigo/20 text-indigo-soft border border-indigo/50"
+                          : "border border-border text-terminal/60 hover:text-terminal hover:border-indigo/30"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="flex-1 overflow-y-auto p-2">
-                {data.modules.map((m: any, mi: number) => {
-                  const items = orderedLessons.filter(
-                    (l: any) => l.module_id === m.id,
-                  );
-                  const modDone = items.filter((l: any) =>
-                    progressSet.has(l.id),
-                  ).length;
-                  const isOpen = openModules[m.id] ?? true;
-                  return (
-                    <div key={m.id} className="mb-2">
-                      <button
-                        onClick={() =>
-                          setOpenModules((s) => ({ ...s, [m.id]: !isOpen }))
-                        }
-                        className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-white/5"
-                      >
-                        <span className="font-mono text-[10px] text-indigo-soft w-6 shrink-0">
-                          {formatBnNumber(mi + 1).padStart(2, "০")}
-                        </span>
-                        <span className="flex-1 min-w-0">
-                          <span className="block font-body text-sm font-semibold text-terminal truncate">
-                            {m.title}
+                {(() => {
+                  const q = query.trim().toLowerCase();
+                  const matches = (l: any) => {
+                    if (q && !String(l.title ?? "").toLowerCase().includes(q))
+                      return false;
+                    if (filter === "todo" && progressSet.has(l.id)) return false;
+                    if (filter === "done" && !progressSet.has(l.id)) return false;
+                    if (filter === "video" && l.type !== "VIDEO") return false;
+                    if (filter === "text" && l.type !== "TEXT") return false;
+                    return true;
+                  };
+                  const searching = q.length > 0 || filter !== "all";
+                  const modulesRendered = data.modules
+                    .map((m: any, mi: number) => {
+                      const items = orderedLessons.filter(
+                        (l: any) => l.module_id === m.id && matches(l),
+                      );
+                      return { m, mi, items };
+                    })
+                    .filter(({ items }) => !searching || items.length > 0);
+
+                  if (modulesRendered.length === 0)
+                    return (
+                      <div className="px-3 py-8 text-center font-body text-sm text-terminal/50">
+                        কোনো পাঠ পাওয়া যায়নি
+                      </div>
+                    );
+
+                  return modulesRendered.map(({ m, mi, items }) => {
+                    const allItems = orderedLessons.filter(
+                      (l: any) => l.module_id === m.id,
+                    );
+                    const modDone = allItems.filter((l: any) =>
+                      progressSet.has(l.id),
+                    ).length;
+                    const isOpen = searching
+                      ? true
+                      : (openModules[m.id] ?? true);
+                    return (
+                      <div key={m.id} className="mb-2">
+                        <button
+                          onClick={() =>
+                            setOpenModules((s) => ({ ...s, [m.id]: !isOpen }))
+                          }
+                          className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-white/5"
+                        >
+                          <span className="font-mono text-[10px] text-indigo-soft w-6 shrink-0">
+                            {formatBnNumber(mi + 1).padStart(2, "০")}
                           </span>
-                          <span className="block font-mono text-[10px] text-terminal/50">
-                            {formatBnNumber(modDone)}/
-                            {formatBnNumber(items.length)} সম্পন্ন
+                          <span className="flex-1 min-w-0">
+                            <span className="block font-body text-sm font-semibold text-terminal truncate">
+                              {m.title}
+                            </span>
+                            <span className="block font-mono text-[10px] text-terminal/50">
+                              {formatBnNumber(modDone)}/
+                              {formatBnNumber(allItems.length)} সম্পন্ন
+                            </span>
                           </span>
-                        </span>
-                        <ChevronRight
-                          className={`h-4 w-4 text-terminal/40 transition-transform ${
-                            isOpen ? "rotate-90" : ""
-                          }`}
-                        />
-                      </button>
-                      {isOpen && (
-                        <div className="mt-1 space-y-0.5 pl-2">
-                          {items.map((l: any) => {
-                            const done = progressSet.has(l.id);
-                            const activeLesson = l.id === activeId;
-                            return (
-                              <button
-                                key={l.id}
-                                onClick={() => goto(l.id)}
-                                className={`w-full text-left rounded-md px-2 py-2 font-body text-sm flex items-center gap-2 transition ${
-                                  activeLesson
-                                    ? "bg-indigo/15 text-terminal border border-indigo/40"
-                                    : "text-terminal/80 hover:bg-white/5 border border-transparent"
-                                }`}
-                              >
-                                {done ? (
-                                  <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-soft" />
-                                ) : activeLesson ? (
-                                  <LessonIcon type={l.type} active />
-                                ) : (
-                                  <Circle className="h-4 w-4 shrink-0 text-terminal/30" />
-                                )}
-                                <span className="flex-1 min-w-0 truncate">
-                                  {l.title}
-                                </span>
-                                {l.duration_sec ? (
-                                  <span className="font-mono text-[10px] text-terminal/40 shrink-0">
-                                    {fmtDur(l.duration_sec)}
+                          <ChevronRight
+                            className={`h-4 w-4 text-terminal/40 transition-transform ${
+                              isOpen ? "rotate-90" : ""
+                            }`}
+                          />
+                        </button>
+                        {isOpen && (
+                          <div className="mt-1 space-y-0.5 pl-2">
+                            {items.map((l: any) => {
+                              const done = progressSet.has(l.id);
+                              const activeLesson = l.id === activeId;
+                              return (
+                                <button
+                                  key={l.id}
+                                  onClick={() => goto(l.id)}
+                                  className={`w-full text-left rounded-md px-2 py-2 font-body text-sm flex items-center gap-2 transition ${
+                                    activeLesson
+                                      ? "bg-indigo/15 text-terminal border border-indigo/40"
+                                      : "text-terminal/80 hover:bg-white/5 border border-transparent"
+                                  }`}
+                                >
+                                  {done ? (
+                                    <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-soft" />
+                                  ) : activeLesson ? (
+                                    <LessonIcon type={l.type} active />
+                                  ) : (
+                                    <Circle className="h-4 w-4 shrink-0 text-terminal/30" />
+                                  )}
+                                  <span className="flex-1 min-w-0 truncate">
+                                    {l.title}
                                   </span>
-                                ) : null}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                                  {l.duration_sec ? (
+                                    <span className="font-mono text-[10px] text-terminal/40 shrink-0">
+                                      {fmtDur(l.duration_sec)}
+                                    </span>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </aside>
