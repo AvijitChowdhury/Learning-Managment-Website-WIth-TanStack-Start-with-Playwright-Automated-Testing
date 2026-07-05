@@ -53,12 +53,13 @@ function AdminIndex() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-bn-serif text-xl font-bold text-terminal">সামগ্রিক ওভারভিউ</h2>
-        <a
-          href="/api/admin/orders.csv"
+        <button
+          onClick={handleExport}
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 font-mono text-xs text-terminal hover:border-lime hover:text-lime"
         >
           <Download className="h-3.5 w-3.5" /> CSV এক্সপোর্ট
-        </a>
+        </button>
+
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
