@@ -335,21 +335,25 @@ function SortableLesson({
         >
           {expanded ? "▲" : "▼"}
         </button>
-        {dirty && (
-          <button
-            onClick={() => {
-              const sec = mmSsToSec(durationStr);
-              if (Number.isNaN(sec)) {
-                toast.error("Duration must be seconds or mm:ss");
-                return;
-              }
-              onSave({ ...local, duration_sec: sec });
-            }}
-            className="rounded bg-lime px-2 py-1 font-mono text-[10px] font-bold text-ink"
-          >
-            সেভ
-          </button>
-        )}
+        <button
+          disabled={!dirty}
+          onClick={() => {
+            const sec = mmSsToSec(durationStr);
+            if (Number.isNaN(sec)) {
+              toast.error("Duration must be seconds or mm:ss");
+              return;
+            }
+            onSave({ ...local, duration_sec: sec });
+          }}
+          className={`rounded px-3 py-1 font-mono text-[11px] font-bold ${
+            dirty
+              ? "bg-lime text-ink hover:bg-lime/90 animate-pulse"
+              : "border border-border bg-code-gray text-terminal/40"
+          }`}
+        >
+          {dirty ? "💾 সেভ" : "✓ সেভড"}
+        </button>
+
         <button
           onClick={() => confirm("ডিলিট?") && onDelete()}
           className="rounded border border-red-400/40 px-2 py-1 font-mono text-[10px] text-red-300"
