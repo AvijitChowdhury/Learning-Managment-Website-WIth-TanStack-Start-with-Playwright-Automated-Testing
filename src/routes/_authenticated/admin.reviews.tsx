@@ -61,10 +61,19 @@ function AdminReviews() {
 
   const goPage = (p: number) =>
     navigate({
-      search: (prev) => ({ ...prev, page: Math.min(Math.max(1, p), totalPages) }),
+      search: (prev: { page: number; courseId: string }) => ({
+        ...prev,
+        page: Math.min(Math.max(1, p), totalPages),
+      }),
     });
   const setCourse = (id: string) =>
-    navigate({ search: (prev) => ({ ...prev, courseId: id, page: 1 }) });
+    navigate({
+      search: (prev: { page: number; courseId: string }) => ({
+        ...prev,
+        courseId: id,
+        page: 1,
+      }),
+    });
 
   return (
     <div>
