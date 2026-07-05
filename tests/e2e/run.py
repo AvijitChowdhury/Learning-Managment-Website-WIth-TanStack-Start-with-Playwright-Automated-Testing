@@ -21,11 +21,47 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from fixtures import SCREENSHOTS, make_browser, restore_supabase_session  # noqa: E402
-from tests import test_admin, test_dashboard, test_public  # noqa: E402
+from tests import (  # noqa: E402
+    test_a11y,
+    test_admin,
+    test_auth_flow,
+    test_dashboard,
+    test_i18n,
+    test_navigation,
+    test_performance,
+    test_public,
+    test_responsive,
+    test_seo,
+)
 
-ALL_TESTS = test_public.TESTS + test_dashboard.TESTS + test_admin.TESTS
+ALL_TESTS = (
+    test_public.TESTS
+    + test_dashboard.TESTS
+    + test_admin.TESTS
+    + test_seo.TESTS
+    + test_navigation.TESTS
+    + test_a11y.TESTS
+    + test_performance.TESTS
+    + test_i18n.TESTS
+    + test_auth_flow.TESTS
+    + test_responsive.TESTS
+)
 
 ALLURE_DIR = Path(__file__).parent / "allure-results"
+
+# Human-readable epic/severity mapping per suite.
+SUITE_META: dict[str, dict[str, str]] = {
+    "public": {"epic": "Public Site", "feature": "Marketing & Catalog", "severity": "critical"},
+    "dashboard": {"epic": "Student Dashboard", "feature": "Learning Surface", "severity": "critical"},
+    "admin": {"epic": "Admin Console", "feature": "Content & Ops", "severity": "blocker"},
+    "seo": {"epic": "Public Site", "feature": "SEO & Metadata", "severity": "normal"},
+    "nav": {"epic": "Public Site", "feature": "Routing & Navigation", "severity": "normal"},
+    "a11y": {"epic": "Quality", "feature": "Accessibility", "severity": "normal"},
+    "perf": {"epic": "Quality", "feature": "Performance", "severity": "minor"},
+    "i18n": {"epic": "Public Site", "feature": "Localization (bn-BD)", "severity": "normal"},
+    "auth": {"epic": "Authentication", "feature": "Session & Redirects", "severity": "critical"},
+    "responsive": {"epic": "Quality", "feature": "Responsive Layout", "severity": "minor"},
+}
 
 
 def _reset_allure_dir() -> None:
