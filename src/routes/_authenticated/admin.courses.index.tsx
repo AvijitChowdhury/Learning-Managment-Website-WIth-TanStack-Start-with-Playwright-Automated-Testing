@@ -15,7 +15,9 @@ function AdminCourses() {
   const list = useServerFn(adminListCourses);
   const cats = useServerFn(adminListCategories);
   const save = useServerFn(adminSaveCourse);
+  const del = useServerFn(adminDeleteCourse);
   const qc = useQueryClient();
+
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
   const [open, setOpen] = useState(false);
