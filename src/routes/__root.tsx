@@ -12,10 +12,15 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { installGoogleTranslateFix } from "@/lib/google-translate-fix";
 import { supabase } from "@/integrations/supabase/client";
 import { isCurrentUserAdmin } from "@/lib/admin.functions";
 import { bn } from "@/lib/i18n/bn";
 import { Toaster } from "@/components/ui/sonner";
+
+if (typeof window !== "undefined") {
+  installGoogleTranslateFix();
+}
 
 
 function NotFoundComponent() {
