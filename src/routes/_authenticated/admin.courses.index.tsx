@@ -206,7 +206,16 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!parsed.valid) return;
+            if (!parsed.valid) {
+              const labelMap: Record<string, string> = {
+                ...Object.fromEntries(TEXT_FIELDS.map((f) => [f.key, f.label])),
+                ...Object.fromEntries(AREA_FIELDS.map((f) => [f.key, f.label])),
+                thumbnail_url: "থাম্বনেইল",
+              };
+              const missing = [...parsed.invalidKeys].map((k) => labelMap[k] ?? k);
+              toast.error(`পূরণ করুন: ${missing.join(", ")}`);
+              return;
+            }
             const wyl = (form.what_you_learn ?? "")
               .split("\n")
               .map((s: string) => s.trim())
@@ -222,8 +231,9 @@ function AdminCourses() {
           className="rounded-2xl border border-border bg-code-gray p-6 grid gap-4 md:grid-cols-2"
         >
           <div className="md:col-span-2 rounded-lg border border-lime/30 bg-lime/5 px-4 py-3 font-body text-xs text-terminal/80">
-            <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন — সব প্রয়োজনীয় ফিল্ড ঠিক না হলে সংরক্ষণ বাটন সক্রিয় হবে না।
+            <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন। কোনো ফিল্ড লাল হলে সেটা ঠিক করুন — সংরক্ষণ বাটন সবসময় সক্রিয়, ভুল থাকলে কোন ফিল্ডে সমস্যা তা জানানো হবে।
           </div>
+
 
           <div className="md:col-span-2 rounded-lg border border-border bg-ink/40 p-4">
             <div className="flex items-center justify-between gap-2">
@@ -303,7 +313,7 @@ function AdminCourses() {
                   value={form[f.key] ?? ""}
                   onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                   className={`mt-1 w-full rounded-md border bg-ink px-3 py-2 text-terminal focus:outline-none font-body ${
-                    invalid ? "border-border/70 focus:border-lime" : "border-border focus:border-lime"
+                    invalid ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
                   }`}
                 />
                 <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
@@ -368,7 +378,7 @@ function AdminCourses() {
 
           <button
             type="submit"
-            disabled={!parsed.valid || mut.isPending}
+            disabled={mut.isPending}
             className="md:col-span-2 rounded-md bg-lime px-5 py-3 font-mono text-sm font-bold text-ink disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {mut.isPending ? "সংরক্ষণ হচ্ছে…" : "সংরক্ষণ করুন"}
