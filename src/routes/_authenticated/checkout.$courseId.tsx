@@ -34,6 +34,12 @@ function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
+    if (adminInfo?.admin) {
+      navigate({ to: "/admin", replace: true });
+    }
+  }, [adminInfo?.admin, navigate]);
+
+  useEffect(() => {
     supabase
       .from("courses")
       .select("id,title,slug,price,discount_price,thumbnail_url,subtitle")
@@ -42,6 +48,7 @@ function CheckoutPage() {
       .maybeSingle()
       .then(({ data }) => setCourse(data));
   }, [courseId]);
+
 
   const baseAmount = Number(course?.discount_price ?? course?.price ?? 0);
   const finalAmount = applied ? applied.final : baseAmount;
