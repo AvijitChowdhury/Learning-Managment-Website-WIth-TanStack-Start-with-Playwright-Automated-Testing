@@ -19,7 +19,7 @@ export function installGoogleTranslateFix() {
   w.__gtFixInstalled = true;
 
   const originalRemoveChild = Node.prototype.removeChild;
-  Node.prototype.removeChild = function <T extends Node>(child: T): T {
+  Node.prototype.removeChild = function <T extends Node>(this: Node, child: T): T {
     if (child.parentNode !== this) {
       if (child.parentNode) {
         try {
@@ -35,6 +35,7 @@ export function installGoogleTranslateFix() {
 
   const originalInsertBefore = Node.prototype.insertBefore;
   Node.prototype.insertBefore = function <T extends Node>(
+    this: Node,
     newNode: T,
     referenceNode: Node | null,
   ): T {
