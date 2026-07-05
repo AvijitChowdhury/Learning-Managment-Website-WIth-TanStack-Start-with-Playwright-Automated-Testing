@@ -287,7 +287,7 @@ function CourseDetail() {
             {isAdmin ? (
               <div className="mt-5 space-y-2">
                 <div className="rounded-lg border border-lime/40 bg-lime/10 px-3 py-2 text-center font-mono text-[11px] text-lime">
-                  ⚡ অ্যাডমিন মোড — আপনি এই কোর্স ফ্রি অ্যাক্সেস পাচ্ছেন
+                  ⚡ অ্যাডমিন মোড — অ্যাডমিন কোর্স কিনতে বা এনরোল করতে পারে না
                 </div>
                 <Link
                   to="/admin/courses/$id/edit"
@@ -304,6 +304,7 @@ function CourseDetail() {
                 </Link>
               </div>
             ) : (
+
               <>
                 <Link
                   to="/checkout/$courseId"
