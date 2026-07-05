@@ -100,6 +100,7 @@ const emptyForm: FormState = {
 
 function CouponsAdmin() {
   const list = useServerFn(listCoupons);
+  const analytics = useServerFn(couponAnalytics);
   const upsert = useServerFn(upsertCoupon);
   const del = useServerFn(deleteCoupon);
   const qc = useQueryClient();
@@ -108,6 +109,19 @@ function CouponsAdmin() {
     queryKey: ["admin", "coupons"],
     queryFn: () => list(),
   });
+  const { data: stats } = useQuery({
+    queryKey: ["admin", "coupon-analytics"],
+    queryFn: () => analytics(),
+  });
+  const byCode = stats?.byCode ?? {};
+  const totals = stats?.totals ?? { redeemed: 0, revenue: 0, discount: 0 };
+  const activeCount = coupons.filter((c: any) => c.active).length;
+  const remainingUses = coupons.reduce(
+    (s: number, c: any) => (c.max_uses ? s + Math.max(0, c.max_uses - (c.used_count ?? 0)) : s),
+    0,
+  );
+  const hasUnlimited = coupons.some((c: any) => c.active && c.max_uses == null);
+  const fmtBdt = (n: number) => `৳${n.toLocaleString("bn-BD", { maximumFractionDigits: 0 })}`;
 
   const [form, setForm] = useState<FormState>(emptyForm);
   const editing = !!form.id;
