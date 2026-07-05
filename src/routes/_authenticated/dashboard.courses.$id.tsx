@@ -12,6 +12,7 @@ import {
   Paperclip,
   Menu,
   X,
+  Search,
 } from "lucide-react";
 import {
   getCoursePlayer,
