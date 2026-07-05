@@ -13,14 +13,43 @@ const coursesQO = queryOptions({
 });
 
 export const Route = createFileRoute("/courses/")({
-  head: () => ({
-    meta: [
-      { title: "সব কোর্স — শিখো" },
-      { name: "description", content: "বাংলায় সব কোর্স ব্রাউজ করুন। বিষয়ভিত্তিক ফিল্টার ও সার্চ।" },
-      { property: "og:title", content: "সব কোর্স — শিখো" },
-    ],
-  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(coursesQO),
+  head: ({ loaderData }) => {
+    const count = loaderData?.courses?.length ?? 0;
+    const desc = count
+      ? `বাংলায় ${count}+ কোর্স ব্রাউজ করুন — প্রোগ্রামিং, ডিজাইন, IELTS, মার্কেটিং ও ক্যারিয়ার স্কিল। বিষয়ভিত্তিক ফিল্টার ও সার্চ।`
+      : "বাংলায় সব কোর্স ব্রাউজ করুন — প্রোগ্রামিং, ডিজাইন, IELTS ও ক্যারিয়ার স্কিল। বিষয়ভিত্তিক ফিল্টার ও সার্চ।";
+    const courseList = (loaderData?.courses ?? []).slice(0, 20).map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://lmsavi.lovable.app/courses/${c.slug}`,
+      name: c.title,
+    }));
+    return {
+      meta: [
+        { title: "সব কোর্স — প্রোগ্রামিং শিখো" },
+        { name: "description", content: desc },
+        { property: "og:title", content: "সব কোর্স — প্রোগ্রামিং শিখো" },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: "https://lmsavi.lovable.app/courses" },
+        { property: "og:type", content: "website" },
+      ],
+      links: [{ rel: "canonical", href: "https://lmsavi.lovable.app/courses" }],
+      scripts: courseList.length
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                name: "প্রোগ্রামিং শিখো — সব কোর্স",
+                itemListElement: courseList,
+              }),
+            },
+          ]
+        : undefined,
+    };
+  },
   component: CatalogPage,
   errorComponent: ({ error }) => (
     <div className="container-page py-24 text-center text-muted-foreground">
