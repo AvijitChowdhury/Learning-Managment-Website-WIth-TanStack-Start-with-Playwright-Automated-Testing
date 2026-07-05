@@ -139,16 +139,16 @@ function HomePage() {
           aria-hidden
         />
 
-        <div className="relative container-page grid gap-10 py-20 md:py-28 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+        <div className="relative container-page grid gap-6 py-10 md:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
             <Prompt>$ boot shikho.sh</Prompt>
-            <h1 className="mt-6 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
+            <h1 className="mt-3 font-bn-serif text-[2.4rem] md:text-[4rem] font-extrabold leading-[1.05] text-terminal">
               <AnimatedText text={bn.home.heroTitle} />
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1, duration: 0.7 }}
-                className="block mt-4 font-display text-xl md:text-2xl font-semibold text-terminal/80"
+                className="block mt-2 font-display text-xl md:text-2xl font-semibold text-terminal/80"
               >
                 এখন শিখছি <TypingHeadline />
               </motion.span>
@@ -158,10 +158,11 @@ function HomePage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.2, duration: 0.7 }}
-              className="mt-6 max-w-xl font-body text-lg leading-8 text-terminal/75"
+              className="mt-3 max-w-xl font-body text-lg leading-8 text-terminal/75"
             >
               {bn.home.heroSubtitle}
             </motion.p>
+
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
