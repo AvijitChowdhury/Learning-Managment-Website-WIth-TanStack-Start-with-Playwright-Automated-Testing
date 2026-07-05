@@ -329,8 +329,13 @@ function SortableLesson({
   const dirty = JSON.stringify(local) !== JSON.stringify(lesson);
   const set = (patch: Partial<LessonRow>) => setLocal({ ...local, ...patch });
 
-  const videoOk = !!local.content_url && isValidUrl(local.content_url);
-  const missingVideo = local.type === "VIDEO" && !local.content_url;
+  const urlRaw = (local.content_url ?? "").trim();
+  const embed = urlRaw ? checkEmbeddable(urlRaw) : null;
+  const videoOk = embed?.ok === true;
+  const videoInvalid = local.type === "VIDEO" && !!urlRaw && embed?.ok === false;
+  const missingVideo = local.type === "VIDEO" && !urlRaw;
+  const blockSave = local.type === "VIDEO" && (missingVideo || videoInvalid);
+  const canSave = dirty && !blockSave;
 
   return (
     <div
