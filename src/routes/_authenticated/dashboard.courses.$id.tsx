@@ -305,6 +305,36 @@ function PlayerPage() {
                   </button>
                 </div>
 
+                {(active.description || active.assignment || active.resource_url) && (
+                  <div className="mt-5 space-y-4 border-t border-border pt-4 font-body text-sm text-terminal/90">
+                    {active.description && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">বিবরণ</div>
+                        <p className="whitespace-pre-line">{active.description}</p>
+                      </div>
+                    )}
+                    {active.assignment && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">অ্যাসাইনমেন্ট</div>
+                        <p className="whitespace-pre-line rounded-md border border-indigo/30 bg-indigo/5 p-3">{active.assignment}</p>
+                      </div>
+                    )}
+                    {active.resource_url && (
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-terminal/50 mb-1">রিসোর্স</div>
+                        <a
+                          href={active.resource_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-lime/50 bg-lime/10 px-3 py-1.5 font-mono text-xs text-lime hover:bg-lime hover:text-ink"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" /> ডাউনলোড / দেখুন
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Prev / Next */}
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
                   <button

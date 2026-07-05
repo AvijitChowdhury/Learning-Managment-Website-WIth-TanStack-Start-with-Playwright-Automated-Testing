@@ -62,7 +62,7 @@ export const getCoursePlayer = createServerFn({ method: "GET" })
     const { data: lessons } = modIds.length
       ? await supabase
           .from("lessons")
-          .select("id,module_id,title,type,duration_sec,order,content_url,text_content")
+          .select("id,module_id,title,type,duration_sec,order,content_url,text_content,description,assignment,resource_url")
           .in("module_id", modIds)
           .order("order")
       : { data: [] as any[] };

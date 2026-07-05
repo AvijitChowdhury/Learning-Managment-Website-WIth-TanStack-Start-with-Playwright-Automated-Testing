@@ -66,11 +66,16 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const wyl = (form.what_you_learn ?? "")
+              .split("\n")
+              .map((s: string) => s.trim())
+              .filter(Boolean);
             mut.mutate({
               ...form,
               price: Number(form.price),
               discount_price: form.discount_price ? Number(form.discount_price) : null,
               category_id: form.category_id || null,
+              what_you_learn: wyl.length ? wyl : null,
             });
           }}
           className="rounded-2xl border border-border bg-code-gray p-6 grid gap-3 md:grid-cols-2"

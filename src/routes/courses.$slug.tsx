@@ -332,7 +332,53 @@ function CourseDetail() {
             </Accordion>
           </div>
 
+          {/* WHAT YOU'LL LEARN */}
+          {course.what_you_learn && course.what_you_learn.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="text-2xl font-semibold">কী শিখবেন</h2>
+              <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                {course.what_you_learn.map((item: string, i: number) => (
+                  <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                    <span className="mt-0.5 text-brand">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* GIFT / BONUS RESOURCES */}
+          {course.gift_resources && (
+            <div className="rounded-2xl border border-lime/40 bg-lime/5 p-6">
+              <div className="font-mono text-xs uppercase tracking-wider text-lime">🎁 বোনাস উপহার</div>
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                {course.gift_resources}
+              </p>
+            </div>
+          )}
+
+          {/* INTRO VIDEO */}
+          {course.intro_video_url && (
+            <div>
+              <h2 className="text-2xl font-semibold">ইন্ট্রো ভিডিও</h2>
+              <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-border bg-black">
+                {/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(course.intro_video_url) ? (
+                  <iframe
+                    src={course.intro_video_url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
+                    title="Intro"
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video src={course.intro_video_url} controls className="h-full w-full" />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* REQUIREMENTS */}
+
           {requirements.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold">{bn.courses.requirements}</h2>
