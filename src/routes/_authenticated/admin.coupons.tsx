@@ -214,27 +214,39 @@ function CouponsAdmin() {
                 placeholder="ভ্যালু"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শুরু (আপনার সময়)
-                <input
-                  type="datetime-local"
-                  value={form.startsAt}
-                  onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-                  className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
-                />
-              </label>
-              <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শেষ (আপনার সময়)
-                <input
-                  type="datetime-local"
-                  value={form.endsAt}
-                  onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-                  min={form.startsAt || undefined}
-                  className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
-                />
-              </label>
+            <div className="rounded-md border border-border bg-code-gray/40 p-3">
+              <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] text-terminal/70">
+                <Calendar className="h-3 w-3 text-lime" /> মেয়াদ (ঐচ্ছিক — খালি রাখলে সর্বদা বৈধ)
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wide text-terminal/60">
+                  শুরুর তারিখ
+                  <input
+                    type="date"
+                    value={form.startsAt}
+                    onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
+                    className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-terminal outline-none focus:border-lime [color-scheme:dark]"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wide text-terminal/60">
+                  শেষ তারিখ
+                  <input
+                    type="date"
+                    value={form.endsAt}
+                    onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+                    min={form.startsAt || undefined}
+                    className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-terminal outline-none focus:border-lime [color-scheme:dark]"
+                  />
+                </label>
+              </div>
+              {(form.startsAt || form.endsAt) && (
+                <div className="mt-2 font-mono text-[11px] text-lime">
+                  বৈধতা: {form.startsAt ? fmtDate(dateInputToIso(form.startsAt)) : "এখন"} →{" "}
+                  {form.endsAt ? fmtDate(dateInputToIso(form.endsAt, true)) : "অনির্দিষ্ট"}
+                </div>
+              )}
             </div>
+
             <input
               type="number"
               value={form.maxUses}
