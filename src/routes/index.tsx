@@ -242,6 +242,25 @@ function HomePage() {
             </div>
           </motion.div>
         </div>
+
+        {/* Marquee */}
+        <div className="relative border-t border-border bg-code-gray/60 py-2 overflow-hidden">
+          <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
+            {Array.from({ length: 2 }).map((_, k) => (
+              <div key={k} className="flex gap-6 pr-6">
+                {tags.map(({ label, Icon }) => (
+                  <span
+                    key={`${k}-${label}`}
+                    className="inline-flex items-center gap-1.5 hover:text-lime transition-colors"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
 
@@ -273,24 +292,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Marquee */}
-      <div className="relative border-b border-border bg-code-gray/60 py-2 overflow-hidden">
-        <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
-          {Array.from({ length: 2 }).map((_, k) => (
-            <div key={k} className="flex gap-6 pr-6">
-              {tags.map(({ label, Icon }) => (
-                <span
-                  key={`${k}-${label}`}
-                  className="inline-flex items-center gap-1.5 hover:text-lime transition-colors"
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {label}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
 
 
       {/* Featured courses */}
