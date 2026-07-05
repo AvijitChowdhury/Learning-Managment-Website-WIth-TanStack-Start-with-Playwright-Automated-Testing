@@ -102,7 +102,18 @@ function ScrollProgress() {
 function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
-  const tags = ["Python", "Design", "IELTS", "Excel", "SEO", "Marketing", "Freelancing", "AI", "React", "UI/UX"];
+  const tags = [
+    { label: "Python", Icon: Code2 },
+    { label: "Design", Icon: Palette },
+    { label: "IELTS", Icon: Languages },
+    { label: "Excel", Icon: Sheet },
+    { label: "SEO", Icon: Search },
+    { label: "Marketing", Icon: Megaphone },
+    { label: "Freelancing", Icon: Briefcase },
+    { label: "AI", Icon: Sparkles },
+    { label: "React", Icon: Atom },
+    { label: "UI/UX", Icon: LayoutDashboard },
+  ];
 
   return (
     <>
