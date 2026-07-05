@@ -495,13 +495,25 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+        "id, user_id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title)",
       )
       .order("created_at", { ascending: false })
       .limit(10000);
     if (error) throw new Error(error.message);
 
     const rows = data ?? [];
+    const userIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean))) as string[];
+    let profilesById: Record<string, { name: string | null; email: string | null }> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", userIds);
+      profilesById = Object.fromEntries(
+        (profs ?? []).map((p: any) => [p.id, { name: p.name, email: p.email }]),
+      );
+    }
+
     const header = [
       "id",
       "created_at",
@@ -520,6 +532,7 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
     ];
     const lines = [header.join(",")];
     for (const r of rows as any[]) {
+      const prof = r.user_id ? profilesById[r.user_id] : null;
       lines.push(
         [
           r.id,
@@ -530,8 +543,8 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
           r.coupon_code ?? "",
           r.currency,
           r.courses?.title ?? "",
-          r.profiles?.name ?? "",
-          r.profiles?.email ?? "",
+          prof?.name ?? "",
+          prof?.email ?? "",
           r.payment_method ?? "",
           r.transaction_id ?? "",
           r.sender_number ?? "",
@@ -543,3 +556,39 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
     }
     return { csv: lines.join("\n"), filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
   });
+
+export const adminOverviewCharts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000);
+    since.setHours(0, 0, 0, 0);
+    const { data: orders } = await supabaseAdmin
+      .from("orders")
+      .select("amount, status, created_at")
+      .gte("created_at", since.toISOString())
+      .limit(5000);
+    const rows = orders ?? [];
+
+    const days: { date: string; revenue: number; orders: number }[] = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(since.getTime() + i * 86400000);
+      const key = d.toISOString().slice(0, 10);
+      days.push({ date: key, revenue: 0, orders: 0 });
+    }
+    const dayIdx = new Map(days.map((d, i) => [d.date, i]));
+    const statusCounts: Record<string, number> = {};
+    for (const r of rows as any[]) {
+      statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1;
+      const key = new Date(r.created_at).toISOString().slice(0, 10);
+      const i = dayIdx.get(key);
+      if (i !== undefined) {
+        days[i].orders += 1;
+        if (r.status === "PAID") days[i].revenue += Number(r.amount ?? 0);
+      }
+    }
+    const statusBreakdown = Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+    return { days, statusBreakdown };
+  });
+
