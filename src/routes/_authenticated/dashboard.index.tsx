@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listMyEnrollments } from "@/lib/learning.functions";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({ meta: [{ title: "ড্যাশবোর্ড — শিখো" }, { name: "robots", content: "noindex" }] }),
@@ -14,10 +15,16 @@ function DashboardPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const fetchEnrollments = useServerFn(listMyEnrollments);
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
   const { data: enrollments, isLoading } = useQuery({
     queryKey: ["my-enrollments"],
     queryFn: () => fetchEnrollments(),
   });
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin(),
+  });
+
 
   async function handleSignOut() {
     await qc.cancelQueries();
