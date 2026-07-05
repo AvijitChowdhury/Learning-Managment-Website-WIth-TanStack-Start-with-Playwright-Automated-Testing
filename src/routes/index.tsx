@@ -251,10 +251,10 @@ function HomePage() {
                 {tags.map(({ label, Icon, color }) => (
                   <span
                     key={`${k}-${label}`}
-                    className="inline-flex items-center gap-2 hover:text-lime transition-colors"
+                    className="flex flex-col items-center gap-2 hover:text-lime transition-colors"
                   >
                     <Icon className="h-4 w-4 shrink-0" style={{ color }} />
-                    {label}
+                    <span className="whitespace-pre-line text-center">{label}</span>
                   </span>
                 ))}
               </div>
