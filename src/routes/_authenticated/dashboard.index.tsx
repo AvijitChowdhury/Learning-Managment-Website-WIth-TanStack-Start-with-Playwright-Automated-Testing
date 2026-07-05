@@ -42,13 +42,22 @@ function DashboardPage() {
             স্বাগতম, <span className="text-lime">{user.user_metadata?.name ?? user.email}</span>
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {adminInfo?.admin && (
+            <Link
+              to="/admin"
+              className="rounded-md border border-lime bg-lime/10 px-4 py-2 font-mono text-xs font-bold text-lime hover:bg-lime hover:text-ink"
+            >
+              ⚡ অ্যাডমিন প্যানেল
+            </Link>
+          )}
           <Link
             to="/dashboard/orders"
             className="rounded-md border border-border px-4 py-2 font-mono text-xs text-terminal hover:border-lime hover:text-lime"
           >
             অর্ডার
           </Link>
+
           <Link
 
             to="/dashboard/support"
