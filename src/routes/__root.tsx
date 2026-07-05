@@ -115,6 +115,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="bn">
       <head>
+        <meta name="google" content="translate" />
         <HeadContent />
       </head>
       <body>
