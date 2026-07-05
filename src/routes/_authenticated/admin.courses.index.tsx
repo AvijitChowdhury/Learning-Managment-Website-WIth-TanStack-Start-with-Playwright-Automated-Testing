@@ -243,14 +243,13 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            setSubmitAttempted(true);
             if (!parsed.valid) {
-              const labelMap: Record<string, string> = {
-                ...Object.fromEntries(TEXT_FIELDS.map((f) => [f.key, f.label])),
-                ...Object.fromEntries(AREA_FIELDS.map((f) => [f.key, f.label])),
-                thumbnail_url: "থাম্বনেইল",
-              };
-              const missing = [...parsed.invalidKeys].map((k) => labelMap[k] ?? k);
-              toast.error(`পূরণ করুন: ${missing.join(", ")}`);
+              const first = Object.keys(parsed.errors)[0];
+              toast.error(parsed.errors[first] ?? "কিছু ফিল্ড ঠিক করতে হবে");
+              const el = document.querySelector<HTMLElement>(`[data-field="${first}"]`);
+              el?.focus();
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
               return;
             }
             const wyl = (form.what_you_learn ?? "")
