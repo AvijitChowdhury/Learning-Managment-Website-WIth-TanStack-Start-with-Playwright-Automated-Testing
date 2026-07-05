@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { motion, useScroll, useSpring } from "motion/react";
-import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionTemplate } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 import { listPublishedCourses } from "@/lib/courses.functions";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT } from "@/lib/format";
