@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Download, TrendingUp, ShoppingBag, Users, BookOpen, Clock, AlertTriangle } from "lucide-react";
-import { adminOverview } from "@/lib/admin.functions";
+import { toast } from "sonner";
+import { adminOverview, adminExportOrdersCsv } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -11,7 +12,26 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 
 function AdminIndex() {
   const fn = useServerFn(adminOverview);
+  const exportCsv = useServerFn(adminExportOrdersCsv);
   const { data, isLoading } = useQuery({ queryKey: ["admin-overview"], queryFn: () => fn() });
+
+  async function handleExport() {
+    try {
+      const res = await exportCsv();
+      const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      toast.error(e?.message ?? "এক্সপোর্ট ব্যর্থ");
+    }
+  }
+
 
   if (isLoading) return <p className="text-terminal/60">লোড হচ্ছে…</p>;
   if (!data) return null;
