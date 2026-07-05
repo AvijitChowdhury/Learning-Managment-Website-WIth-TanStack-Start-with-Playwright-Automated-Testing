@@ -80,7 +80,11 @@ async def admin_course_editor(page):
     if not course_id:
         # derive from the list page
         await page.goto(f"{BASE_URL}/admin/courses", wait_until="domcontentloaded")
-        await page.wait_for_load_state("networkidle", timeout=8000)
+        # wait for at least one edit link to render, not just networkidle
+        try:
+            await page.wait_for_selector("a[href$='/edit']", timeout=15000)
+        except Exception:
+            pass
         hrefs = await page.eval_on_selector_all(
             "a[href*='/admin/courses/']", "els => els.map(e => e.getAttribute('href'))"
         )
