@@ -29,8 +29,11 @@ import {
   adminReorderModules,
   adminReorderLessons,
   adminBulkImportLessons,
+  adminSaveCourse,
+  adminListCategories,
 } from "@/lib/admin.functions";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin/courses/$id/edit")({
   component: EditPage,
