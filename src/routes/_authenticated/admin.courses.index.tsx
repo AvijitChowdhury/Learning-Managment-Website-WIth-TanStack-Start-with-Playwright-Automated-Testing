@@ -268,7 +268,7 @@ function AdminCourses() {
           className="rounded-2xl border border-border bg-code-gray p-6 grid gap-4 md:grid-cols-2"
         >
           <div className="md:col-span-2 rounded-lg border border-lime/30 bg-lime/5 px-4 py-3 font-body text-xs text-terminal/80">
-            <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন। কোনো ফিল্ড লাল হলে সেটা ঠিক করুন — সংরক্ষণ বাটন সবসময় সক্রিয়, ভুল থাকলে কোন ফিল্ডে সমস্যা তা জানানো হবে।
+            <span className="font-mono text-lime">টিপ:</span> তারকা (*) চিহ্নিত ফিল্ড আবশ্যক। কোনো ফিল্ডে সমস্যা থাকলে নিচে লাল রঙে সমস্যাটি দেখানো হবে — সেটি ঠিক করে আবার সংরক্ষণ করুন।
           </div>
 
 
