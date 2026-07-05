@@ -90,6 +90,39 @@ function isValidUrl(u: string): boolean {
   }
 }
 
+function extractVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (!u.hostname.includes("vimeo.com")) return null;
+    const m = u.pathname.match(/\/(\d+)/);
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+const DIRECT_VIDEO_EXT = /\.(mp4|webm|ogg|ogv|mov|m4v|m3u8)(\?.*)?$/i;
+
+/**
+ * Returns { ok: true } when the URL can be embedded (YouTube, Vimeo, or a
+ * direct video file), otherwise { ok: false, reason } with a message the
+ * admin can act on.
+ */
+function checkEmbeddable(raw: string): { ok: true } | { ok: false; reason: string } {
+  const url = raw.trim();
+  if (!url) return { ok: false, reason: "ভিডিও URL দিন" };
+  if (!isValidUrl(url))
+    return { ok: false, reason: "URL অবৈধ — https:// দিয়ে শুরু হতে হবে" };
+  if (extractYouTubeId(url)) return { ok: true };
+  if (extractVimeoId(url)) return { ok: true };
+  if (DIRECT_VIDEO_EXT.test(url.split("#")[0])) return { ok: true };
+  return {
+    ok: false,
+    reason:
+      "এমবেড করা যায়নি — YouTube / Vimeo লিংক বা সরাসরি .mp4/.webm ভিডিও ফাইল দিন",
+  };
+}
+
 // ---------- video preview ----------
 
 function VideoPreview({ url }: { url: string }) {
@@ -101,6 +134,19 @@ function VideoPreview({ url }: { url: string }) {
           src={`https://www.youtube.com/embed/${yt}`}
           className="h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+  const vm = extractVimeoId(url);
+  if (vm) {
+    return (
+      <div className="aspect-video w-full max-w-md overflow-hidden rounded border border-border bg-black">
+        <iframe
+          src={`https://player.vimeo.com/video/${vm}`}
+          className="h-full w-full"
+          allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
         />
       </div>
