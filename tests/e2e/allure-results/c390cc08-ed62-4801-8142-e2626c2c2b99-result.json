@@ -1,0 +1,55 @@
+{
+  "uuid": "c390cc08-ed62-4801-8142-e2626c2c2b99",
+  "historyId": "i18n.currency",
+  "name": "i18n.currency",
+  "fullName": "tests.e2e.i18n.currency",
+  "description": "currency ok",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279125764,
+  "stop": 1783279127599,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "i18n"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "story",
+      "value": "currency"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

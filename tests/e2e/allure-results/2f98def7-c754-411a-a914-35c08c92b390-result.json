@@ -1,0 +1,55 @@
+{
+  "uuid": "2f98def7-c754-411a-a914-35c08c92b390",
+  "historyId": "admin.coupon_create",
+  "name": "admin.coupon_create",
+  "fullName": "tests.e2e.admin.coupon_create",
+  "description": "created E2EA9F2",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279073090,
+  "stop": 1783279077433,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "coupon_create"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

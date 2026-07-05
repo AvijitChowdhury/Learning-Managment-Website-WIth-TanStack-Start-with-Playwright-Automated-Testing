@@ -1,0 +1,55 @@
+{
+  "uuid": "a791b77a-a6d0-4af4-9655-fca180c4539c",
+  "historyId": "public.landing_ctas",
+  "name": "public.landing_ctas",
+  "fullName": "tests.e2e.public.landing_ctas",
+  "description": "resolved links: ['/free-class', '/courses']",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279046458,
+  "stop": 1783279048473,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "story",
+      "value": "landing_ctas"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

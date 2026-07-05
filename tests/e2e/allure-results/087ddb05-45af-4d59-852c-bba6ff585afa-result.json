@@ -1,0 +1,55 @@
+{
+  "uuid": "087ddb05-45af-4d59-852c-bba6ff585afa",
+  "historyId": "a11y.img_alt",
+  "name": "a11y.img_alt",
+  "fullName": "tests.e2e.a11y.img_alt",
+  "description": "all images have alt",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279111175,
+  "stop": 1783279113033,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "a11y"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Accessibility"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Accessibility"
+    },
+    {
+      "name": "story",
+      "value": "img_alt"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

@@ -1,0 +1,61 @@
+{
+  "uuid": "0b7e52f1-ba15-41d6-81e7-a6c3302c0bad",
+  "historyId": "admin.overview",
+  "name": "admin.overview",
+  "fullName": "tests.e2e.admin.overview",
+  "description": "len=80318",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279060158,
+  "stop": 1783279062717,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "overview"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.overview screenshot",
+      "source": "4d6b2529-5c74-4d42-a6f8-313490d6b5cb-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}
