@@ -105,6 +105,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=Baloo+Da+2:wght@500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "প্রোগ্রামিং শিখো",
+              alternateName: "Programming Shikho",
+              url: "https://lmsavi.lovable.app",
+              logo: "https://lmsavi.lovable.app/favicon.ico",
+            },
+            {
+              "@type": "WebSite",
+              name: "প্রোগ্রামিং শিখো",
+              url: "https://lmsavi.lovable.app",
+              inLanguage: "bn-BD",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: "https://lmsavi.lovable.app/courses?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            },
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
