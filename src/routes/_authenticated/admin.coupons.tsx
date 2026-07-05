@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, TicketPercent } from "lucide-react";
+import { Plus, Trash2, TicketPercent, Pencil, X, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { deleteCoupon, listCoupons, upsertCoupon } from "@/lib/lms-admin.functions";
 
@@ -11,31 +11,101 @@ export const Route = createFileRoute("/_authenticated/admin/coupons")({
   component: CouponsAdmin,
 });
 
+// ISO string → yyyy-MM-ddTHH:mm in LOCAL time for <input type="datetime-local">
+function isoToLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function localInputToIso(v: string): string | null {
+  if (!v) return null;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("bn-BD", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function couponStatus(c: any): { label: string; tone: "lime" | "amber" | "red" | "muted" } {
+  if (!c.active) return { label: "বন্ধ", tone: "muted" };
+  const now = Date.now();
+  if (c.starts_at && new Date(c.starts_at).getTime() > now)
+    return { label: "শীঘ্রই সক্রিয়", tone: "amber" };
+  if (c.ends_at && new Date(c.ends_at).getTime() < now)
+    return { label: "মেয়াদ শেষ", tone: "red" };
+  if (c.max_uses != null && (c.used_count ?? 0) >= c.max_uses)
+    return { label: "সীমা শেষ", tone: "red" };
+  return { label: "সক্রিয়", tone: "lime" };
+}
+
+type FormState = {
+  id?: string;
+  code: string;
+  type: "PERCENT" | "FLAT";
+  value: string;
+  startsAt: string;
+  endsAt: string;
+  maxUses: string;
+  active: boolean;
+};
+
+const emptyForm: FormState = {
+  code: "",
+  type: "PERCENT",
+  value: "10",
+  startsAt: "",
+  endsAt: "",
+  maxUses: "",
+  active: true,
+};
+
 function CouponsAdmin() {
   const list = useServerFn(listCoupons);
   const upsert = useServerFn(upsertCoupon);
   const del = useServerFn(deleteCoupon);
   const qc = useQueryClient();
 
-  const { data: coupons = [] } = useQuery({ queryKey: ["admin", "coupons"], queryFn: () => list() });
+  const { data: coupons = [] } = useQuery({
+    queryKey: ["admin", "coupons"],
+    queryFn: () => list(),
+  });
 
-  const [code, setCode] = useState("");
-  const [type, setType] = useState<"PERCENT" | "FLAT">("PERCENT");
-  const [value, setValue] = useState<string>("10");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [maxUses, setMaxUses] = useState<string>("");
-  const [active, setActive] = useState(true);
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const editing = !!form.id;
+
+  const startEdit = (c: any) =>
+    setForm({
+      id: c.id,
+      code: c.code,
+      type: c.discount_type,
+      value: String(c.discount_value),
+      startsAt: isoToLocalInput(c.starts_at),
+      endsAt: isoToLocalInput(c.ends_at),
+      maxUses: c.max_uses ? String(c.max_uses) : "",
+      active: !!c.active,
+    });
+
+  const reset = () => setForm(emptyForm);
 
   const upsertMut = useMutation({
     mutationFn: (data: any) => upsert({ data }),
     onSuccess: () => {
-      toast.success("সংরক্ষিত");
-      setCode("");
-      setValue("10");
-      setStartsAt("");
-      setEndsAt("");
-      setMaxUses("");
+      toast.success(editing ? "কুপন আপডেট হয়েছে" : "কুপন যোগ হয়েছে");
+      reset();
       qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "সমস্যা হয়েছে"),
@@ -50,6 +120,24 @@ function CouponsAdmin() {
     onError: (e: any) => toast.error(e?.message ?? "মুছে ফেলা যায়নি"),
   });
 
+  const submit = () => {
+    if (!form.code.trim() || !form.value) return;
+    if (form.startsAt && form.endsAt && new Date(form.startsAt) >= new Date(form.endsAt)) {
+      toast.error("শুরুর তারিখ শেষের তারিখের আগে হতে হবে");
+      return;
+    }
+    upsertMut.mutate({
+      id: form.id,
+      code: form.code.trim(),
+      discount_type: form.type,
+      discount_value: Number(form.value),
+      starts_at: localInputToIso(form.startsAt),
+      ends_at: localInputToIso(form.endsAt),
+      max_uses: form.maxUses ? Number(form.maxUses) : null,
+      active: form.active,
+    });
+  };
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-3">
@@ -59,19 +147,34 @@ function CouponsAdmin() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="font-display text-base font-semibold text-terminal">নতুন কুপন</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold text-terminal">
+              {editing ? "কুপন এডিট করুন" : "নতুন কুপন"}
+            </h3>
+            {editing && (
+              <button
+                onClick={reset}
+                className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 font-mono text-[10px] text-terminal/70 hover:border-lime hover:text-lime"
+              >
+                <X className="h-3 w-3" /> বাতিল
+              </button>
+            )}
+          </div>
           <div className="mt-4 grid gap-3">
             <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ""))}
+              value={form.code}
+              onChange={(e) =>
+                setForm({ ...form, code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "") })
+              }
               placeholder="কোড (যেমন SAVE20)"
               maxLength={40}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:border-lime"
+              disabled={editing}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:border-lime disabled:opacity-60"
             />
             <div className="grid grid-cols-2 gap-3">
               <select
-                value={type}
-                onChange={(e) => setType(e.target.value as any)}
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value as any })}
                 className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-lime"
               >
                 <option value="PERCENT">% ছাড়</option>
@@ -79,8 +182,8 @@ function CouponsAdmin() {
               </select>
               <input
                 type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
+                value={form.value}
+                onChange={(e) => setForm({ ...form, value: e.target.value })}
                 min={1}
                 className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-lime"
                 placeholder="ভ্যালু"
@@ -88,52 +191,47 @@ function CouponsAdmin() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শুরু
+                শুরু (আপনার সময়)
                 <input
                   type="datetime-local"
-                  value={startsAt}
-                  onChange={(e) => setStartsAt(e.target.value)}
+                  value={form.startsAt}
+                  onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
                   className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
                 />
               </label>
               <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শেষ
+                শেষ (আপনার সময়)
                 <input
                   type="datetime-local"
-                  value={endsAt}
-                  onChange={(e) => setEndsAt(e.target.value)}
+                  value={form.endsAt}
+                  onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+                  min={form.startsAt || undefined}
                   className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
                 />
               </label>
             </div>
             <input
               type="number"
-              value={maxUses}
-              onChange={(e) => setMaxUses(e.target.value)}
+              value={form.maxUses}
+              onChange={(e) => setForm({ ...form, maxUses: e.target.value })}
               placeholder="সর্বোচ্চ ব্যবহার (ঐচ্ছিক)"
               min={1}
               className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-lime"
             />
             <label className="inline-flex items-center gap-2 text-sm text-terminal">
-              <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={form.active}
+                onChange={(e) => setForm({ ...form, active: e.target.checked })}
+              />
               সক্রিয়
             </label>
             <button
-              disabled={upsertMut.isPending || !code.trim() || !value}
-              onClick={() =>
-                upsertMut.mutate({
-                  code: code.trim(),
-                  discount_type: type,
-                  discount_value: Number(value),
-                  starts_at: startsAt ? new Date(startsAt).toISOString() : null,
-                  ends_at: endsAt ? new Date(endsAt).toISOString() : null,
-                  max_uses: maxUses ? Number(maxUses) : null,
-                  active,
-                })
-              }
+              disabled={upsertMut.isPending || !form.code.trim() || !form.value}
+              onClick={submit}
               className="inline-flex items-center justify-center gap-2 rounded-md bg-lime px-4 py-2 font-mono text-xs font-bold text-ink disabled:opacity-50"
             >
-              <Plus className="h-3.5 w-3.5" /> কুপন যোগ করুন
+              <Plus className="h-3.5 w-3.5" /> {editing ? "আপডেট" : "কুপন যোগ করুন"}
             </button>
           </div>
         </div>
@@ -143,28 +241,70 @@ function CouponsAdmin() {
             মোট: {coupons.length}
           </div>
           <ul className="divide-y divide-border">
-            {coupons.map((c: any) => (
-              <li key={c.id} className="flex items-center justify-between gap-3 px-5 py-3">
-                <div>
-                  <div className="font-mono text-sm font-bold text-terminal">{c.code}</div>
-                  <div className="mt-0.5 font-mono text-[11px] text-terminal/60">
-                    {c.discount_type === "PERCENT" ? `${c.discount_value}%` : `৳${c.discount_value}`} · ব্যবহার:{" "}
-                    {c.used_count}
-                    {c.max_uses ? `/${c.max_uses}` : ""} ·{" "}
-                    <span className={c.active ? "text-lime" : "text-destructive"}>
-                      {c.active ? "সক্রিয়" : "বন্ধ"}
-                    </span>
+            {coupons.map((c: any) => {
+              const st = couponStatus(c);
+              const toneCls =
+                st.tone === "lime"
+                  ? "text-lime border-lime/40 bg-lime/10"
+                  : st.tone === "amber"
+                    ? "text-amber-400 border-amber-400/40 bg-amber-400/10"
+                    : st.tone === "red"
+                      ? "text-red-300 border-red-400/40 bg-red-500/10"
+                      : "text-terminal/60 border-border bg-code-gray";
+              return (
+                <li key={c.id} className="px-5 py-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-sm font-bold text-terminal">{c.code}</span>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 font-mono text-[10px] ${toneCls}`}
+                        >
+                          {st.label}
+                        </span>
+                        <span className="rounded-full border border-border bg-code-gray px-2 py-0.5 font-mono text-[10px] text-terminal/70">
+                          {c.discount_type === "PERCENT"
+                            ? `${c.discount_value}% ছাড়`
+                            : `৳${c.discount_value} ছাড়`}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 grid gap-1 font-mono text-[11px] text-terminal/60 sm:grid-cols-2">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-lime" />
+                          শুরু: <span className="text-terminal/80">{fmtDate(c.starts_at)}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-amber-400" />
+                          শেষ: <span className="text-terminal/80">{fmtDate(c.ends_at)}</span>
+                        </span>
+                        <span>
+                          ব্যবহার: {c.used_count ?? 0}
+                          {c.max_uses ? ` / ${c.max_uses}` : " (আনলিমিটেড)"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <button
+                        onClick={() => startEdit(c)}
+                        className="rounded-md border border-border p-1.5 text-terminal/70 hover:border-lime hover:text-lime"
+                        aria-label="এডিট"
+                        title="এডিট"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => confirm(`ডিলিট করবেন "${c.code}"?`) && delMut.mutate(c.id)}
+                        className="rounded-md border border-border p-1.5 text-terminal/60 hover:border-destructive hover:text-destructive"
+                        aria-label="মুছুন"
+                        title="মুছুন"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => delMut.mutate(c.id)}
-                  className="rounded-md border border-border p-1.5 text-terminal/60 hover:border-destructive hover:text-destructive"
-                  aria-label="মুছুন"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </li>
-            ))}
+                </li>
+              );
+            })}
             {coupons.length === 0 && (
               <li className="p-5 text-sm text-terminal/60">এখনও কোনো কুপন নেই।</li>
             )}

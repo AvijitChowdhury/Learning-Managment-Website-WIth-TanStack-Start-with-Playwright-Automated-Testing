@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar } from "lucide-react";
+import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -9,9 +10,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getCourseBySlug } from "@/lib/courses.functions";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT, formatBnNumber, formatBnDate } from "@/lib/format";
 import fallbackThumb from "@/assets/course-thumbnail-fallback.jpg";
+
 
 const qo = (slug: string) =>
   queryOptions({
@@ -61,7 +64,15 @@ export const Route = createFileRoute("/courses/$slug")({
 function CourseDetail() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(qo(slug));
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin().catch(() => ({ admin: false })),
+    staleTime: 60_000,
+  });
+  const isAdmin = !!adminInfo?.admin;
   if (!data) return null;
+
   const {
     course,
     modules,
@@ -191,18 +202,42 @@ function CourseDetail() {
                 </>
               )}
             </div>
-            <Link
-              to="/checkout/$courseId"
-              params={{ courseId: course.id }}
-              className="mt-5 block w-full rounded-lg bg-brand-gradient px-4 py-3 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
-            >
-              {bn.courses.buy}
-            </Link>
-            {freePreview && (
-              <button className="mt-2 block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent">
-                {bn.courses.watchPreview}
-              </button>
+            {isAdmin ? (
+              <div className="mt-5 space-y-2">
+                <div className="rounded-lg border border-lime/40 bg-lime/10 px-3 py-2 text-center font-mono text-[11px] text-lime">
+                  ⚡ অ্যাডমিন মোড — আপনি এই কোর্স ফ্রি অ্যাক্সেস পাচ্ছেন
+                </div>
+                <Link
+                  to="/admin/courses/$id/edit"
+                  params={{ id: course.id }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-lime px-4 py-3 text-center font-mono text-sm font-bold text-ink hover:bg-lime/90"
+                >
+                  <Settings className="h-4 w-4" /> কোর্স এডিট করুন
+                </Link>
+                <Link
+                  to="/admin"
+                  className="block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent"
+                >
+                  অ্যাডমিন প্যানেল
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/checkout/$courseId"
+                  params={{ courseId: course.id }}
+                  className="mt-5 block w-full rounded-lg bg-brand-gradient px-4 py-3 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+                >
+                  {bn.courses.buy}
+                </Link>
+                {freePreview && (
+                  <button className="mt-2 block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent">
+                    {bn.courses.watchPreview}
+                  </button>
+                )}
+              </>
             )}
+
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />

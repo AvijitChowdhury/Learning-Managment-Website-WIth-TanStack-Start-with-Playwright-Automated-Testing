@@ -335,21 +335,25 @@ function SortableLesson({
         >
           {expanded ? "▲" : "▼"}
         </button>
-        {dirty && (
-          <button
-            onClick={() => {
-              const sec = mmSsToSec(durationStr);
-              if (Number.isNaN(sec)) {
-                toast.error("Duration must be seconds or mm:ss");
-                return;
-              }
-              onSave({ ...local, duration_sec: sec });
-            }}
-            className="rounded bg-lime px-2 py-1 font-mono text-[10px] font-bold text-ink"
-          >
-            সেভ
-          </button>
-        )}
+        <button
+          disabled={!dirty}
+          onClick={() => {
+            const sec = mmSsToSec(durationStr);
+            if (Number.isNaN(sec)) {
+              toast.error("Duration must be seconds or mm:ss");
+              return;
+            }
+            onSave({ ...local, duration_sec: sec });
+          }}
+          className={`rounded px-3 py-1 font-mono text-[11px] font-bold ${
+            dirty
+              ? "bg-lime text-ink hover:bg-lime/90 animate-pulse"
+              : "border border-border bg-code-gray text-terminal/40"
+          }`}
+        >
+          {dirty ? "💾 সেভ" : "✓ সেভড"}
+        </button>
+
         <button
           onClick={() => confirm("ডিলিট?") && onDelete()}
           className="rounded border border-red-400/40 px-2 py-1 font-mono text-[10px] text-red-300"
@@ -445,10 +449,33 @@ function EditPage() {
   });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-course", id] });
 
-  const mSave = useMutation({ mutationFn: (v: any) => saveMod({ data: v }), onSuccess: invalidate });
-  const mDel = useMutation({ mutationFn: (v: any) => delMod({ data: v }), onSuccess: invalidate });
-  const lSave = useMutation({ mutationFn: (v: any) => saveLesson({ data: v }), onSuccess: invalidate });
-  const lDel = useMutation({ mutationFn: (v: any) => delLesson({ data: v }), onSuccess: invalidate });
+  const mSave = useMutation({
+    mutationFn: (v: any) => saveMod({ data: v }),
+    onSuccess: () => {
+      toast.success("মডিউল সেভ হয়েছে");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "সেভ ব্যর্থ"),
+  });
+  const mDel = useMutation({
+    mutationFn: (v: any) => delMod({ data: v }),
+    onSuccess: invalidate,
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+  const lSave = useMutation({
+    mutationFn: (v: any) => saveLesson({ data: v }),
+    onSuccess: () => {
+      toast.success("পাঠ সেভ হয়েছে");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "সেভ ব্যর্থ — ভিডিও URL সঠিক কিনা দেখুন"),
+  });
+  const lDel = useMutation({
+    mutationFn: (v: any) => delLesson({ data: v }),
+    onSuccess: invalidate,
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+
 
   const [newModTitle, setNewModTitle] = useState("");
   // local optimistic state for DnD
