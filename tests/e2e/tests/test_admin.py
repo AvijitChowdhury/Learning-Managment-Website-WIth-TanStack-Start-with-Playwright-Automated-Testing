@@ -125,8 +125,9 @@ async def admin_instructors_page(page):
     await page.goto(f"{BASE_URL}/admin/instructors", wait_until="domcontentloaded")
     await page.wait_for_load_state("networkidle", timeout=10000)
     await shot(page, "18_admin_instructors")
-    heading = page.locator("h1:has-text('ইন্সট্রাক্টর')")
-    assert await heading.count() > 0, "instructors heading missing"
+    assert (
+        await page.get_by_text("ইন্সট্রাক্টর", exact=False).count() > 0
+    ), "instructors heading missing"
     assert (
         await page.locator("button:has-text('নতুন ইন্সট্রাক্টর')").count() > 0
     ), "new instructor button missing"
