@@ -103,16 +103,16 @@ function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
   const tags = [
-    { label: "Python", Icon: Code2 },
-    { label: "Design", Icon: Palette },
-    { label: "IELTS", Icon: Languages },
-    { label: "Excel", Icon: Sheet },
-    { label: "SEO", Icon: Search },
-    { label: "Marketing", Icon: Megaphone },
-    { label: "Freelancing", Icon: Briefcase },
-    { label: "AI", Icon: Sparkles },
-    { label: "React", Icon: Atom },
-    { label: "UI/UX", Icon: LayoutDashboard },
+    { label: "পাইথন", Icon: Code2, color: "#3B82F6" },
+    { label: "ডিজাইন", Icon: Palette, color: "#EC4899" },
+    { label: "আইইএলটিএস", Icon: Languages, color: "#8B5CF6" },
+    { label: "এক্সেল", Icon: Sheet, color: "#22C55E" },
+    { label: "এসইও", Icon: Search, color: "#F59E0B" },
+    { label: "মার্কেটিং", Icon: Megaphone, color: "#EF4444" },
+    { label: "ফ্রিল্যান্সিং", Icon: Briefcase, color: "#14B8A6" },
+    { label: "এআই", Icon: Sparkles, color: "#C8FF4D" },
+    { label: "রিঅ্যাক্ট", Icon: Atom, color: "#06B6D4" },
+    { label: "ইউআই/ইউএক্স", Icon: LayoutDashboard, color: "#F97316" },
   ];
 
   return (
