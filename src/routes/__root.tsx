@@ -1,9 +1,10 @@
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -168,21 +169,24 @@ function Header() {
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
-            isAdmin ? (
-              <Link
-                to="/admin"
-                className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
-              >
-                অ্যাডমিন ড্যাশবোর্ড
-              </Link>
-            ) : (
-              <Link
-                to="/dashboard"
-                className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
-              >
-                {bn.nav.dashboard}
-              </Link>
-            )
+            <>
+              {isAdmin ? (
+                <Link
+                  to="/admin"
+                  className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
+                >
+                  অ্যাডমিন ড্যাশবোর্ড
+                </Link>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
+                >
+                  {bn.nav.dashboard}
+                </Link>
+              )}
+              <LogoutButton />
+            </>
           ) : (
             <Link
               to="/auth"
@@ -194,6 +198,34 @@ function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const handleSignOut = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={busy}
+      className="rounded-md border border-border px-3 py-2 text-sm font-mono text-terminal/80 hover:text-lime hover:border-lime transition-colors disabled:opacity-60"
+    >
+      {busy ? "…" : "লগআউট"}
+    </button>
   );
 }
 
