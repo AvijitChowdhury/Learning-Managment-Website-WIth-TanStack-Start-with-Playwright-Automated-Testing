@@ -69,3 +69,15 @@ nix run nixpkgs#allure -- serve tests/e2e/allure-results
 ```
 
 Pass `--no-allure` to `run.py` to skip result emission (e.g. when iterating on a single test).
+
+#### Report preview
+
+Screenshots of each Allure page live in [`allure-report-screenshots/`](./allure-report-screenshots):
+
+![Allure overview](./allure-report-screenshots/overview.png)
+![Allure suites](./allure-report-screenshots/suites.png)
+![Allure graphs](./allure-report-screenshots/graphs.png)
+![Allure timeline](./allure-report-screenshots/timeline.png)
+![Allure behaviors](./allure-report-screenshots/behaviors.png)
+![Allure packages](./allure-report-screenshots/packages.png)
+![Allure categories](./allure-report-screenshots/categories.png)
