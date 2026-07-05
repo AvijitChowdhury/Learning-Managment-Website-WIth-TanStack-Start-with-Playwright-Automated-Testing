@@ -180,7 +180,7 @@ export const adminSetOrderMethod = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch: { payment_method: string | null; transaction_id?: string | null } = {
       payment_method: data.payment_method && data.payment_method.length ? data.payment_method : null,
     };
     if (data.transaction_id !== undefined) {
