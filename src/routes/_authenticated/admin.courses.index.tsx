@@ -49,7 +49,7 @@ const TEXT_FIELDS: FieldDef[] = [
   { key: "title", label: "শিরোনাম", tip: "সংক্ষিপ্ত ও স্পষ্ট নাম, ৩–১২০ অক্ষর।", required: true, placeholder: "উদা: পাইথন হাতেখড়ি" },
   { key: "slug", label: "স্লাগ", tip: "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)। URL-এ ব্যবহার হবে।", required: true, placeholder: "python-hatekhori" },
   { key: "subtitle", label: "সাবটাইটেল", tip: "এক লাইনে কোর্সের প্রতিশ্রুতি। সর্বোচ্চ ১৬০ অক্ষর।", placeholder: "শূন্য থেকে শুরু করে প্রজেক্ট পর্যন্ত" },
-  { key: "thumbnail_url", label: "থাম্বনেইল URL", tip: "https:// দিয়ে শুরু হওয়া পাবলিক ইমেজ লিংক (16:9 রেশিও)।", required: true, type: "url", placeholder: "https://…/thumb.jpg" },
+  
   { key: "price", label: "মূল্য (BDT)", tip: "পূর্ণসংখ্যা টাকায়। ফ্রি কোর্সের জন্য 0।", required: true, type: "number", placeholder: "999" },
   { key: "discount_price", label: "ডিসকাউন্ট মূল্য", tip: "ঐচ্ছিক। থাকলে মূল দামের কম হতে হবে।", type: "number", placeholder: "699" },
   { key: "intro_video_url", label: "ইন্ট্রো ভিডিও URL", tip: "ঐচ্ছিক। YouTube/Vimeo/MP4 লিংক (https://)।", type: "url", placeholder: "https://youtu.be/…" },
