@@ -322,13 +322,18 @@ function AdminCourses() {
                 <div className="font-mono text-[11px] text-terminal/50">অথবা সরাসরি ইমেজের লিংক দিন:</div>
                 <input
                   type="url"
+                  data-field="thumbnail_url"
                   placeholder="https://…/thumb.jpg"
                   value={form.thumbnail_url ?? ""}
                   onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, thumbnail_url: true }))}
                   className={`w-full rounded-md border bg-ink px-3 py-2 text-terminal font-body focus:outline-none ${
-                    parsed.invalidKeys.has("thumbnail_url") ? "border-border/70 focus:border-lime" : "border-border focus:border-lime"
+                    shouldShow("thumbnail_url") ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
                   }`}
                 />
+                {shouldShow("thumbnail_url") && (
+                  <p className="font-mono text-[11px] text-red-300">{parsed.errors.thumbnail_url}</p>
+                )}
               </div>
             </div>
           </div>
