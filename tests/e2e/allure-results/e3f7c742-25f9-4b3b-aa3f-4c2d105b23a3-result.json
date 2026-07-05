@@ -1,0 +1,61 @@
+{
+  "uuid": "e3f7c742-25f9-4b3b-aa3f-4c2d105b23a3",
+  "historyId": "nav.checkout_return_redirect",
+  "name": "nav.checkout_return_redirect",
+  "fullName": "tests.e2e.nav.checkout_return_redirect",
+  "description": "http://localhost:8080/checkout/error",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279109402,
+  "stop": 1783279109758,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "checkout_return_redirect"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "nav.checkout_return_redirect screenshot",
+      "source": "166f4d56-8e30-449d-b52d-35c943218e6b-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

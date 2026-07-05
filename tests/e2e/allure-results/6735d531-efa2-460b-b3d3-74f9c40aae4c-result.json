@@ -1,0 +1,61 @@
+{
+  "uuid": "6735d531-efa2-460b-b3d3-74f9c40aae4c",
+  "historyId": "dashboard.support",
+  "name": "dashboard.support",
+  "fullName": "tests.e2e.dashboard.support",
+  "description": "reachable",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279058492,
+  "stop": 1783279060156,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "dashboard"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "subSuite",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "epic",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "feature",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "story",
+      "value": "support"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "dashboard.support screenshot",
+      "source": "70cc0e75-a1b4-424b-8dcd-a8034ddaeb37-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

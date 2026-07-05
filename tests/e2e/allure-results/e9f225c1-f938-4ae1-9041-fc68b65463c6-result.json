@@ -1,0 +1,61 @@
+{
+  "uuid": "e9f225c1-f938-4ae1-9041-fc68b65463c6",
+  "historyId": "admin.instructors_page",
+  "name": "admin.instructors_page",
+  "fullName": "tests.e2e.admin.instructors_page",
+  "description": "page + create button",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279083603,
+  "stop": 1783279086295,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "instructors_page"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.instructors_page screenshot",
+      "source": "4e403e22-d93a-40f2-9f1f-e1a6656a9789-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

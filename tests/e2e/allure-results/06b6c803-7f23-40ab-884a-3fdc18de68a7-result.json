@@ -1,14 +1,14 @@
 {
-  "uuid": "da6d35f9-70ee-4d6e-b2b1-99fbc2e4d733",
-  "historyId": "admin.instructor_create",
-  "name": "admin.instructor_create",
-  "fullName": "tests.e2e.admin.instructor_create",
-  "description": "created E2E Instructor f9ca",
+  "uuid": "06b6c803-7f23-40ab-884a-3fdc18de68a7",
+  "historyId": "admin.reviews_page",
+  "name": "admin.reviews_page",
+  "fullName": "tests.e2e.admin.reviews_page",
+  "description": "reviews page renders",
   "status": "passed",
   "statusDetails": {},
   "stage": "finished",
-  "start": 1783278728545,
-  "stop": 1783278736951,
+  "start": 1783279094405,
+  "stop": 1783279098715,
   "labels": [
     {
       "name": "suite",
@@ -32,7 +32,7 @@
     },
     {
       "name": "story",
-      "value": "instructor_create"
+      "value": "reviews_page"
     },
     {
       "name": "severity",
@@ -51,11 +51,5 @@
       "value": "sandbox"
     }
   ],
-  "attachments": [
-    {
-      "name": "admin.instructor_create screenshot",
-      "source": "9df81a3f-9406-4f32-8bdc-5a514501efa6-attachment.png",
-      "type": "image/png"
-    }
-  ]
+  "attachments": []
 }

@@ -1,0 +1,55 @@
+{
+  "uuid": "ee1a2226-4d4a-471f-8c38-44c4432cb265",
+  "historyId": "admin.orders_join",
+  "name": "admin.orders_join",
+  "fullName": "tests.e2e.admin.orders_join",
+  "description": "clean",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279064202,
+  "stop": 1783279065818,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "orders_join"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

@@ -1,1 +1,1 @@
-{"reportName":"Shikho LMS — Playwright E2E","testRuns":[],"statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1},"time":{"start":1783278728545,"stop":1783278736951,"duration":8406,"minDuration":8406,"maxDuration":8406,"sumDuration":8406}}
+{"reportName":"Shikho LMS — Playwright E2E","testRuns":[],"statistic":{"failed":2,"broken":0,"skipped":0,"passed":52,"unknown":0,"total":54},"time":{"start":1783279043611,"stop":1783279135720,"duration":92109,"minDuration":33,"maxDuration":8107,"sumDuration":91693}}

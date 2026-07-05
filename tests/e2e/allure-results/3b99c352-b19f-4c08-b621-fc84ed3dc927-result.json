@@ -1,0 +1,55 @@
+{
+  "uuid": "3b99c352-b19f-4c08-b621-fc84ed3dc927",
+  "historyId": "admin.orders_tabs",
+  "name": "admin.orders_tabs",
+  "fullName": "tests.e2e.admin.orders_tabs",
+  "description": "all three tabs clicked",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783279065819,
+  "stop": 1783279069844,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "orders_tabs"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}
