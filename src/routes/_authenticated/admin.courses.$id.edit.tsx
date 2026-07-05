@@ -391,7 +391,14 @@ function SortableLesson({
           {expanded ? "▲" : "▼"}
         </button>
         <button
-          disabled={!dirty}
+          disabled={!canSave}
+          title={
+            blockSave
+              ? videoInvalid
+                ? "ভিডিও URL ঠিক করুন"
+                : "ভিডিও URL যোগ করুন"
+              : undefined
+          }
           onClick={() => {
             const sec = mmSsToSec(durationStr);
             if (Number.isNaN(sec)) {
@@ -400,13 +407,19 @@ function SortableLesson({
             }
             onSave({ ...local, duration_sec: sec });
           }}
-          className={`rounded px-3 py-1 font-mono text-[11px] font-bold ${
-            dirty
+          className={`rounded px-3 py-1 font-mono text-[11px] font-bold transition ${
+            canSave
               ? "bg-lime text-ink hover:bg-lime/90 animate-pulse"
-              : "border border-border bg-code-gray text-terminal/40"
+              : dirty && blockSave
+                ? "border border-red-400/50 bg-red-500/10 text-red-300 cursor-not-allowed"
+                : "border border-border bg-code-gray text-terminal/40"
           }`}
         >
-          {dirty ? "💾 সেভ" : "✓ সেভড"}
+          {canSave
+            ? "💾 সেভ"
+            : dirty && blockSave
+              ? "⚠ ঠিক করুন"
+              : "✓ সেভড"}
         </button>
 
         <button
