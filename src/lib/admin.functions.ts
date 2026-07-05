@@ -133,6 +133,10 @@ export const adminSaveCourse = createServerFn({ method: "POST" })
         level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
         is_published: z.boolean(),
         category_id: z.string().uuid().nullable().optional(),
+        what_you_learn: z.string().max(5000).nullable().optional(),
+        gift_resources: z.string().max(2000).nullable().optional(),
+        intro_video_url: z.string().max(500).nullable().optional(),
+        total_duration: z.string().max(50).nullable().optional(),
       })
       .parse(d),
   )
