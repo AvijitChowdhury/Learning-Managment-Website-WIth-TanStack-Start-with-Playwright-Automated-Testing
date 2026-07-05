@@ -26,6 +26,7 @@ import {
   Star,
   ArrowLeft,
   Terminal,
+  GraduationCap,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -46,6 +47,7 @@ const NAV = [
   { to: "/admin/orders", label: "অর্ডার", icon: ShoppingBag, exact: false },
   { to: "/admin/users", label: "ইউজার", icon: Users, exact: false },
   { to: "/admin/courses", label: "কোর্স", icon: BookOpen, exact: false },
+  { to: "/admin/instructors", label: "ইন্সট্রাক্টর", icon: GraduationCap, exact: false },
   { to: "/admin/categories", label: "ক্যাটেগরি", icon: FolderTree, exact: false },
   { to: "/admin/coupons", label: "কুপন", icon: TicketPercent, exact: false },
   { to: "/admin/reviews", label: "রিভিউ", icon: Star, exact: false },

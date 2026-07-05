@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse } from "@/lib/admin.functions";
+import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse, adminListInstructorOptions } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -72,10 +72,12 @@ function AdminCourses() {
   const cats = useServerFn(adminListCategories);
   const save = useServerFn(adminSaveCourse);
   const del = useServerFn(adminDeleteCourse);
+  const instrs = useServerFn(adminListInstructorOptions);
   const qc = useQueryClient();
 
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
+  const { data: instructors } = useQuery({ queryKey: ["admin-instructor-options"], queryFn: () => instrs() });
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -89,6 +91,7 @@ function AdminCourses() {
     subtitle: "",
     thumbnail_url: "",
     category_id: null,
+    instructor_profile_id: null,
     description: "",
     what_you_learn: "",
     gift_resources: "",
@@ -104,7 +107,7 @@ function AdminCourses() {
       setOpen(false);
       setForm({
         title: "", slug: "", price: 0, discount_price: null, level: "BEGINNER",
-        is_published: false, subtitle: "", thumbnail_url: "", category_id: null,
+        is_published: false, subtitle: "", thumbnail_url: "", category_id: null, instructor_profile_id: null,
         description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
       });
     },
@@ -225,6 +228,7 @@ function AdminCourses() {
               price: Number(form.price),
               discount_price: form.discount_price ? Number(form.discount_price) : null,
               category_id: form.category_id || null,
+              instructor_profile_id: form.instructor_profile_id || null,
               what_you_learn: wyl.length ? wyl : null,
             });
           }}
@@ -361,6 +365,31 @@ function AdminCourses() {
               ))}
             </select>
             <span className="mt-1 block font-mono text-[11px] text-terminal/50">কোর্সটি কোন বিষয়ে পড়ে সেটি বেছে নিন।</span>
+          </label>
+
+          <label className="block md:col-span-2">
+            <span className="font-mono text-xs text-terminal/60">ইন্সট্রাক্টর</span>
+            <select
+              value={form.instructor_profile_id ?? ""}
+              onChange={(e) => setForm({ ...form, instructor_profile_id: e.target.value || null })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="">— নেই —</option>
+              {(instructors ?? []).map((i: any) => (
+                <option key={i.id} value={i.id}>
+                  {i.name}
+                  {i.headline ? ` — ${i.headline}` : ""}
+                  {!i.is_published ? " (ড্রাফট)" : ""}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1 block font-mono text-[11px] text-terminal/50">
+              কোর্সের সাথে দেখাতে চাওয়া ইন্সট্রাক্টর প্রোফাইল বেছে নিন। প্রোফাইল যোগ করতে{" "}
+              <Link to="/admin/instructors" className="text-lime hover:underline">
+                ইন্সট্রাক্টর সেকশন
+              </Link>{" "}
+              দেখুন।
+            </span>
           </label>
 
           <label className="flex items-start gap-2 font-mono text-xs text-terminal md:col-span-2">

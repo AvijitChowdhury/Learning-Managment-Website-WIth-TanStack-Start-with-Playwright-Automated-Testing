@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings, X } from "lucide-react";
+import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings, X, Award, Linkedin, Twitter, Github, Youtube, Link as LinkIcon } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -539,27 +539,98 @@ function CourseDetail() {
             )}
           </div>
 
-          {/* INSTRUCTOR BIO */}
+          {/* INSTRUCTOR PROFILE */}
           {instructor && (
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-2xl font-semibold">{bn.courses.instructor}</h2>
-              <div className="mt-4 flex items-start gap-4">
-                {instructor.avatar_url ? (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+              {"cover_url" in instructor && (instructor as any).cover_url && (
+                <div className="h-32 w-full overflow-hidden bg-gradient-to-br from-brand/20 to-brand/5">
                   <img
-                    src={instructor.avatar_url}
-                    alt={instructor.name ?? ""}
-                    className="h-16 w-16 rounded-full object-cover"
+                    src={(instructor as any).cover_url}
+                    alt=""
+                    className="h-full w-full object-cover"
                   />
-                ) : (
-                  <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary text-xl font-semibold">
-                    {(instructor.name ?? "?").slice(0, 1)}
+                </div>
+              )}
+              <div className="p-6">
+                <div className="mb-4 flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                  <Award className="h-4 w-4 text-brand" /> {bn.courses.instructor}
+                </div>
+                <div className="flex flex-col items-start gap-5 sm:flex-row">
+                  {instructor.avatar_url ? (
+                    <img
+                      src={instructor.avatar_url}
+                      alt={instructor.name ?? ""}
+                      className="h-24 w-24 shrink-0 rounded-full border-4 border-background object-cover shadow-lg"
+                    />
+                  ) : (
+                    <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-background bg-brand/10 text-3xl font-bold text-brand shadow-lg">
+                      {(instructor.name ?? "?").slice(0, 1)}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground">{instructor.name}</h3>
+                      {"headline" in instructor && (instructor as any).headline && (
+                        <p className="text-sm text-muted-foreground">
+                          {(instructor as any).headline}
+                        </p>
+                      )}
+                    </div>
+
+                    {"years_experience" in instructor && (instructor as any).years_experience ? (
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/5 px-2.5 py-1 text-xs font-medium text-brand">
+                        {formatBnNumber((instructor as any).years_experience)}+ বছরের অভিজ্ঞতা
+                      </div>
+                    ) : null}
+
+                    {"expertise" in instructor && Array.isArray((instructor as any).expertise) && (instructor as any).expertise.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {(instructor as any).expertise.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {"bio" in instructor && (instructor as any).bio && (
+                      <p className="whitespace-pre-line pt-2 text-sm leading-relaxed text-muted-foreground">
+                        {(instructor as any).bio}
+                      </p>
+                    )}
+
+                    {("website_url" in instructor ||
+                      "linkedin_url" in instructor ||
+                      "twitter_url" in instructor ||
+                      "github_url" in instructor ||
+                      "youtube_url" in instructor) && (
+                      <div className="flex flex-wrap gap-2 pt-3">
+                        {[
+                          { url: (instructor as any).website_url, Icon: LinkIcon, label: "Website" },
+                          { url: (instructor as any).linkedin_url, Icon: Linkedin, label: "LinkedIn" },
+                          { url: (instructor as any).twitter_url, Icon: Twitter, label: "Twitter" },
+                          { url: (instructor as any).github_url, Icon: Github, label: "GitHub" },
+                          { url: (instructor as any).youtube_url, Icon: Youtube, label: "YouTube" },
+                        ]
+                          .filter((s) => !!s.url)
+                          .map(({ url, Icon, label }) => (
+                            <a
+                              key={label}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={label}
+                              className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-brand hover:text-brand"
+                            >
+                              <Icon className="h-4 w-4" />
+                            </a>
+                          ))}
+                      </div>
+                    )}
                   </div>
-                )}
-                <div>
-                  <p className="text-lg font-semibold">{instructor.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    অভিজ্ঞ শিক্ষক · বাংলায় শেখানোর দশকের অভিজ্ঞতা
-                  </p>
                 </div>
               </div>
             </div>

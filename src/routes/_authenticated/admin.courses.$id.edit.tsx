@@ -31,6 +31,7 @@ import {
   adminBulkImportLessons,
   adminSaveCourse,
   adminListCategories,
+  adminListInstructorOptions,
 } from "@/lib/admin.functions";
 import { toast } from "sonner";
 
@@ -518,9 +519,14 @@ function SortableLesson({
 function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => void }) {
   const save = useServerFn(adminSaveCourse);
   const cats = useServerFn(adminListCategories);
+  const instrs = useServerFn(adminListInstructorOptions);
   const { data: categories } = useQuery({
     queryKey: ["admin-categories"],
     queryFn: () => cats(),
+  });
+  const { data: instructors } = useQuery({
+    queryKey: ["admin-instructor-options"],
+    queryFn: () => instrs(),
   });
   const [form, setForm] = useState<any>({
     title: course.title ?? "",
@@ -538,6 +544,7 @@ function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => vo
     gift_resources: course.gift_resources ?? "",
     level: course.level ?? "BEGINNER",
     category_id: course.category_id ?? null,
+    instructor_profile_id: course.instructor_profile_id ?? null,
     is_published: !!course.is_published,
   });
   const [open, setOpen] = useState(false);
@@ -584,6 +591,7 @@ function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => vo
               level: form.level,
               is_published: !!form.is_published,
               category_id: form.category_id || null,
+              instructor_profile_id: form.instructor_profile_id || null,
               description: form.description || undefined,
               what_you_learn: wyl.length ? wyl : null,
               gift_resources: form.gift_resources || null,
@@ -649,6 +657,23 @@ function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => vo
               <option value="">— নেই —</option>
               {(categories ?? []).map((c: any) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block md:col-span-2">
+            <span className="font-mono text-xs text-terminal/60">ইন্সট্রাক্টর</span>
+            <select
+              value={form.instructor_profile_id ?? ""}
+              onChange={(e) => setForm({ ...form, instructor_profile_id: e.target.value || null })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="">— নেই —</option>
+              {(instructors ?? []).map((i: any) => (
+                <option key={i.id} value={i.id}>
+                  {i.name}
+                  {i.headline ? ` — ${i.headline}` : ""}
+                  {!i.is_published ? " (ড্রাফট)" : ""}
+                </option>
               ))}
             </select>
           </label>
