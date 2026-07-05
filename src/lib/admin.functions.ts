@@ -750,7 +750,7 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
           .join(","),
       );
     }
-    return { csv: lines.join("\n"), filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
+    return { csv: "\uFEFF" + lines.join("\r\n") + "\r\n", filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
   });
 
 export const adminOverviewCharts = createServerFn({ method: "GET" })
