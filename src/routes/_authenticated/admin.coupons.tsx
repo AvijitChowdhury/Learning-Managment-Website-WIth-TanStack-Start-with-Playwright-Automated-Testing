@@ -146,6 +146,7 @@ function CouponsAdmin() {
       toast.success(editing ? "কুপন আপডেট হয়েছে" : "কুপন যোগ হয়েছে");
       reset();
       qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+      qc.invalidateQueries({ queryKey: ["admin", "coupon-analytics"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "সমস্যা হয়েছে"),
   });
@@ -155,6 +156,7 @@ function CouponsAdmin() {
     onSuccess: () => {
       toast.success("মুছে ফেলা হয়েছে");
       qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+      qc.invalidateQueries({ queryKey: ["admin", "coupon-analytics"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "মুছে ফেলা যায়নি"),
   });
