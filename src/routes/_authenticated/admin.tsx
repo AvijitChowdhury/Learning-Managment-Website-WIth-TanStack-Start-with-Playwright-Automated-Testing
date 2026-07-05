@@ -26,6 +26,7 @@ import {
   Star,
   ArrowLeft,
   Terminal,
+  GraduationCap,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
