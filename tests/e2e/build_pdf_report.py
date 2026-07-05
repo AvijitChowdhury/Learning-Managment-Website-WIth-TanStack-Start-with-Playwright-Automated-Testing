@@ -55,7 +55,11 @@ def load_env() -> list[tuple[str, str]]:
     for line in p.read_text().splitlines():
         if "=" in line:
             k, v = line.split("=", 1)
-            out.append((k.strip(), v.strip()))
+            k, v = k.strip(), v.strip()
+            # Mask the E2E test account email so the report never leaks it.
+            if k == "AUTH" and "@" in v:
+                v = v.split(" as ", 1)[0] + " as ***"
+            out.append((k, v))
     return out
 
 
