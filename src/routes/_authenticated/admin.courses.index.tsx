@@ -378,7 +378,7 @@ function AdminCourses() {
 
           <button
             type="submit"
-            disabled={!parsed.valid || mut.isPending}
+            disabled={mut.isPending}
             className="md:col-span-2 rounded-md bg-lime px-5 py-3 font-mono text-sm font-bold text-ink disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {mut.isPending ? "সংরক্ষণ হচ্ছে…" : "সংরক্ষণ করুন"}
