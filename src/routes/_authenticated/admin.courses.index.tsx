@@ -115,6 +115,20 @@ function AdminCourses() {
     total_duration: "",
   });
 
+  function friendlySaveError(e: any): string {
+    const raw = String(e?.message ?? e ?? "").toLowerCase();
+    if (!raw) return "সংরক্ষণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+    if (raw.includes("duplicate") || raw.includes("unique") || raw.includes("courses_slug"))
+      return "এই স্লাগ ইতিমধ্যে ব্যবহৃত হয়েছে। অন্য একটি স্লাগ দিন।";
+    if (raw.includes("unauthorized") || raw.includes("forbidden") || raw.includes("permission") || raw.includes("rls"))
+      return "এই কাজের অনুমতি নেই। আবার লগইন করে চেষ্টা করুন।";
+    if (raw.includes("network") || raw.includes("fetch") || raw.includes("timeout") || raw.includes("failed to fetch"))
+      return "নেটওয়ার্ক সমস্যা। ইন্টারনেট চেক করে আবার চেষ্টা করুন।";
+    if (raw.includes("foreign key") || raw.includes("violates"))
+      return "নির্বাচিত ক্যাটাগরি/ইন্সট্রাক্টর সঠিক নয়। আবার বেছে নিন।";
+    return "সংরক্ষণ ব্যর্থ হয়েছে। ফিল্ডগুলো পুনরায় দেখুন।";
+  }
+
   const mut = useMutation({
     mutationFn: (v: any) => save({ data: v }),
     onSuccess: () => {
@@ -127,7 +141,7 @@ function AdminCourses() {
         description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
       });
     },
-    onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
+    onError: (e: any) => toast.error(friendlySaveError(e)),
   });
 
   const delMut = useMutation({
