@@ -24,8 +24,8 @@ function AdminOrders() {
 
   const mut = useMutation({
     mutationFn: (v: { orderId: string; status: any }) => setStatus({ data: v }),
-    onSuccess: () => {
-      toast.success("আপডেটেড");
+    onSuccess: (res: any) => {
+      toast.success(res?.enrolled ? "পেইড — ইউজারকে কোর্স অ্যাক্সেস দেওয়া হয়েছে" : "আপডেটেড");
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
