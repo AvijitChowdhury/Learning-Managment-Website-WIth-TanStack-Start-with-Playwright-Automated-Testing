@@ -53,6 +53,28 @@ function AdminCourses() {
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
   });
 
+  const delMut = useMutation({
+    mutationFn: (id: string) => del({ data: { id } }),
+    onSuccess: () => {
+      toast.success("কোর্স ডিলিট হয়েছে");
+      qc.invalidateQueries({ queryKey: ["admin-courses"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+
+  function confirmDelete(c: any) {
+    toast(`"${c.title}" ডিলিট করবেন?`, {
+      description: "পুরো কোর্স, মডিউল, পাঠ, এনরোলমেন্ট ও রিভিউ মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না।",
+      duration: 10000,
+      action: {
+        label: "হ্যাঁ, ডিলিট",
+        onClick: () => delMut.mutate(c.id),
+      },
+      cancel: { label: "বাতিল", onClick: () => {} },
+    });
+  }
+
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
