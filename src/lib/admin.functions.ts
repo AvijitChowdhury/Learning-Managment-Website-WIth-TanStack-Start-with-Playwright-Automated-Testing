@@ -273,6 +273,156 @@ export const adminDeleteLesson = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminReorderModules = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        course_id: z.string().uuid(),
+        order: z.array(z.object({ id: z.string().uuid(), order: z.number().int().min(0) })).max(500),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await Promise.all(
+      data.order.map((r) =>
+        supabaseAdmin.from("modules").update({ order: r.order }).eq("id", r.id).eq("course_id", data.course_id),
+      ),
+    );
+    return { ok: true };
+  });
+
+export const adminReorderLessons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        updates: z
+          .array(
+            z.object({
+              id: z.string().uuid(),
+              module_id: z.string().uuid(),
+              order: z.number().int().min(0),
+            }),
+          )
+          .max(2000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await Promise.all(
+      data.updates.map((u) =>
+        supabaseAdmin
+          .from("lessons")
+          .update({ module_id: u.module_id, order: u.order })
+          .eq("id", u.id),
+      ),
+    );
+    return { ok: true };
+  });
+
+function parseDurationToSec(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const s = String(v).trim();
+  if (/^\d+$/.test(s)) return Number(s);
+  const m = s.match(/^(\d+):([0-5]?\d)$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  const h = s.match(/^(\d+):([0-5]?\d):([0-5]?\d)$/);
+  if (h) return Number(h[1]) * 3600 + Number(h[2]) * 60 + Number(h[3]);
+  return NaN;
+}
+
+function isValidUrl(u: string): boolean {
+  try {
+    const url = new URL(u);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parseBool(v: unknown): boolean {
+  const s = String(v ?? "").trim().toLowerCase();
+  return s === "true" || s === "1" || s === "yes" || s === "y";
+}
+
+export const adminBulkImportLessons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        module_id: z.string().uuid(),
+        rows: z
+          .array(
+            z.object({
+              title: z.string().optional(),
+              videoUrl: z.string().optional(),
+              content: z.string().optional(),
+              duration: z.union([z.string(), z.number()]).optional(),
+              freePreview: z.union([z.string(), z.boolean()]).optional(),
+            }),
+          )
+          .max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: existing } = await supabaseAdmin
+      .from("lessons")
+      .select("order")
+      .eq("module_id", data.module_id)
+      .order("order", { ascending: false })
+      .limit(1);
+    let nextOrder = existing && existing[0] ? existing[0].order + 1 : 0;
+
+    const failures: { row: number; reason: string }[] = [];
+    const toInsert: any[] = [];
+
+    data.rows.forEach((r, i) => {
+      const rowNum = i + 1;
+      const title = (r.title ?? "").toString().trim();
+      if (!title) return failures.push({ row: rowNum, reason: "missing title" });
+
+      const videoUrl = (r.videoUrl ?? "").toString().trim();
+      if (videoUrl && !isValidUrl(videoUrl))
+        return failures.push({ row: rowNum, reason: "invalid video URL" });
+
+      const durationSec =
+        r.duration === undefined || r.duration === "" ? null : parseDurationToSec(r.duration);
+      if (durationSec !== null && (Number.isNaN(durationSec) || durationSec < 0))
+        return failures.push({ row: rowNum, reason: "invalid duration (use seconds or mm:ss)" });
+
+      toInsert.push({
+        module_id: data.module_id,
+        title: title.slice(0, 200),
+        type: "VIDEO",
+        content_url: videoUrl || null,
+        description: (r.content ?? "").toString().slice(0, 5000) || null,
+        duration_sec: durationSec,
+        is_free_preview: parseBool(r.freePreview),
+        order: nextOrder++,
+      });
+    });
+
+    let created = 0;
+    if (toInsert.length) {
+      const { error, data: ins } = await supabaseAdmin.from("lessons").insert(toInsert).select("id");
+      if (error) {
+        return { created: 0, failed: data.rows.length, failures: [{ row: 0, reason: error.message }] };
+      }
+      created = ins?.length ?? toInsert.length;
+    }
+
+    return { created, failed: failures.length, failures };
+  });
+
 export const adminListReviews = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
