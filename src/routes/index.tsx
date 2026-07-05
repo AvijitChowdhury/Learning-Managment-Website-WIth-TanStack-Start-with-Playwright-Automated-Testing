@@ -318,14 +318,26 @@ function HomePage() {
 
 
       {/* Why */}
-      <section className="border-b border-border">
+      <motion.section
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
+        className="border-b border-border"
+      >
         <div className="container-page py-20">
           <Reveal>
             <Prompt>$ cat features.md</Prompt>
-            <h2 className="mt-4 font-bn-serif text-4xl md:text-5xl font-bold text-terminal">
+            <motion.h2
+              initial={{ opacity: 0, y: 20, letterSpacing: "0.05em" }}
+              whileInView={{ opacity: 1, y: 0, letterSpacing: "0em" }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.9, delay: 0.15, ease: [0.2, 0.7, 0.2, 1] }}
+              className="mt-4 font-bn-serif text-4xl md:text-5xl font-bold text-terminal"
+            >
               {bn.home.whyTitle.replace(/শিখো$/, "")}
               <span className="text-lime">শিখো</span>
-            </h2>
+            </motion.h2>
           </Reveal>
           <StaggerGroup className="mt-12 grid gap-5 md:grid-cols-3">
             {bn.home.why.map((w, i) => (
@@ -343,7 +355,7 @@ function HomePage() {
             ))}
           </StaggerGroup>
         </div>
-      </section>
+      </motion.section>
 
 
 
