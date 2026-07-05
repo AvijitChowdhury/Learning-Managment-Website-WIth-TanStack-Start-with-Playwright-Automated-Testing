@@ -387,7 +387,7 @@ function CourseDetail() {
           )}
 
           {/* REVIEWS */}
-          <div>
+          <div id="reviews" className="scroll-mt-24">
             <h2 className="text-2xl font-semibold">{bn.courses.reviews}</h2>
             {reviewCount > 0 ? (
               <div className="mt-5 grid gap-6 md:grid-cols-[240px_1fr]">
