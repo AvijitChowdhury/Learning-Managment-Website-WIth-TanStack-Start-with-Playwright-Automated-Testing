@@ -244,7 +244,7 @@ function HomePage() {
         </div>
 
         {/* Marquee */}
-        <div className="relative border-t border-border bg-code-gray/60 py-2 overflow-hidden">
+        <div className="relative mt-10 border-t border-border bg-code-gray/60 py-5 overflow-hidden">
           <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
             {Array.from({ length: 2 }).map((_, k) => (
               <div key={k} className="flex gap-6 pr-6">
