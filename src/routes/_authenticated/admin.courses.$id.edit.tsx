@@ -29,8 +29,11 @@ import {
   adminReorderModules,
   adminReorderLessons,
   adminBulkImportLessons,
+  adminSaveCourse,
+  adminListCategories,
 } from "@/lib/admin.functions";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin/courses/$id/edit")({
   component: EditPage,
@@ -510,7 +513,177 @@ function SortableLesson({
   );
 }
 
+// ---------- course details form ----------
+
+function CourseDetailsForm({ course, onSaved }: { course: any; onSaved: () => void }) {
+  const save = useServerFn(adminSaveCourse);
+  const cats = useServerFn(adminListCategories);
+  const { data: categories } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: () => cats(),
+  });
+  const [form, setForm] = useState<any>({
+    title: course.title ?? "",
+    slug: course.slug ?? "",
+    subtitle: course.subtitle ?? "",
+    thumbnail_url: course.thumbnail_url ?? "",
+    price: course.price ?? 0,
+    discount_price: course.discount_price ?? "",
+    intro_video_url: course.intro_video_url ?? "",
+    total_duration: course.total_duration ?? "",
+    description: course.description ?? "",
+    what_you_learn: Array.isArray(course.what_you_learn)
+      ? course.what_you_learn.join("\n")
+      : (course.what_you_learn ?? ""),
+    gift_resources: course.gift_resources ?? "",
+    level: course.level ?? "BEGINNER",
+    category_id: course.category_id ?? null,
+    is_published: !!course.is_published,
+  });
+  const [open, setOpen] = useState(false);
+
+  const mut = useMutation({
+    mutationFn: (v: any) => save({ data: v }),
+    onSuccess: () => {
+      toast.success("কোর্স ডিটেইলস সেভ হয়েছে");
+      onSaved();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "সেভ ব্যর্থ"),
+  });
+
+  return (
+    <div className="rounded-2xl border border-border bg-code-gray">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-6 py-4 text-left"
+      >
+        <span className="font-bn-serif text-lg font-semibold text-terminal">
+          কোর্স ডিটেইলস — টাইটেল, দাম, বিবরণ ইত্যাদি
+        </span>
+        <span className="font-mono text-xs text-terminal/60">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const wyl = (form.what_you_learn ?? "")
+              .split("\n")
+              .map((s: string) => s.trim())
+              .filter(Boolean);
+            mut.mutate({
+              id: course.id,
+              title: form.title,
+              slug: form.slug,
+              subtitle: form.subtitle || undefined,
+              thumbnail_url: form.thumbnail_url || undefined,
+              price: Number(form.price),
+              discount_price:
+                form.discount_price === "" || form.discount_price === null
+                  ? null
+                  : Number(form.discount_price),
+              level: form.level,
+              is_published: !!form.is_published,
+              category_id: form.category_id || null,
+              description: form.description || undefined,
+              what_you_learn: wyl.length ? wyl : null,
+              gift_resources: form.gift_resources || null,
+              intro_video_url: form.intro_video_url || null,
+              total_duration: form.total_duration || null,
+            });
+          }}
+          className="grid gap-3 border-t border-border p-6 md:grid-cols-2"
+        >
+          {[
+            ["title", "শিরোনাম"],
+            ["slug", "স্লাগ"],
+            ["subtitle", "সাবটাইটেল"],
+            ["thumbnail_url", "থাম্বনেইল URL"],
+            ["price", "মূল্য (BDT)"],
+            ["discount_price", "ডিসকাউন্ট মূল্য"],
+            ["intro_video_url", "ইন্ট্রো ভিডিও URL"],
+            ["total_duration", "মোট সময় (উদা: ১২ ঘণ্টা)"],
+          ].map(([k, l]) => (
+            <label key={k} className="block">
+              <span className="font-mono text-xs text-terminal/60">{l}</span>
+              <input
+                value={form[k as string] ?? ""}
+                onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
+                className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"
+              />
+            </label>
+          ))}
+          {[
+            ["description", "কোর্স বিবরণ"],
+            ["what_you_learn", "কী শিখবেন (প্রতি লাইনে একটি)"],
+            ["gift_resources", "উপহার রিসোর্স"],
+          ].map(([k, l]) => (
+            <label key={k} className="block md:col-span-2">
+              <span className="font-mono text-xs text-terminal/60">{l}</span>
+              <textarea
+                rows={3}
+                value={form[k as string] ?? ""}
+                onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
+                className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"
+              />
+            </label>
+          ))}
+          <label className="block">
+            <span className="font-mono text-xs text-terminal/60">লেভেল</span>
+            <select
+              value={form.level}
+              onChange={(e) => setForm({ ...form, level: e.target.value })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="BEGINNER">BEGINNER</option>
+              <option value="INTERMEDIATE">INTERMEDIATE</option>
+              <option value="ADVANCED">ADVANCED</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="font-mono text-xs text-terminal/60">ক্যাটাগরি</span>
+            <select
+              value={form.category_id ?? ""}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value || null })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="">— নেই —</option>
+              {(categories ?? []).map((c: any) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 font-mono text-xs text-terminal md:col-span-2">
+            <input
+              type="checkbox"
+              checked={form.is_published}
+              onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
+            />
+            পাবলিশ করুন
+          </label>
+          {form.thumbnail_url && (
+            <div className="md:col-span-2">
+              <span className="font-mono text-xs text-terminal/60">প্রিভিউ</span>
+              <img
+                src={form.thumbnail_url}
+                alt=""
+                className="mt-1 h-32 w-56 rounded object-cover border border-border"
+              />
+            </div>
+          )}
+          <button
+            disabled={mut.isPending}
+            className="md:col-span-2 rounded-md bg-lime px-5 py-3 font-mono text-sm font-bold text-ink disabled:opacity-50"
+          >
+            {mut.isPending ? "সেভ হচ্ছে…" : "💾 কোর্স ডিটেইলস সেভ করুন"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 // ---------- page ----------
+
 
 function EditPage() {
   const { id } = Route.useParams();
@@ -682,6 +855,14 @@ function EditPage() {
           Curriculum — drag modules or lessons to reorder. Drop lessons onto another module to move.
         </p>
       </div>
+
+      {course && (
+        <CourseDetailsForm
+          course={course}
+          onSaved={() => qc.invalidateQueries({ queryKey: ["admin-course", id] })}
+        />
+      )}
+
 
       <div className="rounded-2xl border border-border bg-code-gray p-6">
         <div className="flex gap-2">

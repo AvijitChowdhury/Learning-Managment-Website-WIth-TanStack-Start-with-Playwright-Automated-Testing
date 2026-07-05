@@ -1,10 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { createCourseCharge } from "@/lib/payments.functions";
 import { previewCoupon } from "@/lib/lms-admin.functions";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtBDT } from "@/lib/format";
+
 
 export const Route = createFileRoute("/_authenticated/checkout/$courseId")({
   head: () => ({ meta: [{ title: "চেকআউট — শিখো" }, { name: "robots", content: "noindex" }] }),
@@ -15,14 +18,26 @@ function CheckoutPage() {
   const { courseId } = Route.useParams();
   const charge = useServerFn(createCourseCharge);
   const preview = useServerFn(previewCoupon);
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
   const navigate = useNavigate();
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin(),
+  });
   const [course, setCourse] = useState<any>(null);
+
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [applied, setApplied] = useState<{ code: string; discount: number; final: number } | null>(null);
   const [couponMsg, setCouponMsg] = useState<string | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+
+  useEffect(() => {
+    if (adminInfo?.admin) {
+      navigate({ to: "/admin", replace: true });
+    }
+  }, [adminInfo?.admin, navigate]);
 
   useEffect(() => {
     supabase
@@ -33,6 +48,7 @@ function CheckoutPage() {
       .maybeSingle()
       .then(({ data }) => setCourse(data));
   }, [courseId]);
+
 
   const baseAmount = Number(course?.discount_price ?? course?.price ?? 0);
   const finalAmount = applied ? applied.final : baseAmount;

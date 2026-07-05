@@ -65,6 +65,13 @@ export const createCourseCharge = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Admins cannot purchase / enroll as students.
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "ADMIN",
+    });
+    if (isAdmin) throw new Error("অ্যাডমিন হিসেবে কোর্স কেনা যায় না");
+
     // Fetch course (server-computed price!)
     const { data: course, error: cErr } = await supabase
       .from("courses")
@@ -73,6 +80,7 @@ export const createCourseCharge = createServerFn({ method: "POST" })
       .maybeSingle();
     if (cErr) throw new Error(cErr.message);
     if (!course || !course.is_published) throw new Error("কোর্স পাওয়া যায়নি");
+
 
     // Already enrolled?
     const { data: existing } = await supabase
