@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FreeClassRouteImport } from './routes/free-class'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -31,6 +32,11 @@ import { Route as ApiPublicWebhooksUddoktapayRouteImport } from './routes/api/pu
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard.courses.$id'
 import { Route as AuthenticatedAdminCoursesIdEditRouteImport } from './routes/_authenticated/admin.courses.$id.edit'
 
+const FreeClassRoute = FreeClassRouteImport.update({
+  id: '/free-class',
+  path: '/free-class',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesRoute = CoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
+  '/free-class': typeof FreeClassRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/free-class': typeof FreeClassRoute
   '/checkout/cancelled': typeof CheckoutCancelledRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
+  '/free-class': typeof FreeClassRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/courses'
+    | '/free-class'
     | '/admin'
     | '/dashboard'
     | '/checkout/cancelled'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/free-class'
     | '/checkout/cancelled'
     | '/checkout/return'
     | '/courses/$slug'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/courses'
+    | '/free-class'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/checkout/cancelled'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CoursesRoute: typeof CoursesRouteWithChildren
+  FreeClassRoute: typeof FreeClassRoute
   CheckoutCancelledRoute: typeof CheckoutCancelledRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicWebhooksUddoktapayRoute: typeof ApiPublicWebhooksUddoktapayRoute
@@ -290,6 +303,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/free-class': {
+      id: '/free-class'
+      path: '/free-class'
+      fullPath: '/free-class'
+      preLoaderRoute: typeof FreeClassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses': {
       id: '/courses'
       path: '/courses'
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CoursesRoute: CoursesRouteWithChildren,
+  FreeClassRoute: FreeClassRoute,
   CheckoutCancelledRoute: CheckoutCancelledRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicWebhooksUddoktapayRoute: ApiPublicWebhooksUddoktapayRoute,
