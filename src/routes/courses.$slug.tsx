@@ -413,31 +413,41 @@ function CourseDetail() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="divide-y divide-border">
-                        {items.map((l) => (
-                          <li
-                            key={l.id}
-                            className="flex items-center justify-between gap-3 py-3 text-sm"
-                          >
-                            <span className="flex min-w-0 items-center gap-3">
-                              {l.is_free_preview ? (
-                                <Play className="h-4 w-4 shrink-0 text-brand" />
-                              ) : (
-                                <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
-                              )}
-                              <span className="truncate">{l.title}</span>
-                              {l.is_free_preview && (
-                                <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
-                                  {bn.courses.freePreview}
-                                </span>
-                              )}
-                            </span>
-                            {l.duration_sec ? (
-                              <span className="shrink-0 text-xs text-muted-foreground">
-                                {fmtDur(l.duration_sec)}
+                        {items.map((l) => {
+                          const playable = l.is_free_preview && !!l.content_url;
+                          return (
+                            <li
+                              key={l.id}
+                              onClick={
+                                playable
+                                  ? () => setPreview({ title: l.title, url: l.content_url! })
+                                  : undefined
+                              }
+                              className={`flex items-center justify-between gap-3 py-3 text-sm ${
+                                playable ? "cursor-pointer hover:text-brand" : ""
+                              }`}
+                            >
+                              <span className="flex min-w-0 items-center gap-3">
+                                {l.is_free_preview ? (
+                                  <Play className="h-4 w-4 shrink-0 text-brand" />
+                                ) : (
+                                  <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                )}
+                                <span className="truncate">{l.title}</span>
+                                {l.is_free_preview && (
+                                  <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                                    {bn.courses.freePreview}
+                                  </span>
+                                )}
                               </span>
-                            ) : null}
-                          </li>
-                        ))}
+                              {l.duration_sec ? (
+                                <span className="shrink-0 text-xs text-muted-foreground">
+                                  {fmtDur(l.duration_sec)}
+                                </span>
+                              ) : null}
+                            </li>
+                          );
+                        })}
                         {items.length === 0 && (
                           <li className="py-3 text-sm text-muted-foreground">
                             পাঠ শীঘ্রই যোগ করা হবে।
