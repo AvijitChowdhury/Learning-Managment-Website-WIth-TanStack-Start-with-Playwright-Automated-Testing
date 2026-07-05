@@ -159,11 +159,7 @@ function HomePage() {
       {/* Hero */}
       <section
         ref={heroRef}
-        onMouseMove={(e) => {
-          const r = e.currentTarget.getBoundingClientRect();
-          mx.set(((e.clientX - r.left) / r.width) * 100);
-          my.set(((e.clientY - r.top) / r.height) * 100);
-        }}
+        onMouseMove={handleMouseMove}
         className="relative overflow-hidden border-b border-border"
       >
         <div className="absolute inset-0 terminal-grid opacity-40" aria-hidden />
