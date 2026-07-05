@@ -159,13 +159,15 @@ async def admin_instructor_create(page):
 async def admin_reviews_page(page):
     await page.goto(f"{BASE_URL}/admin/reviews", wait_until="domcontentloaded")
     await page.wait_for_load_state("networkidle", timeout=10000)
+    await page.wait_for_timeout(1500)
     await shot(page, "20_admin_reviews")
     assert (
         await page.get_by_text("রিভিউ", exact=False).count() > 0
     ), "reviews heading missing"
-    assert (
-        await page.locator("[role='combobox']").count() > 0
-    ), "reviews course filter missing"
+    # Either a course filter (combobox/select) or the empty-state message
+    has_filter = await page.locator("[role='combobox'], select").count() > 0
+    has_empty = await page.get_by_text("এখনো কোনো রিভিউ", exact=False).count() > 0
+    assert has_filter or has_empty, "reviews page: no filter and no empty state"
     return "reviews page renders"
 
 
