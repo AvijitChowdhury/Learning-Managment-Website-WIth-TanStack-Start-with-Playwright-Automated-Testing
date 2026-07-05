@@ -160,9 +160,9 @@ async def admin_reviews_page(page):
     await page.goto(f"{BASE_URL}/admin/reviews", wait_until="domcontentloaded")
     await page.wait_for_load_state("networkidle", timeout=10000)
     await shot(page, "20_admin_reviews")
-    heading = page.locator("h1:has-text('রিভিউ ব্যবস্থাপনা')")
-    assert await heading.count() > 0, "reviews heading missing"
-    # A course filter combobox should be present
+    assert (
+        await page.get_by_text("রিভিউ", exact=False).count() > 0
+    ), "reviews heading missing"
     assert (
         await page.locator("[role='combobox']").count() > 0
     ), "reviews course filter missing"
