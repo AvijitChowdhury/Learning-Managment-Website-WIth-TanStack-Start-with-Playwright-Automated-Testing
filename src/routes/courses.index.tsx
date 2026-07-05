@@ -59,8 +59,14 @@ function CatalogPage() {
 
       <div className="mt-8 flex flex-col md:flex-row gap-4 md:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-terminal/40" />
+          <label htmlFor="course-search" className="sr-only">
+            {bn.courses.search}
+          </label>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-terminal/40" aria-hidden="true" />
           <input
+            id="course-search"
+            type="search"
+            aria-label={bn.courses.search}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={bn.courses.search}
