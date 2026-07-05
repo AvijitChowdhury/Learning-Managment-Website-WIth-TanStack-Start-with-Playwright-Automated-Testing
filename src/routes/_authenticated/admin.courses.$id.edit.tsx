@@ -856,6 +856,14 @@ function EditPage() {
         </p>
       </div>
 
+      {course && (
+        <CourseDetailsForm
+          course={course}
+          onSaved={() => qc.invalidateQueries({ queryKey: ["admin-course", id] })}
+        />
+      )}
+
+
       <div className="rounded-2xl border border-border bg-code-gray p-6">
         <div className="flex gap-2">
           <input
