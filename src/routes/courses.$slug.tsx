@@ -64,7 +64,15 @@ export const Route = createFileRoute("/courses/$slug")({
 function CourseDetail() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(qo(slug));
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin().catch(() => ({ admin: false })),
+    staleTime: 60_000,
+  });
+  const isAdmin = !!adminInfo?.admin;
   if (!data) return null;
+
   const {
     course,
     modules,
