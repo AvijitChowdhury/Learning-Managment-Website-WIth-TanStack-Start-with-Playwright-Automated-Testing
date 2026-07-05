@@ -445,10 +445,33 @@ function EditPage() {
   });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-course", id] });
 
-  const mSave = useMutation({ mutationFn: (v: any) => saveMod({ data: v }), onSuccess: invalidate });
-  const mDel = useMutation({ mutationFn: (v: any) => delMod({ data: v }), onSuccess: invalidate });
-  const lSave = useMutation({ mutationFn: (v: any) => saveLesson({ data: v }), onSuccess: invalidate });
-  const lDel = useMutation({ mutationFn: (v: any) => delLesson({ data: v }), onSuccess: invalidate });
+  const mSave = useMutation({
+    mutationFn: (v: any) => saveMod({ data: v }),
+    onSuccess: () => {
+      toast.success("মডিউল সেভ হয়েছে");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "সেভ ব্যর্থ"),
+  });
+  const mDel = useMutation({
+    mutationFn: (v: any) => delMod({ data: v }),
+    onSuccess: invalidate,
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+  const lSave = useMutation({
+    mutationFn: (v: any) => saveLesson({ data: v }),
+    onSuccess: () => {
+      toast.success("পাঠ সেভ হয়েছে");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "সেভ ব্যর্থ — ভিডিও URL সঠিক কিনা দেখুন"),
+  });
+  const lDel = useMutation({
+    mutationFn: (v: any) => delLesson({ data: v }),
+    onSuccess: invalidate,
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+
 
   const [newModTitle, setNewModTitle] = useState("");
   // local optimistic state for DnD
