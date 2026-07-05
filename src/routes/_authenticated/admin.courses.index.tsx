@@ -8,32 +8,48 @@ import { fmtBDT } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const httpUrl = z.string().trim().url().refine((v) => /^https?:\/\//i.test(v), "");
+const httpUrl = z
+  .string({ message: "লিংক দিন" })
+  .trim()
+  .min(1, "লিংক দিন")
+  .refine((v) => /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
 const optionalHttpUrl = z
   .string()
   .trim()
   .optional()
-  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "");
+  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
 
 const courseSchema = z.object({
-  title: z.string().trim().min(3).max(120),
-  slug: z
-    .string()
+  title: z
+    .string({ message: "শিরোনাম লিখুন" })
     .trim()
-    .min(3)
-    .max(80)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, ""),
-  subtitle: z.string().trim().max(160).optional().or(z.literal("")),
+    .min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(120, "শিরোনাম সর্বোচ্চ ১২০ অক্ষর"),
+  slug: z
+    .string({ message: "স্লাগ লিখুন" })
+    .trim()
+    .min(3, "স্লাগ কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(80, "স্লাগ সর্বোচ্চ ৮০ অক্ষর")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)"),
+  subtitle: z.string().trim().max(160, "সাবটাইটেল সর্বোচ্চ ১৬০ অক্ষর").optional().or(z.literal("")),
   thumbnail_url: httpUrl,
-  price: z.coerce.number().int().min(0).max(1_000_000),
+  price: z.coerce
+    .number({ message: "মূল্য একটি সংখ্যা হতে হবে" })
+    .int("পূর্ণসংখ্যা লিখুন")
+    .min(0, "মূল্য ঋণাত্মক হতে পারবে না")
+    .max(1_000_000, "মূল্য অনেক বড়"),
   discount_price: z
-    .union([z.coerce.number().int().min(0).max(1_000_000), z.literal("").transform(() => null), z.null()])
+    .union([
+      z.coerce.number().int("পূর্ণসংখ্যা লিখুন").min(0, "ঋণাত্মক হতে পারবে না").max(1_000_000, "অনেক বড়"),
+      z.literal("").transform(() => null),
+      z.null(),
+    ])
     .optional(),
   intro_video_url: optionalHttpUrl.or(z.literal("")),
-  total_duration: z.string().trim().max(40).optional().or(z.literal("")),
-  description: z.string().trim().max(4000).optional().or(z.literal("")),
-  what_you_learn: z.string().trim().max(2000).optional().or(z.literal("")),
-  gift_resources: z.string().trim().max(1000).optional().or(z.literal("")),
+  total_duration: z.string().trim().max(40, "সর্বোচ্চ ৪০ অক্ষর").optional().or(z.literal("")),
+  description: z.string().trim().max(4000, "সর্বোচ্চ ৪০০০ অক্ষর").optional().or(z.literal("")),
+  what_you_learn: z.string().trim().max(2000, "সর্বোচ্চ ২০০০ অক্ষর").optional().or(z.literal("")),
+  gift_resources: z.string().trim().max(1000, "সর্বোচ্চ ১০০০ অক্ষর").optional().or(z.literal("")),
 });
 
 type FieldDef = {
@@ -99,6 +115,20 @@ function AdminCourses() {
     total_duration: "",
   });
 
+  function friendlySaveError(e: any): string {
+    const raw = String(e?.message ?? e ?? "").toLowerCase();
+    if (!raw) return "সংরক্ষণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+    if (raw.includes("duplicate") || raw.includes("unique") || raw.includes("courses_slug"))
+      return "এই স্লাগ ইতিমধ্যে ব্যবহৃত হয়েছে। অন্য একটি স্লাগ দিন।";
+    if (raw.includes("unauthorized") || raw.includes("forbidden") || raw.includes("permission") || raw.includes("rls"))
+      return "এই কাজের অনুমতি নেই। আবার লগইন করে চেষ্টা করুন।";
+    if (raw.includes("network") || raw.includes("fetch") || raw.includes("timeout") || raw.includes("failed to fetch"))
+      return "নেটওয়ার্ক সমস্যা। ইন্টারনেট চেক করে আবার চেষ্টা করুন।";
+    if (raw.includes("foreign key") || raw.includes("violates"))
+      return "নির্বাচিত ক্যাটাগরি/ইন্সট্রাক্টর সঠিক নয়। আবার বেছে নিন।";
+    return "সংরক্ষণ ব্যর্থ হয়েছে। ফিল্ডগুলো পুনরায় দেখুন।";
+  }
+
   const mut = useMutation({
     mutationFn: (v: any) => save({ data: v }),
     onSuccess: () => {
@@ -111,7 +141,7 @@ function AdminCourses() {
         description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
       });
     },
-    onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
+    onError: (e: any) => toast.error(friendlySaveError(e)),
   });
 
   const delMut = useMutation({
@@ -168,30 +198,34 @@ function AdminCourses() {
 
 
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
   const parsed = useMemo(() => {
     const candidate = {
       ...form,
       price: form.price === "" ? undefined : form.price,
       discount_price: form.discount_price === "" || form.discount_price == null ? null : form.discount_price,
     };
+    const errors: Record<string, string> = {};
     const result = courseSchema.safeParse(candidate);
     if (!result.success) {
-      const bad = new Set<string>();
       for (const issue of result.error.issues) {
         const first = issue.path[0];
-        if (typeof first === "string") bad.add(first);
+        if (typeof first === "string" && !errors[first]) {
+          errors[first] = issue.message || "সঠিকভাবে পূরণ করুন";
+        }
       }
-      // extra rule: discount must be < price when set
-      const p = Number(form.price);
-      const d = form.discount_price === "" || form.discount_price == null ? null : Number(form.discount_price);
-      if (d != null && !Number.isNaN(d) && !Number.isNaN(p) && d >= p) bad.add("discount_price");
-      return { valid: false, invalidKeys: bad };
     }
     const p = Number(form.price);
     const d = form.discount_price === "" || form.discount_price == null ? null : Number(form.discount_price);
-    if (d != null && d >= p) return { valid: false, invalidKeys: new Set(["discount_price"]) };
-    return { valid: true, invalidKeys: new Set<string>() };
+    if (d != null && !Number.isNaN(d) && !Number.isNaN(p) && d >= p) {
+      errors.discount_price = "ডিসকাউন্ট মূল্য মূল দামের কম হতে হবে";
+    }
+    return { valid: Object.keys(errors).length === 0, errors };
   }, [form]);
+
+  const shouldShow = (key: string) => (submitAttempted || touched[key]) && !!parsed.errors[key];
 
   return (
     <div className="space-y-4">
@@ -209,14 +243,13 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            setSubmitAttempted(true);
             if (!parsed.valid) {
-              const labelMap: Record<string, string> = {
-                ...Object.fromEntries(TEXT_FIELDS.map((f) => [f.key, f.label])),
-                ...Object.fromEntries(AREA_FIELDS.map((f) => [f.key, f.label])),
-                thumbnail_url: "থাম্বনেইল",
-              };
-              const missing = [...parsed.invalidKeys].map((k) => labelMap[k] ?? k);
-              toast.error(`পূরণ করুন: ${missing.join(", ")}`);
+              const first = Object.keys(parsed.errors)[0];
+              toast.error(parsed.errors[first] ?? "কিছু ফিল্ড ঠিক করতে হবে");
+              const el = document.querySelector<HTMLElement>(`[data-field="${first}"]`);
+              el?.focus();
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
               return;
             }
             const wyl = (form.what_you_learn ?? "")
@@ -235,7 +268,7 @@ function AdminCourses() {
           className="rounded-2xl border border-border bg-code-gray p-6 grid gap-4 md:grid-cols-2"
         >
           <div className="md:col-span-2 rounded-lg border border-lime/30 bg-lime/5 px-4 py-3 font-body text-xs text-terminal/80">
-            <span className="font-mono text-lime">টিপ:</span> প্রতিটি ফিল্ডের নিচের হিন্ট মেনে চলুন। কোনো ফিল্ড লাল হলে সেটা ঠিক করুন — সংরক্ষণ বাটন সবসময় সক্রিয়, ভুল থাকলে কোন ফিল্ডে সমস্যা তা জানানো হবে।
+            <span className="font-mono text-lime">টিপ:</span> তারকা (*) চিহ্নিত ফিল্ড আবশ্যক। কোনো ফিল্ডে সমস্যা থাকলে নিচে লাল রঙে সমস্যাটি দেখানো হবে — সেটি ঠিক করে আবার সংরক্ষণ করুন।
           </div>
 
 
@@ -289,13 +322,18 @@ function AdminCourses() {
                 <div className="font-mono text-[11px] text-terminal/50">অথবা সরাসরি ইমেজের লিংক দিন:</div>
                 <input
                   type="url"
+                  data-field="thumbnail_url"
                   placeholder="https://…/thumb.jpg"
                   value={form.thumbnail_url ?? ""}
                   onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, thumbnail_url: true }))}
                   className={`w-full rounded-md border bg-ink px-3 py-2 text-terminal font-body focus:outline-none ${
-                    parsed.invalidKeys.has("thumbnail_url") ? "border-border/70 focus:border-lime" : "border-border focus:border-lime"
+                    shouldShow("thumbnail_url") ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
                   }`}
                 />
+                {shouldShow("thumbnail_url") && (
+                  <p className="font-mono text-[11px] text-red-300">{parsed.errors.thumbnail_url}</p>
+                )}
               </div>
             </div>
           </div>
@@ -303,7 +341,7 @@ function AdminCourses() {
 
 
           {TEXT_FIELDS.map((f) => {
-            const invalid = parsed.invalidKeys.has(f.key);
+            const showErr = shouldShow(f.key);
             return (
               <label key={f.key} className="block">
                 <span className="font-mono text-xs text-terminal/60">
@@ -313,14 +351,20 @@ function AdminCourses() {
                 <input
                   type={f.type === "number" ? "number" : f.type === "url" ? "url" : "text"}
                   inputMode={f.type === "number" ? "numeric" : undefined}
+                  data-field={f.key}
                   placeholder={f.placeholder}
                   value={form[f.key] ?? ""}
                   onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, [f.key]: true }))}
                   className={`mt-1 w-full rounded-md border bg-ink px-3 py-2 text-terminal focus:outline-none font-body ${
-                    invalid ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
+                    showErr ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
                   }`}
                 />
-                <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
+                {showErr ? (
+                  <span className="mt-1 block font-mono text-[11px] text-red-300">{parsed.errors[f.key]}</span>
+                ) : (
+                  <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
+                )}
               </label>
             );
           })}
