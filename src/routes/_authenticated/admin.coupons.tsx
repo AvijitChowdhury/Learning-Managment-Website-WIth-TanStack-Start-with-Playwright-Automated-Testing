@@ -11,46 +11,71 @@ export const Route = createFileRoute("/_authenticated/admin/coupons")({
   component: CouponsAdmin,
 });
 
-// ISO string → yyyy-MM-ddTHH:mm in LOCAL time for <input type="datetime-local">
-function isoToLocalInput(iso: string | null | undefined): string {
+// ISO string → yyyy-MM-dd (local date) for <input type="date">
+function isoToDateInput(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function localInputToIso(v: string): string | null {
+// yyyy-MM-dd → ISO. `endOfDay=true` sets 23:59:59 local time so the coupon
+// stays valid through the entire end date.
+function dateInputToIso(v: string, endOfDay = false): string | null {
   if (!v) return null;
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const [, y, mo, d] = m;
+  const dt = new Date(
+    +y,
+    +mo - 1,
+    +d,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+  );
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toISOString();
 }
 
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("bn-BD", {
+  return d.toLocaleDateString("bn-BD", {
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
+}
+
+function daysBetween(a: Date, b: Date): number {
+  return Math.ceil((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function validityLine(c: any): string {
+  const s = c.starts_at ? fmtDate(c.starts_at) : "এখন";
+  const e = c.ends_at ? fmtDate(c.ends_at) : "অনির্দিষ্ট";
+  return `${s} → ${e}`;
 }
 
 function couponStatus(c: any): { label: string; tone: "lime" | "amber" | "red" | "muted" } {
   if (!c.active) return { label: "বন্ধ", tone: "muted" };
-  const now = Date.now();
-  if (c.starts_at && new Date(c.starts_at).getTime() > now)
+  const now = new Date();
+  if (c.starts_at && new Date(c.starts_at).getTime() > now.getTime())
     return { label: "শীঘ্রই সক্রিয়", tone: "amber" };
-  if (c.ends_at && new Date(c.ends_at).getTime() < now)
+  if (c.ends_at && new Date(c.ends_at).getTime() < now.getTime())
     return { label: "মেয়াদ শেষ", tone: "red" };
   if (c.max_uses != null && (c.used_count ?? 0) >= c.max_uses)
     return { label: "সীমা শেষ", tone: "red" };
+  if (c.ends_at) {
+    const left = daysBetween(now, new Date(c.ends_at));
+    if (left <= 7) return { label: `${left} দিন বাকি`, tone: "amber" };
+  }
   return { label: "সক্রিয়", tone: "lime" };
 }
+
 
 type FormState = {
   id?: string;
@@ -93,8 +118,8 @@ function CouponsAdmin() {
       code: c.code,
       type: c.discount_type,
       value: String(c.discount_value),
-      startsAt: isoToLocalInput(c.starts_at),
-      endsAt: isoToLocalInput(c.ends_at),
+      startsAt: isoToDateInput(c.starts_at),
+      endsAt: isoToDateInput(c.ends_at),
       maxUses: c.max_uses ? String(c.max_uses) : "",
       active: !!c.active,
     });
@@ -131,8 +156,8 @@ function CouponsAdmin() {
       code: form.code.trim(),
       discount_type: form.type,
       discount_value: Number(form.value),
-      starts_at: localInputToIso(form.startsAt),
-      ends_at: localInputToIso(form.endsAt),
+      starts_at: dateInputToIso(form.startsAt, false),
+      ends_at: dateInputToIso(form.endsAt, true),
       max_uses: form.maxUses ? Number(form.maxUses) : null,
       active: form.active,
     });
@@ -189,27 +214,39 @@ function CouponsAdmin() {
                 placeholder="ভ্যালু"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শুরু (আপনার সময়)
-                <input
-                  type="datetime-local"
-                  value={form.startsAt}
-                  onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-                  className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
-                />
-              </label>
-              <label className="flex flex-col gap-1 font-mono text-[11px] text-terminal/60">
-                শেষ (আপনার সময়)
-                <input
-                  type="datetime-local"
-                  value={form.endsAt}
-                  onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-                  min={form.startsAt || undefined}
-                  className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-terminal outline-none focus:border-lime"
-                />
-              </label>
+            <div className="rounded-md border border-border bg-code-gray/40 p-3">
+              <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] text-terminal/70">
+                <Calendar className="h-3 w-3 text-lime" /> মেয়াদ (ঐচ্ছিক — খালি রাখলে সর্বদা বৈধ)
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wide text-terminal/60">
+                  শুরুর তারিখ
+                  <input
+                    type="date"
+                    value={form.startsAt}
+                    onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
+                    className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-terminal outline-none focus:border-lime [color-scheme:dark]"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wide text-terminal/60">
+                  শেষ তারিখ
+                  <input
+                    type="date"
+                    value={form.endsAt}
+                    onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+                    min={form.startsAt || undefined}
+                    className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-terminal outline-none focus:border-lime [color-scheme:dark]"
+                  />
+                </label>
+              </div>
+              {(form.startsAt || form.endsAt) && (
+                <div className="mt-2 font-mono text-[11px] text-lime">
+                  বৈধতা: {form.startsAt ? fmtDate(dateInputToIso(form.startsAt)) : "এখন"} →{" "}
+                  {form.endsAt ? fmtDate(dateInputToIso(form.endsAt, true)) : "অনির্দিষ্ট"}
+                </div>
+              )}
             </div>
+
             <input
               type="number"
               value={form.maxUses}
@@ -268,20 +305,21 @@ function CouponsAdmin() {
                             : `৳${c.discount_value} ছাড়`}
                         </span>
                       </div>
-                      <div className="mt-1.5 grid gap-1 font-mono text-[11px] text-terminal/60 sm:grid-cols-2">
-                        <span className="inline-flex items-center gap-1">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-terminal/70">
+                        <span className="inline-flex items-center gap-1.5">
                           <Calendar className="h-3 w-3 text-lime" />
-                          শুরু: <span className="text-terminal/80">{fmtDate(c.starts_at)}</span>
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-amber-400" />
-                          শেষ: <span className="text-terminal/80">{fmtDate(c.ends_at)}</span>
+                          <span className="text-terminal/60">মেয়াদ:</span>
+                          <span className="text-terminal">{validityLine(c)}</span>
                         </span>
                         <span>
-                          ব্যবহার: {c.used_count ?? 0}
-                          {c.max_uses ? ` / ${c.max_uses}` : " (আনলিমিটেড)"}
+                          <span className="text-terminal/60">ব্যবহার:</span>{" "}
+                          <span className="text-terminal">
+                            {c.used_count ?? 0}
+                            {c.max_uses ? ` / ${c.max_uses}` : " (আনলিমিটেড)"}
+                          </span>
                         </span>
                       </div>
+
                     </div>
                     <div className="flex shrink-0 gap-1.5">
                       <button
