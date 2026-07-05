@@ -341,7 +341,7 @@ function AdminCourses() {
 
 
           {TEXT_FIELDS.map((f) => {
-            const invalid = parsed.invalidKeys.has(f.key);
+            const showErr = shouldShow(f.key);
             return (
               <label key={f.key} className="block">
                 <span className="font-mono text-xs text-terminal/60">
@@ -351,14 +351,20 @@ function AdminCourses() {
                 <input
                   type={f.type === "number" ? "number" : f.type === "url" ? "url" : "text"}
                   inputMode={f.type === "number" ? "numeric" : undefined}
+                  data-field={f.key}
                   placeholder={f.placeholder}
                   value={form[f.key] ?? ""}
                   onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, [f.key]: true }))}
                   className={`mt-1 w-full rounded-md border bg-ink px-3 py-2 text-terminal focus:outline-none font-body ${
-                    invalid ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
+                    showErr ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
                   }`}
                 />
-                <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
+                {showErr ? (
+                  <span className="mt-1 block font-mono text-[11px] text-red-300">{parsed.errors[f.key]}</span>
+                ) : (
+                  <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
+                )}
               </label>
             );
           })}
