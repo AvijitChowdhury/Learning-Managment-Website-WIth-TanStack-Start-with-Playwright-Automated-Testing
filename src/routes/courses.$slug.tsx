@@ -123,13 +123,30 @@ export const Route = createFileRoute("/courses/$slug")({
 function CourseDetail() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(qo(slug));
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) setSignedIn(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
+      setSignedIn(!!s),
+    );
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
   const checkAdmin = useServerFn(isCurrentUserAdmin);
   const { data: adminInfo } = useQuery({
     queryKey: ["is-admin"],
     queryFn: () => checkAdmin().catch(() => ({ admin: false })),
     staleTime: 60_000,
+    enabled: signedIn === true,
   });
   const isAdmin = !!adminInfo?.admin;
+  const [preview, setPreview] = useState<{ title: string; url: string } | null>(null);
+
   if (!data) return null;
 
   const {
