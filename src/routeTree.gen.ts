@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FreeClassRouteImport } from './routes/free-class'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -16,21 +17,30 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as CheckoutErrorRouteImport } from './routes/checkout.error'
 import { Route as CheckoutCancelledRouteImport } from './routes/checkout.cancelled'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_authenticated/dashboard.support'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardOrdersRouteImport } from './routes/_authenticated/dashboard.orders'
 import { Route as AuthenticatedCheckoutCourseIdRouteImport } from './routes/_authenticated/checkout.$courseId'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated/admin.reviews'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin.courses'
+import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
+import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin.categories'
 import { Route as ApiPublicWebhooksUddoktapayRouteImport } from './routes/api/public/webhooks/uddoktapay'
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard.courses.$id'
 import { Route as AuthenticatedAdminCoursesIdEditRouteImport } from './routes/_authenticated/admin.courses.$id.edit'
 
+const FreeClassRoute = FreeClassRouteImport.update({
+  id: '/free-class',
+  path: '/free-class',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesRoute = CoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -65,6 +75,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutErrorRoute = CheckoutErrorRouteImport.update({
+  id: '/checkout/error',
+  path: '/checkout/error',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutCancelledRoute = CheckoutCancelledRouteImport.update({
   id: '/checkout/cancelled',
   path: '/checkout/cancelled',
@@ -91,6 +106,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedDashboardSupportRoute =
+  AuthenticatedDashboardSupportRouteImport.update({
+    id: '/support',
+    path: '/support',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardProfileRoute =
   AuthenticatedDashboardProfileRouteImport.update({
     id: '/profile',
@@ -127,6 +148,18 @@ const AuthenticatedAdminCoursesRoute =
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCouponsRoute =
+  AuthenticatedAdminCouponsRouteImport.update({
+    id: '/coupons',
+    path: '/coupons',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCategoriesRoute =
+  AuthenticatedAdminCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicWebhooksUddoktapayRoute =
   ApiPublicWebhooksUddoktapayRouteImport.update({
     id: '/api/public/webhooks/uddoktapay',
@@ -150,18 +183,23 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
+  '/free-class': typeof FreeClassRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
+  '/checkout/error': typeof CheckoutErrorRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses/': typeof CoursesIndexRoute
+  '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
   '/dashboard/orders': typeof AuthenticatedDashboardOrdersRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
@@ -171,16 +209,21 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/free-class': typeof FreeClassRoute
   '/checkout/cancelled': typeof CheckoutCancelledRoute
+  '/checkout/error': typeof CheckoutErrorRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses': typeof CoursesIndexRoute
+  '/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
   '/dashboard/orders': typeof AuthenticatedDashboardOrdersRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
@@ -193,18 +236,23 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRouteWithChildren
+  '/free-class': typeof FreeClassRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/checkout/cancelled': typeof CheckoutCancelledRoute
+  '/checkout/error': typeof CheckoutErrorRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/courses/': typeof CoursesIndexRoute
+  '/_authenticated/admin/categories': typeof AuthenticatedAdminCategoriesRoute
+  '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/_authenticated/checkout/$courseId': typeof AuthenticatedCheckoutCourseIdRoute
   '/_authenticated/dashboard/orders': typeof AuthenticatedDashboardOrdersRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/_authenticated/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
@@ -217,18 +265,23 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/courses'
+    | '/free-class'
     | '/admin'
     | '/dashboard'
     | '/checkout/cancelled'
+    | '/checkout/error'
     | '/checkout/return'
     | '/courses/$slug'
     | '/courses/'
+    | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
     | '/checkout/$courseId'
     | '/dashboard/orders'
     | '/dashboard/profile'
+    | '/dashboard/support'
     | '/admin/'
     | '/dashboard/'
     | '/dashboard/courses/$id'
@@ -238,16 +291,21 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/free-class'
     | '/checkout/cancelled'
+    | '/checkout/error'
     | '/checkout/return'
     | '/courses/$slug'
     | '/courses'
+    | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/courses'
     | '/admin/orders'
     | '/admin/reviews'
     | '/checkout/$courseId'
     | '/dashboard/orders'
     | '/dashboard/profile'
+    | '/dashboard/support'
     | '/admin'
     | '/dashboard'
     | '/dashboard/courses/$id'
@@ -259,18 +317,23 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/courses'
+    | '/free-class'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/checkout/cancelled'
+    | '/checkout/error'
     | '/checkout/return'
     | '/courses/$slug'
     | '/courses/'
+    | '/_authenticated/admin/categories'
+    | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/reviews'
     | '/_authenticated/checkout/$courseId'
     | '/_authenticated/dashboard/orders'
     | '/_authenticated/dashboard/profile'
+    | '/_authenticated/dashboard/support'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/courses/$id'
@@ -283,13 +346,22 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CoursesRoute: typeof CoursesRouteWithChildren
+  FreeClassRoute: typeof FreeClassRoute
   CheckoutCancelledRoute: typeof CheckoutCancelledRoute
+  CheckoutErrorRoute: typeof CheckoutErrorRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicWebhooksUddoktapayRoute: typeof ApiPublicWebhooksUddoktapayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/free-class': {
+      id: '/free-class'
+      path: '/free-class'
+      fullPath: '/free-class'
+      preLoaderRoute: typeof FreeClassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses': {
       id: '/courses'
       path: '/courses'
@@ -339,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/error': {
+      id: '/checkout/error'
+      path: '/checkout/error'
+      fullPath: '/checkout/error'
+      preLoaderRoute: typeof CheckoutErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/cancelled': {
       id: '/checkout/cancelled'
       path: '/checkout/cancelled'
@@ -373,6 +452,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/dashboard/support': {
+      id: '/_authenticated/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof AuthenticatedDashboardSupportRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/profile': {
       id: '/_authenticated/dashboard/profile'
@@ -416,6 +502,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/coupons': {
+      id: '/_authenticated/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AuthenticatedAdminCouponsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/categories': {
+      id: '/_authenticated/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/webhooks/uddoktapay': {
       id: '/api/public/webhooks/uddoktapay'
       path: '/api/public/webhooks/uddoktapay'
@@ -455,6 +555,8 @@ const AuthenticatedAdminCoursesRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
+  AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRoute
@@ -462,6 +564,8 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
+  AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRoute,
@@ -474,6 +578,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardOrdersRoute: typeof AuthenticatedDashboardOrdersRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
+  AuthenticatedDashboardSupportRoute: typeof AuthenticatedDashboardSupportRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardCoursesIdRoute: typeof AuthenticatedDashboardCoursesIdRoute
 }
@@ -482,6 +587,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardOrdersRoute: AuthenticatedDashboardOrdersRoute,
     AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
+    AuthenticatedDashboardSupportRoute: AuthenticatedDashboardSupportRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
     AuthenticatedDashboardCoursesIdRoute: AuthenticatedDashboardCoursesIdRoute,
   }
@@ -524,7 +630,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CoursesRoute: CoursesRouteWithChildren,
+  FreeClassRoute: FreeClassRoute,
   CheckoutCancelledRoute: CheckoutCancelledRoute,
+  CheckoutErrorRoute: CheckoutErrorRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicWebhooksUddoktapayRoute: ApiPublicWebhooksUddoktapayRoute,
 }

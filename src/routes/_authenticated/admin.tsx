@@ -27,8 +27,11 @@ function AdminLayout() {
             { to: "/admin", label: "ওভারভিউ" },
             { to: "/admin/orders", label: "অর্ডার" },
             { to: "/admin/courses", label: "কোর্স" },
+            { to: "/admin/categories", label: "ক্যাটেগরি" },
+            { to: "/admin/coupons", label: "কুপন" },
             { to: "/admin/reviews", label: "রিভিউ" },
           ].map((l) => (
+
             <Link
               key={l.to}
               to={l.to}
