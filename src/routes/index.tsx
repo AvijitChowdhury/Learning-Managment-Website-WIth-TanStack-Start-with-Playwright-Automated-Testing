@@ -168,22 +168,29 @@ function HomePage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4, duration: 0.7 }}
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-8 flex flex-wrap gap-3"
             >
               <Link
                 to="/courses"
                 className="group inline-flex items-center gap-2 rounded-md bg-lime px-6 py-3 font-mono text-sm font-bold text-ink glow-lime hover:brightness-95"
               >
-                <span>./browse --courses</span>
+                <span>চেকআউট শুরু করুন</span>
                 <motion.span aria-hidden animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
               </Link>
               <Link
-                to="/auth"
+                to="/courses"
                 className="inline-flex items-center gap-2 rounded-md border border-wire px-6 py-3 font-mono text-sm font-bold text-terminal hover:border-lime hover:text-lime transition-colors"
               >
-                {bn.home.ctaLogin}
+                কোর্স মডিউল দেখুন
+              </Link>
+              <Link
+                to="/free-class"
+                className="inline-flex items-center gap-2 rounded-md border border-amber/50 px-6 py-3 font-mono text-sm font-bold text-amber hover:bg-amber/10 transition-colors"
+              >
+                ফ্রি ক্লাস
               </Link>
             </motion.div>
+
 
             <motion.div
               initial={{ opacity: 0 }}
