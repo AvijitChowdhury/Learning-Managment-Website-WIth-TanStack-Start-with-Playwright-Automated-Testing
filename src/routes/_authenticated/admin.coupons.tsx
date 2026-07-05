@@ -11,46 +11,71 @@ export const Route = createFileRoute("/_authenticated/admin/coupons")({
   component: CouponsAdmin,
 });
 
-// ISO string → yyyy-MM-ddTHH:mm in LOCAL time for <input type="datetime-local">
-function isoToLocalInput(iso: string | null | undefined): string {
+// ISO string → yyyy-MM-dd (local date) for <input type="date">
+function isoToDateInput(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function localInputToIso(v: string): string | null {
+// yyyy-MM-dd → ISO. `endOfDay=true` sets 23:59:59 local time so the coupon
+// stays valid through the entire end date.
+function dateInputToIso(v: string, endOfDay = false): string | null {
   if (!v) return null;
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const [, y, mo, d] = m;
+  const dt = new Date(
+    +y,
+    +mo - 1,
+    +d,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+  );
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toISOString();
 }
 
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("bn-BD", {
+  return d.toLocaleDateString("bn-BD", {
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
+}
+
+function daysBetween(a: Date, b: Date): number {
+  return Math.ceil((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function validityLine(c: any): string {
+  const s = c.starts_at ? fmtDate(c.starts_at) : "এখন";
+  const e = c.ends_at ? fmtDate(c.ends_at) : "অনির্দিষ্ট";
+  return `${s} → ${e}`;
 }
 
 function couponStatus(c: any): { label: string; tone: "lime" | "amber" | "red" | "muted" } {
   if (!c.active) return { label: "বন্ধ", tone: "muted" };
-  const now = Date.now();
-  if (c.starts_at && new Date(c.starts_at).getTime() > now)
+  const now = new Date();
+  if (c.starts_at && new Date(c.starts_at).getTime() > now.getTime())
     return { label: "শীঘ্রই সক্রিয়", tone: "amber" };
-  if (c.ends_at && new Date(c.ends_at).getTime() < now)
+  if (c.ends_at && new Date(c.ends_at).getTime() < now.getTime())
     return { label: "মেয়াদ শেষ", tone: "red" };
   if (c.max_uses != null && (c.used_count ?? 0) >= c.max_uses)
     return { label: "সীমা শেষ", tone: "red" };
+  if (c.ends_at) {
+    const left = daysBetween(now, new Date(c.ends_at));
+    if (left <= 7) return { label: `${left} দিন বাকি`, tone: "amber" };
+  }
   return { label: "সক্রিয়", tone: "lime" };
 }
+
 
 type FormState = {
   id?: string;
