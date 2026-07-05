@@ -2,10 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { adminListOrders, adminSetOrderStatus, adminExportOrdersCsv } from "@/lib/admin.functions";
+import {
+  adminListOrders,
+  adminSetOrderStatus,
+  adminExportOrdersCsv,
+  adminSetOrderMethod,
+  PAYMENT_METHODS,
+} from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
-import { Mail, Phone, Download } from "lucide-react";
+import { Mail, Phone, Download, Pencil, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
@@ -17,10 +23,14 @@ type Tab = "ALL" | "INCOMPLETE" | "PAID";
 function AdminOrders() {
   const list = useServerFn(adminListOrders);
   const setStatus = useServerFn(adminSetOrderStatus);
+  const setMethod = useServerFn(adminSetOrderMethod);
   const exportCsv = useServerFn(adminExportOrdersCsv);
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["admin-orders"], queryFn: () => list() });
   const [tab, setTab] = useState<Tab>("ALL");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draftMethod, setDraftMethod] = useState<string>("");
+  const [draftTxn, setDraftTxn] = useState<string>("");
 
   const mut = useMutation({
     mutationFn: (v: { orderId: string; status: any }) => setStatus({ data: v }),
@@ -29,6 +39,17 @@ function AdminOrders() {
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
+  });
+
+  const methodMut = useMutation({
+    mutationFn: (v: { orderId: string; payment_method: string | null; transaction_id: string | null }) =>
+      setMethod({ data: v }),
+    onSuccess: () => {
+      toast.success("মেথড আপডেটেড");
+      setEditing(null);
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "মেথড আপডেট ব্যর্থ"),
   });
 
   const filtered = useMemo(() => {
@@ -142,9 +163,68 @@ function AdminOrders() {
                 <td className="p-3">{o.courses?.title ?? "—"}</td>
                 <td className="p-3 font-mono">{fmtBDT(Number(o.amount))}</td>
                 <td className="p-3 font-mono text-xs">
-                  {o.payment_method ?? "—"}
-                  {o.transaction_id && (
-                    <div className="text-[10px] text-terminal/50">{o.transaction_id}</div>
+                  {editing === o.id ? (
+                    <div className="flex flex-col gap-1 min-w-[10rem]">
+                      <select
+                        value={draftMethod}
+                        onChange={(e) => setDraftMethod(e.target.value)}
+                        className="rounded border border-border bg-ink px-2 py-1 font-mono text-xs text-terminal"
+                      >
+                        <option value="">— নেই —</option>
+                        {PAYMENT_METHODS.map((m) => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                      <input
+                        value={draftTxn}
+                        onChange={(e) => setDraftTxn(e.target.value)}
+                        placeholder="Transaction ID"
+                        className="rounded border border-border bg-ink px-2 py-1 font-mono text-[11px] text-terminal"
+                      />
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          disabled={methodMut.isPending}
+                          onClick={() =>
+                            methodMut.mutate({
+                              orderId: o.id,
+                              payment_method: draftMethod || null,
+                              transaction_id: draftTxn || null,
+                            })
+                          }
+                          className="inline-flex items-center gap-1 rounded border border-lime px-2 py-0.5 text-[11px] text-lime hover:bg-lime hover:text-ink"
+                        >
+                          <Check className="h-3 w-3" /> সেভ
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(null)}
+                          className="inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-[11px] text-terminal/70 hover:text-lime"
+                        >
+                          <X className="h-3 w-3" /> বাতিল
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(o.id);
+                        setDraftMethod(o.payment_method ?? "");
+                        setDraftTxn(o.transaction_id ?? "");
+                      }}
+                      className="group inline-flex flex-col items-start gap-0.5 text-left hover:text-lime"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        <span className={o.payment_method ? "" : "text-terminal/40"}>
+                          {o.payment_method || "সেট করুন"}
+                        </span>
+                        <Pencil className="h-3 w-3 opacity-40 group-hover:opacity-100" />
+                      </span>
+                      {o.transaction_id && (
+                        <span className="text-[10px] text-terminal/50">{o.transaction_id}</span>
+                      )}
+                    </button>
                   )}
                 </td>
                 <td className="p-3">
