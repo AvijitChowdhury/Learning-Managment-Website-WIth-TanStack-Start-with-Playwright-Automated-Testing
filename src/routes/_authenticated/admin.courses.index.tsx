@@ -1,10 +1,65 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { z } from "zod";
 import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
 import { toast } from "sonner";
+
+const httpUrl = z.string().trim().url().refine((v) => /^https?:\/\//i.test(v), "");
+const optionalHttpUrl = z
+  .string()
+  .trim()
+  .optional()
+  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "");
+
+const courseSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  slug: z
+    .string()
+    .trim()
+    .min(3)
+    .max(80)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, ""),
+  subtitle: z.string().trim().max(160).optional().or(z.literal("")),
+  thumbnail_url: httpUrl,
+  price: z.coerce.number().int().min(0).max(1_000_000),
+  discount_price: z
+    .union([z.coerce.number().int().min(0).max(1_000_000), z.literal("").transform(() => null), z.null()])
+    .optional(),
+  intro_video_url: optionalHttpUrl.or(z.literal("")),
+  total_duration: z.string().trim().max(40).optional().or(z.literal("")),
+  description: z.string().trim().max(4000).optional().or(z.literal("")),
+  what_you_learn: z.string().trim().max(2000).optional().or(z.literal("")),
+  gift_resources: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
+type FieldDef = {
+  key: string;
+  label: string;
+  tip: string;
+  placeholder?: string;
+  required?: boolean;
+  type?: "text" | "number" | "url";
+};
+
+const TEXT_FIELDS: FieldDef[] = [
+  { key: "title", label: "শিরোনাম", tip: "সংক্ষিপ্ত ও স্পষ্ট নাম, ৩–১২০ অক্ষর।", required: true, placeholder: "উদা: পাইথন হাতেখড়ি" },
+  { key: "slug", label: "স্লাগ", tip: "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)। URL-এ ব্যবহার হবে।", required: true, placeholder: "python-hatekhori" },
+  { key: "subtitle", label: "সাবটাইটেল", tip: "এক লাইনে কোর্সের প্রতিশ্রুতি। সর্বোচ্চ ১৬০ অক্ষর।", placeholder: "শূন্য থেকে শুরু করে প্রজেক্ট পর্যন্ত" },
+  { key: "thumbnail_url", label: "থাম্বনেইল URL", tip: "https:// দিয়ে শুরু হওয়া পাবলিক ইমেজ লিংক (16:9 রেশিও)।", required: true, type: "url", placeholder: "https://…/thumb.jpg" },
+  { key: "price", label: "মূল্য (BDT)", tip: "পূর্ণসংখ্যা টাকায়। ফ্রি কোর্সের জন্য 0।", required: true, type: "number", placeholder: "999" },
+  { key: "discount_price", label: "ডিসকাউন্ট মূল্য", tip: "ঐচ্ছিক। থাকলে মূল দামের কম হতে হবে।", type: "number", placeholder: "699" },
+  { key: "intro_video_url", label: "ইন্ট্রো ভিডিও URL", tip: "ঐচ্ছিক। YouTube/Vimeo/MP4 লিংক (https://)।", type: "url", placeholder: "https://youtu.be/…" },
+  { key: "total_duration", label: "মোট সময়", tip: "যেভাবে শিক্ষার্থীদের দেখাতে চান। উদা: ১২ ঘণ্টা।", placeholder: "১২ ঘণ্টা" },
+];
+
+const AREA_FIELDS: FieldDef[] = [
+  { key: "description", label: "কোর্স বিবরণ", tip: "কোর্সে কী থাকবে, কারা করবেন, প্রয়োজনীয়তা — ২–৩ প্যারা।" },
+  { key: "what_you_learn", label: "কী শিখবেন", tip: "প্রতি লাইনে একটি পয়েন্ট লিখুন (৫–৮টি সেরা)।" },
+  { key: "gift_resources", label: "উপহার রিসোর্স", tip: "ঐচ্ছিক। পিডিএফ, টেমপ্লেট, চিটশিট ইত্যাদির তালিকা।" },
+];
 
 
 export const Route = createFileRoute("/_authenticated/admin/courses/")({
