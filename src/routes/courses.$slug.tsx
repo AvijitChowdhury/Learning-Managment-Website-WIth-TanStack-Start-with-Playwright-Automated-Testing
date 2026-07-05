@@ -105,6 +105,12 @@ function CourseDetail() {
       <section className="bg-hero border-b border-border/60">
         <div className="container-page py-10 md:py-14 grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-5">
+            <Link
+              to="/courses"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-navy px-3 py-1.5 font-mono text-xs text-terminal/80 hover:border-indigo/50 hover:text-indigo-soft transition"
+            >
+              ← {bn.nav.courses}
+            </Link>
             <p className="text-sm text-muted-foreground">
               {bn.courses.level[course.level as keyof typeof bn.courses.level]}
             </p>

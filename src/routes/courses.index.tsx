@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { listPublishedCourses } from "@/lib/courses.functions";
 import { bn } from "@/lib/i18n/bn";
-import { formatBDT } from "@/lib/format";
+import { formatBDT, formatBnNumber } from "@/lib/format";
+import fallbackThumb from "@/assets/course-thumbnail-fallback.jpg";
 
 const coursesQO = queryOptions({
   queryKey: ["catalog", "courses"],
@@ -42,19 +44,37 @@ function CatalogPage() {
 
   return (
     <div className="container-page py-12">
-      <h1 className="text-3xl md:text-4xl font-bold">{bn.courses.title}</h1>
+      <div className="flex flex-col gap-3">
+        <span className="font-mono text-xs uppercase tracking-widest text-indigo-soft">
+          <Sparkles className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+          {formatBnNumber(data.courses.length)} কোর্স · বাংলায়
+        </span>
+        <h1 className="font-display text-3xl md:text-5xl font-bold text-terminal">
+          {bn.courses.title}
+        </h1>
+        <p className="max-w-2xl font-body text-muted-foreground">
+          বিষয়ভিত্তিক ফিল্টার করুন বা সরাসরি নাম দিয়ে কোর্স খুঁজুন।
+        </p>
+      </div>
 
-      <div className="mt-8 flex flex-col md:flex-row gap-4">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={bn.courses.search}
-          className="flex-1 rounded-lg border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
+      <div className="mt-8 flex flex-col md:flex-row gap-4 md:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-terminal/40" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={bn.courses.search}
+            className="w-full rounded-xl border border-border bg-code-gray pl-10 pr-4 py-3 font-body text-sm text-terminal placeholder:text-terminal/40 focus:outline-none focus:border-indigo/60 focus:ring-2 focus:ring-indigo/20"
+          />
+        </div>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setCat(null)}
-            className={`rounded-full px-4 py-2 text-sm ${cat === null ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-secondary"}`}
+            className={`rounded-full px-4 py-2 font-mono text-xs transition ${
+              cat === null
+                ? "bg-brand-gradient text-white shadow-lift"
+                : "border border-border bg-code-gray text-terminal/70 hover:text-terminal hover:border-indigo/40"
+            }`}
           >
             {bn.courses.all}
           </button>
@@ -62,7 +82,11 @@ function CatalogPage() {
             <button
               key={c.id}
               onClick={() => setCat(c.id)}
-              className={`rounded-full px-4 py-2 text-sm ${cat === c.id ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-secondary"}`}
+              className={`rounded-full px-4 py-2 font-mono text-xs transition ${
+                cat === c.id
+                  ? "bg-brand-gradient text-white shadow-lift"
+                  : "border border-border bg-code-gray text-terminal/70 hover:text-terminal hover:border-indigo/40"
+              }`}
             >
               {c.name}
             </button>
@@ -71,41 +95,75 @@ function CatalogPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-16 text-center text-muted-foreground">{bn.courses.empty}</p>
+        <div className="mt-16 rounded-2xl border border-dashed border-border bg-code-gray py-16 text-center">
+          <p className="font-body text-muted-foreground">{bn.courses.empty}</p>
+        </div>
       ) : (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((c) => (
-            <Link
-              key={c.id}
-              to="/courses/$slug"
-              params={{ slug: c.slug }}
-              className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-lift"
-            >
-              <div className="aspect-video w-full bg-muted overflow-hidden">
-                {c.thumbnail_url ? (
-                  <img src={c.thumbnail_url} alt={c.title} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
-                ) : (
-                  <div className="h-full w-full bg-hero" />
-                )}
-              </div>
-              <div className="p-5">
-                <h3 className="text-base font-semibold line-clamp-2">{c.title}</h3>
-                {c.subtitle && (
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{c.subtitle}</p>
-                )}
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-lg font-semibold text-brand">
-                    {formatBDT(c.discount_price ?? c.price)}
-                  </span>
-                  {c.discount_price && (
-                    <span className="text-sm text-muted-foreground line-through">
-                      {formatBDT(c.price)}
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((c) => {
+            const hasDiscount = c.discount_price != null && Number(c.discount_price) < Number(c.price);
+            const off = hasDiscount
+              ? Math.round(
+                  (1 - Number(c.discount_price) / Number(c.price)) * 100,
+                )
+              : 0;
+            const levelLabel =
+              bn.courses.level[c.level as keyof typeof bn.courses.level] ?? c.level;
+            return (
+              <Link
+                key={c.id}
+                to="/courses/$slug"
+                params={{ slug: c.slug }}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-code-gray transition hover:border-indigo/60 hover:-translate-y-1 hover:shadow-lift"
+              >
+                <div className="relative aspect-video w-full overflow-hidden bg-navy">
+                  <img
+                    src={c.thumbnail_url ?? fallbackThumb}
+                    alt={c.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = fallbackThumb;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+                  {hasDiscount && (
+                    <span className="absolute top-3 right-3 rounded-full bg-amber px-2.5 py-1 font-mono text-[10px] font-bold text-ink">
+                      {formatBnNumber(off)}% {bn.courses.off}
                     </span>
                   )}
+                  <span className="absolute bottom-3 left-3 rounded-md border border-white/20 bg-black/40 px-2 py-1 font-mono text-[10px] text-white backdrop-blur">
+                    {levelLabel}
+                  </span>
                 </div>
-              </div>
-            </Link>
-          ))}
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="font-display text-base font-bold text-terminal line-clamp-2 group-hover:text-indigo-soft transition">
+                    {c.title}
+                  </h3>
+                  {c.subtitle && (
+                    <p className="mt-1.5 font-body text-sm text-muted-foreground line-clamp-2">
+                      {c.subtitle}
+                    </p>
+                  )}
+                  <div className="mt-auto pt-4 flex items-end justify-between gap-2 border-t border-border/60">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-xl font-bold text-terminal">
+                        {formatBDT(c.discount_price ?? c.price)}
+                      </span>
+                      {hasDiscount && (
+                        <span className="font-mono text-xs text-terminal/40 line-through">
+                          {formatBDT(c.price)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="inline-flex items-center gap-1 font-mono text-xs text-indigo-soft opacity-0 group-hover:opacity-100 transition">
+                      {bn.courses.play} <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
