@@ -82,6 +82,20 @@ function PlayerPage() {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "todo" | "done" | "video" | "text">("all");
+  const [tab, setTab] = useState<"curriculum" | "info" | "reviews" | "faq">("curriculum");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const reviewFn = useServerFn(submitReview);
+  const reviewMut = useMutation({
+    mutationFn: (v: { rating: number; comment: string }) =>
+      reviewFn({ data: { courseId: id, ...v } }),
+    onSuccess: () => {
+      toast.success("রিভিউ জমা হয়েছে");
+      setComment("");
+      setRating(0);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "রিভিউ জমা হয়নি"),
+  });
 
   useEffect(() => {
     if (!activeId && orderedLessons.length) setActiveId(orderedLessons[0].id);
