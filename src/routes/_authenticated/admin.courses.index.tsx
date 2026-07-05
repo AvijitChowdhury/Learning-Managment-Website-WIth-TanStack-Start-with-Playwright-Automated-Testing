@@ -72,10 +72,12 @@ function AdminCourses() {
   const cats = useServerFn(adminListCategories);
   const save = useServerFn(adminSaveCourse);
   const del = useServerFn(adminDeleteCourse);
+  const instrs = useServerFn(adminListInstructorOptions);
   const qc = useQueryClient();
 
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
+  const { data: instructors } = useQuery({ queryKey: ["admin-instructor-options"], queryFn: () => instrs() });
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
