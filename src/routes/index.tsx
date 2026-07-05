@@ -84,7 +84,7 @@ function TypingHeadline() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, del, i]);
 
-  return <span className="font-mono text-lime caret">{text || "\u00A0"}</span>;
+  return <span className="font-mono text-lime caret ml-2 inline-block min-w-[12ch] align-baseline">{text || "\u00A0"}</span>;
 }
 
 function ScrollProgress() {
@@ -103,16 +103,16 @@ function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
   const tags = [
-    { label: "Python", Icon: Code2 },
-    { label: "Design", Icon: Palette },
-    { label: "IELTS", Icon: Languages },
-    { label: "Excel", Icon: Sheet },
-    { label: "SEO", Icon: Search },
-    { label: "Marketing", Icon: Megaphone },
-    { label: "Freelancing", Icon: Briefcase },
-    { label: "AI", Icon: Sparkles },
-    { label: "React", Icon: Atom },
-    { label: "UI/UX", Icon: LayoutDashboard },
+    { label: "পাইথন", Icon: Code2, color: "#3B82F6" },
+    { label: "ডিজাইন", Icon: Palette, color: "#EC4899" },
+    { label: "আইইএলটিএস", Icon: Languages, color: "#8B5CF6" },
+    { label: "এক্সেল", Icon: Sheet, color: "#22C55E" },
+    { label: "এসইও", Icon: Search, color: "#F59E0B" },
+    { label: "মার্কেটিং", Icon: Megaphone, color: "#EF4444" },
+    { label: "ফ্রিল্যান্সিং", Icon: Briefcase, color: "#14B8A6" },
+    { label: "এআই", Icon: Sparkles, color: "#C8FF4D" },
+    { label: "রিঅ্যাক্ট", Icon: Atom, color: "#06B6D4" },
+    { label: "ইউআই/ইউএক্স", Icon: LayoutDashboard, color: "#F97316" },
   ];
 
   return (
@@ -244,17 +244,17 @@ function HomePage() {
         </div>
 
         {/* Marquee */}
-        <div className="relative border-y border-border bg-code-gray/60 py-1.5 overflow-hidden">
-          <div className="marquee-track flex gap-6 whitespace-nowrap font-mono text-xs text-terminal/60">
+        <div className="relative mt-4 md:mt-6 border-y border-border bg-code-gray/60 py-0.5 overflow-hidden max-w-5xl mx-auto rounded-md">
+          <div className="marquee-track flex gap-6 whitespace-nowrap font-body text-xs text-terminal/80">
             {Array.from({ length: 2 }).map((_, k) => (
-              <div key={k} className="flex gap-6 pr-6">
-                {tags.map(({ label, Icon }) => (
+              <div key={k} className="flex gap-8 pr-8">
+                {tags.map(({ label, Icon, color }) => (
                   <span
                     key={`${k}-${label}`}
-                    className="inline-flex items-center gap-1.5 hover:text-lime transition-colors"
+                    className="flex flex-col items-center gap-2 hover:text-lime transition-colors"
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
+                    <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+                    <span className="whitespace-pre-line text-center">{label}</span>
                   </span>
                 ))}
               </div>
@@ -262,6 +262,7 @@ function HomePage() {
           </div>
         </div>
       </section>
+
 
       {/* Why */}
       <section className="border-b border-border">
@@ -290,6 +291,8 @@ function HomePage() {
           </StaggerGroup>
         </div>
       </section>
+
+
 
       {/* Featured courses */}
       <section className="border-b border-border">

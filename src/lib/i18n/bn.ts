@@ -1,6 +1,6 @@
 // Central Bengali strings. Keep copy consistent across the app.
 export const bn = {
-  brand: "শিখো",
+  brand: "প্রোগ্রামিং শিখো",
   tagline: "বাংলায় শেখার নতুন ঠিকানা",
   nav: {
     home: "হোম",

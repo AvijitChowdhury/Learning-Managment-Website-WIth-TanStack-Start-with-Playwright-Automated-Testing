@@ -1,19 +1,28 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { installGoogleTranslateFix } from "@/lib/google-translate-fix";
 import { supabase } from "@/integrations/supabase/client";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
 import { bn } from "@/lib/i18n/bn";
 import { Toaster } from "@/components/ui/sonner";
+
+if (typeof window !== "undefined") {
+  installGoogleTranslateFix();
+}
+
 
 function NotFoundComponent() {
   return (
@@ -69,19 +78,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "শিখো — বাংলায় শেখার নতুন ঠিকানা" },
+      { title: "প্রোগ্রামিং শিখো — বাংলায় শেখার নতুন ঠিকানা" },
       {
         name: "description",
         content: "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।",
       },
-      { name: "author", content: "Shikho" },
-      { property: "og:title", content: "শিখো — বাংলায় শেখার নতুন ঠিকানা" },
+      { name: "author", content: "প্রোগ্রামিং শিখো" },
+      { property: "og:title", content: "প্রোগ্রামিং শিখো — বাংলায় শেখার নতুন ঠিকানা" },
       { property: "og:description", content: "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।" },
+      { property: "og:site_name", content: "প্রোগ্রামিং শিখো" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "bn_BD" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "শিখো — বাংলায় শেখার নতুন ঠিকানা" },
-      { name: "description", content: "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।" },
+      { name: "twitter:title", content: "প্রোগ্রামিং শিখো — বাংলায় শেখার নতুন ঠিকানা" },
       { name: "twitter:description", content: "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/9d399e3d-ccdd-4014-a2f0-f0f5722e8fd4" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/9d399e3d-ccdd-4014-a2f0-f0f5722e8fd4" },
@@ -107,6 +116,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="bn">
       <head>
+        <meta name="google" content="translate" />
         <HeadContent />
       </head>
       <body>
@@ -128,30 +138,55 @@ function Header() {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin(),
+    enabled: signedIn,
+  });
+  const isAdmin = !!adminInfo?.admin;
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-ink/80 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-md bg-lime text-ink font-mono font-bold">
-            শি
+            প্রো
           </span>
           <span className="font-display text-lg font-extrabold text-terminal">{bn.brand}</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm font-body text-terminal/80">
-          <Link to="/" className="hover:text-lime transition-colors">{bn.nav.home}</Link>
-          <Link to="/courses" className="hover:text-lime transition-colors">{bn.nav.courses}</Link>
-          {signedIn && (
-            <Link to="/dashboard" className="hover:text-lime transition-colors">{bn.nav.dashboard}</Link>
+          {isAdmin ? (
+            <Link to="/admin" className="hover:text-lime transition-colors">অ্যাডমিন ড্যাশবোর্ড</Link>
+          ) : (
+            <>
+              <Link to="/" className="hover:text-lime transition-colors">{bn.nav.home}</Link>
+              <Link to="/courses" className="hover:text-lime transition-colors">{bn.nav.courses}</Link>
+              {signedIn && (
+                <Link to="/dashboard" className="hover:text-lime transition-colors">{bn.nav.dashboard}</Link>
+              )}
+            </>
           )}
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
-            <Link
-              to="/dashboard"
-              className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
-            >
-              {bn.nav.dashboard}
-            </Link>
+            <>
+              {isAdmin ? (
+                <Link
+                  to="/admin"
+                  className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
+                >
+                  অ্যাডমিন ড্যাশবোর্ড
+                </Link>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  className="rounded-md bg-lime px-4 py-2 text-sm font-mono font-bold text-ink hover:brightness-95"
+                >
+                  {bn.nav.dashboard}
+                </Link>
+              )}
+              <LogoutButton />
+            </>
           ) : (
             <Link
               to="/auth"
@@ -165,6 +200,35 @@ function Header() {
     </header>
   );
 }
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const handleSignOut = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={busy}
+      className="rounded-md border border-border px-3 py-2 text-sm font-mono text-terminal/80 hover:text-lime hover:border-lime transition-colors disabled:opacity-60"
+    >
+      {busy ? "…" : "লগআউট"}
+    </button>
+  );
+}
+
 
 function Footer() {
   return (

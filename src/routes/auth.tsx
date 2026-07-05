@@ -1,9 +1,40 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { bn } from "@/lib/i18n/bn";
+
+// Blocked disposable/temporary email domains — common throwaway providers
+const DISPOSABLE_DOMAINS = new Set([
+  "mailinator.com", "guerrillamail.com", "guerrillamail.info", "sharklasers.com",
+  "10minutemail.com", "10minutemail.net", "tempmail.com", "temp-mail.org",
+  "tempmail.net", "yopmail.com", "trashmail.com", "throwawaymail.com",
+  "getnada.com", "nada.email", "maildrop.cc", "dispostable.com",
+  "fakeinbox.com", "mailnesia.com", "mintemail.com", "mohmal.com",
+  "spambog.com", "spam4.me", "mytemp.email", "tempmailo.com",
+  "emailondeck.com", "moakt.com", "harakirimail.com", "tempinbox.com",
+  "getairmail.com", "inboxbear.com", "burnermail.io", "mail.tm",
+]);
+
+const emailSchema = z
+  .string()
+  .trim()
+  .max(255, "ইমেইল অনেক বড়")
+  .email("সঠিক ইমেইল দিন")
+  .refine((v) => {
+    const domain = v.split("@")[1]?.toLowerCase();
+    if (!domain) return false;
+    // Must have a TLD and no consecutive dots
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) return false;
+    if (domain.includes("..")) return false;
+    return true;
+  }, "সঠিক ইমেইল দিন")
+  .refine((v) => {
+    const domain = v.split("@")[1]?.toLowerCase() ?? "";
+    return !DISPOSABLE_DOMAINS.has(domain);
+  }, "ডিসপোজেবল / টেম্প ইমেইল ব্যবহার করা যাবে না");
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -38,11 +69,17 @@ function AuthPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "সঠিক ইমেইল দিন");
+      return;
+    }
+    const cleanEmail = parsed.data;
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
           password,
           options: {
             data: { name },
@@ -50,10 +87,17 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success(bn.auth.signupSuccess);
-        navigate({ to: "/dashboard" });
+        // With email confirmation ON, no session is returned until verified
+        if (!data.session) {
+          toast.success("ভেরিফিকেশন লিংক পাঠানো হয়েছে — ইমেইল চেক করুন");
+          setMode("login");
+          setPassword("");
+        } else {
+          toast.success(bn.auth.signupSuccess);
+          navigate({ to: "/dashboard" });
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) throw error;
         toast.success(bn.auth.loginSuccess);
         navigate({ to: "/dashboard" });

@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar } from "lucide-react";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
+import { Play, Lock, CheckCircle2, Star, Clock, BookOpen, Globe, Calendar, Settings, X, Award, Linkedin, Twitter, Github, Youtube, Link as LinkIcon } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -9,9 +10,70 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getCourseBySlug } from "@/lib/courses.functions";
+import { isCurrentUserAdmin } from "@/lib/admin.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { bn } from "@/lib/i18n/bn";
 import { formatBDT, formatBnNumber, formatBnDate } from "@/lib/format";
 import fallbackThumb from "@/assets/course-thumbnail-fallback.jpg";
+
+function toEmbed(url: string): string {
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0`;
+  const vim = url.match(/vimeo\.com\/(\d+)/);
+  if (vim) return `https://player.vimeo.com/video/${vim[1]}?autoplay=1`;
+  return url;
+}
+
+function PreviewModal({
+  title,
+  url,
+  onClose,
+}: {
+  title: string;
+  url: string;
+  onClose: () => void;
+}) {
+  const isEmbed = /(youtube\.com|youtu\.be|vimeo\.com)/.test(url);
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-black shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-2 text-white">
+          <div className="truncate text-sm font-medium">{title}</div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-md p-1 text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="aspect-video w-full bg-black">
+          {isEmbed ? (
+            <iframe
+              src={toEmbed(url)}
+              title={title}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video src={url} controls autoPlay className="h-full w-full" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 const qo = (slug: string) =>
   queryOptions({
@@ -61,7 +123,32 @@ export const Route = createFileRoute("/courses/$slug")({
 function CourseDetail() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(qo(slug));
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) setSignedIn(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
+      setSignedIn(!!s),
+    );
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+  const checkAdmin = useServerFn(isCurrentUserAdmin);
+  const { data: adminInfo } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => checkAdmin().catch(() => ({ admin: false })),
+    staleTime: 60_000,
+    enabled: signedIn === true,
+  });
+  const isAdmin = !!adminInfo?.admin;
+  const [preview, setPreview] = useState<{ title: string; url: string } | null>(null);
+
   if (!data) return null;
+
   const {
     course,
     modules,
@@ -168,8 +255,14 @@ function CourseDetail() {
                 className="aspect-video w-full object-cover"
                 loading="lazy"
               />
-              {freePreview && (
-                <button className="absolute inset-0 grid place-items-center bg-black/30 text-white transition hover:bg-black/40">
+              {freePreview && freePreview.content_url && (
+                <button
+                  onClick={() =>
+                    setPreview({ title: freePreview.title, url: freePreview.content_url! })
+                  }
+                  aria-label="ফ্রি প্রিভিউ দেখুন"
+                  className="absolute inset-0 grid place-items-center bg-black/30 text-white transition hover:bg-black/40"
+                >
                   <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-brand shadow-lg">
                     <Play className="h-6 w-6 fill-current" />
                   </span>
@@ -191,18 +284,48 @@ function CourseDetail() {
                 </>
               )}
             </div>
-            <Link
-              to="/checkout/$courseId"
-              params={{ courseId: course.id }}
-              className="mt-5 block w-full rounded-lg bg-brand-gradient px-4 py-3 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
-            >
-              {bn.courses.buy}
-            </Link>
-            {freePreview && (
-              <button className="mt-2 block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent">
-                {bn.courses.watchPreview}
-              </button>
+            {isAdmin ? (
+              <div className="mt-5 space-y-2">
+                <div className="rounded-lg border border-lime/40 bg-lime/10 px-3 py-2 text-center font-mono text-[11px] text-lime">
+                  ⚡ অ্যাডমিন মোড — অ্যাডমিন কোর্স কিনতে বা এনরোল করতে পারে না
+                </div>
+                <Link
+                  to="/admin/courses/$id/edit"
+                  params={{ id: course.id }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-lime px-4 py-3 text-center font-mono text-sm font-bold text-ink hover:bg-lime/90"
+                >
+                  <Settings className="h-4 w-4" /> কোর্স এডিট করুন
+                </Link>
+                <Link
+                  to="/admin"
+                  className="block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent"
+                >
+                  অ্যাডমিন প্যানেল
+                </Link>
+              </div>
+            ) : (
+
+              <>
+                <Link
+                  to="/checkout/$courseId"
+                  params={{ courseId: course.id }}
+                  className="mt-5 block w-full rounded-lg bg-brand-gradient px-4 py-3 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+                >
+                  {bn.courses.buy}
+                </Link>
+                {freePreview && freePreview.content_url && (
+                  <button
+                    onClick={() =>
+                      setPreview({ title: freePreview.title, url: freePreview.content_url! })
+                    }
+                    className="mt-2 block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium hover:bg-accent"
+                  >
+                    ▶ {bn.courses.watchPreview}
+                  </button>
+                )}
+              </>
             )}
+
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
@@ -291,31 +414,41 @@ function CourseDetail() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="divide-y divide-border">
-                        {items.map((l) => (
-                          <li
-                            key={l.id}
-                            className="flex items-center justify-between gap-3 py-3 text-sm"
-                          >
-                            <span className="flex min-w-0 items-center gap-3">
-                              {l.is_free_preview ? (
-                                <Play className="h-4 w-4 shrink-0 text-brand" />
-                              ) : (
-                                <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
-                              )}
-                              <span className="truncate">{l.title}</span>
-                              {l.is_free_preview && (
-                                <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
-                                  {bn.courses.freePreview}
-                                </span>
-                              )}
-                            </span>
-                            {l.duration_sec ? (
-                              <span className="shrink-0 text-xs text-muted-foreground">
-                                {fmtDur(l.duration_sec)}
+                        {items.map((l) => {
+                          const playable = l.is_free_preview && !!l.content_url;
+                          return (
+                            <li
+                              key={l.id}
+                              onClick={
+                                playable
+                                  ? () => setPreview({ title: l.title, url: l.content_url! })
+                                  : undefined
+                              }
+                              className={`flex items-center justify-between gap-3 py-3 text-sm ${
+                                playable ? "cursor-pointer hover:text-brand" : ""
+                              }`}
+                            >
+                              <span className="flex min-w-0 items-center gap-3">
+                                {l.is_free_preview ? (
+                                  <Play className="h-4 w-4 shrink-0 text-brand" />
+                                ) : (
+                                  <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                )}
+                                <span className="truncate">{l.title}</span>
+                                {l.is_free_preview && (
+                                  <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                                    {bn.courses.freePreview}
+                                  </span>
+                                )}
                               </span>
-                            ) : null}
-                          </li>
-                        ))}
+                              {l.duration_sec ? (
+                                <span className="shrink-0 text-xs text-muted-foreground">
+                                  {fmtDur(l.duration_sec)}
+                                </span>
+                              ) : null}
+                            </li>
+                          );
+                        })}
                         {items.length === 0 && (
                           <li className="py-3 text-sm text-muted-foreground">
                             পাঠ শীঘ্রই যোগ করা হবে।
@@ -406,27 +539,98 @@ function CourseDetail() {
             )}
           </div>
 
-          {/* INSTRUCTOR BIO */}
+          {/* INSTRUCTOR PROFILE */}
           {instructor && (
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-2xl font-semibold">{bn.courses.instructor}</h2>
-              <div className="mt-4 flex items-start gap-4">
-                {instructor.avatar_url ? (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+              {"cover_url" in instructor && (instructor as any).cover_url && (
+                <div className="h-32 w-full overflow-hidden bg-gradient-to-br from-brand/20 to-brand/5">
                   <img
-                    src={instructor.avatar_url}
-                    alt={instructor.name ?? ""}
-                    className="h-16 w-16 rounded-full object-cover"
+                    src={(instructor as any).cover_url}
+                    alt=""
+                    className="h-full w-full object-cover"
                   />
-                ) : (
-                  <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary text-xl font-semibold">
-                    {(instructor.name ?? "?").slice(0, 1)}
+                </div>
+              )}
+              <div className="p-6">
+                <div className="mb-4 flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                  <Award className="h-4 w-4 text-brand" /> {bn.courses.instructor}
+                </div>
+                <div className="flex flex-col items-start gap-5 sm:flex-row">
+                  {instructor.avatar_url ? (
+                    <img
+                      src={instructor.avatar_url}
+                      alt={instructor.name ?? ""}
+                      className="h-24 w-24 shrink-0 rounded-full border-4 border-background object-cover shadow-lg"
+                    />
+                  ) : (
+                    <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-background bg-brand/10 text-3xl font-bold text-brand shadow-lg">
+                      {(instructor.name ?? "?").slice(0, 1)}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground">{instructor.name}</h3>
+                      {"headline" in instructor && (instructor as any).headline && (
+                        <p className="text-sm text-muted-foreground">
+                          {(instructor as any).headline}
+                        </p>
+                      )}
+                    </div>
+
+                    {"years_experience" in instructor && (instructor as any).years_experience ? (
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/5 px-2.5 py-1 text-xs font-medium text-brand">
+                        {formatBnNumber((instructor as any).years_experience)}+ বছরের অভিজ্ঞতা
+                      </div>
+                    ) : null}
+
+                    {"expertise" in instructor && Array.isArray((instructor as any).expertise) && (instructor as any).expertise.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {(instructor as any).expertise.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {"bio" in instructor && (instructor as any).bio && (
+                      <p className="whitespace-pre-line pt-2 text-sm leading-relaxed text-muted-foreground">
+                        {(instructor as any).bio}
+                      </p>
+                    )}
+
+                    {("website_url" in instructor ||
+                      "linkedin_url" in instructor ||
+                      "twitter_url" in instructor ||
+                      "github_url" in instructor ||
+                      "youtube_url" in instructor) && (
+                      <div className="flex flex-wrap gap-2 pt-3">
+                        {[
+                          { url: (instructor as any).website_url, Icon: LinkIcon, label: "Website" },
+                          { url: (instructor as any).linkedin_url, Icon: Linkedin, label: "LinkedIn" },
+                          { url: (instructor as any).twitter_url, Icon: Twitter, label: "Twitter" },
+                          { url: (instructor as any).github_url, Icon: Github, label: "GitHub" },
+                          { url: (instructor as any).youtube_url, Icon: Youtube, label: "YouTube" },
+                        ]
+                          .filter((s) => !!s.url)
+                          .map(({ url, Icon, label }) => (
+                            <a
+                              key={label}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={label}
+                              className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-brand hover:text-brand"
+                            >
+                              <Icon className="h-4 w-4" />
+                            </a>
+                          ))}
+                      </div>
+                    )}
                   </div>
-                )}
-                <div>
-                  <p className="text-lg font-semibold">{instructor.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    অভিজ্ঞ শিক্ষক · বাংলায় শেখানোর দশকের অভিজ্ঞতা
-                  </p>
                 </div>
               </div>
             </div>
@@ -524,13 +728,28 @@ function CourseDetail() {
                   </span>
                 )}
               </div>
-              <Link
-                to="/checkout/$courseId"
-                params={{ courseId: course.id }}
-                className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
-              >
-                {bn.courses.buy}
-              </Link>
+              {isAdmin ? (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg border border-lime/40 bg-lime/10 px-3 py-2 text-center font-mono text-[11px] text-lime">
+                    ⚡ অ্যাডমিন মোড
+                  </div>
+                  <Link
+                    to="/admin/courses/$id/edit"
+                    params={{ id: course.id }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-lime px-4 py-2.5 text-center font-mono text-sm font-bold text-ink hover:bg-lime/90"
+                  >
+                    <Settings className="h-4 w-4" /> কোর্স এডিট করুন
+                  </Link>
+                </div>
+              ) : (
+                <Link
+                  to="/checkout/$courseId"
+                  params={{ courseId: course.id }}
+                  className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+                >
+                  {bn.courses.buy}
+                </Link>
+              )}
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
@@ -627,7 +846,8 @@ function CourseDetail() {
         </section>
       )}
 
-      {/* MOBILE STICKY BUY BAR */}
+      {/* MOBILE STICKY BUY BAR — hidden for admins */}
+      {!isAdmin && (
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 p-3 shadow-lift backdrop-blur lg:hidden">
         <div className="container-page flex items-center gap-3">
           <div className="min-w-0 flex-1">
@@ -650,7 +870,16 @@ function CourseDetail() {
           </Link>
         </div>
       </div>
-      <div className="h-20 lg:hidden" />
+      )}
+      {!isAdmin && <div className="h-20 lg:hidden" />}
+      {preview && (
+        <PreviewModal
+          title={preview.title}
+          url={preview.url}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </>
+
   );
 }

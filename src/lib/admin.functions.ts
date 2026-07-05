@@ -110,7 +110,83 @@ export const adminSetOrderStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.orderId);
+    const { data: order, error: fetchErr } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, course_id, status")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+    if (!order) throw new Error("অর্ডার পাওয়া যায়নি");
+
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.orderId);
+    if (error) throw new Error(error.message);
+
+    let enrolled = false;
+    if (data.status === "PAID" && order.user_id && order.course_id) {
+      const { data: existing, error: exErr } = await supabaseAdmin
+        .from("enrollments")
+        .select("id")
+        .eq("user_id", order.user_id)
+        .eq("course_id", order.course_id)
+        .maybeSingle();
+      if (exErr) throw new Error(exErr.message);
+      if (!existing) {
+        const { error: insErr } = await supabaseAdmin.from("enrollments").insert({
+          user_id: order.user_id,
+          course_id: order.course_id,
+          order_id: order.id,
+        });
+        if (insErr) throw new Error(insErr.message);
+        enrolled = true;
+      }
+    }
+
+    if (data.status !== "PAID" && order.status === "PAID" && order.user_id && order.course_id) {
+      await supabaseAdmin
+        .from("enrollments")
+        .delete()
+        .eq("user_id", order.user_id)
+        .eq("course_id", order.course_id)
+        .eq("order_id", order.id);
+    }
+
+    return { ok: true, enrolled };
+  });
+
+export const PAYMENT_METHODS = [
+  "bKash",
+  "Nagad",
+  "Rocket",
+  "Card",
+  "Bank Transfer",
+  "Manual",
+  "Other",
+] as const;
+
+export const adminSetOrderMethod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        orderId: z.string().uuid(),
+        payment_method: z.string().trim().max(40).nullable(),
+        transaction_id: z.string().trim().max(120).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: { payment_method: string | null; transaction_id?: string | null } = {
+      payment_method: data.payment_method && data.payment_method.length ? data.payment_method : null,
+    };
+    if (data.transaction_id !== undefined) {
+      patch.transaction_id = data.transaction_id && data.transaction_id.length ? data.transaction_id : null;
+    }
+    const { error } = await supabaseAdmin.from("orders").update(patch).eq("id", data.orderId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -126,6 +202,87 @@ export const adminListCourses = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+export const adminDeleteCourse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const courseId = data.id;
+
+    // Delete lessons + lesson_progress via modules
+    const { data: mods } = await supabaseAdmin
+      .from("modules")
+      .select("id")
+      .eq("course_id", courseId);
+    const moduleIds = (mods ?? []).map((m) => m.id);
+    if (moduleIds.length) {
+      const { data: lessons } = await supabaseAdmin
+        .from("lessons")
+        .select("id")
+        .in("module_id", moduleIds);
+      const lessonIds = (lessons ?? []).map((l) => l.id);
+      if (lessonIds.length) {
+        await supabaseAdmin.from("lesson_progress").delete().in("lesson_id", lessonIds);
+        await supabaseAdmin.from("lessons").delete().in("id", lessonIds);
+      }
+      await supabaseAdmin.from("modules").delete().in("id", moduleIds);
+    }
+
+    // Wipe related course-scoped records. Orders and support_threads are
+    // left as historical records (no FK enforces referential integrity).
+    await supabaseAdmin.from("enrollments").delete().eq("course_id", courseId);
+    await supabaseAdmin.from("reviews").delete().eq("course_id", courseId);
+
+
+    const { error } = await supabaseAdmin.from("courses").delete().eq("id", courseId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
+export const adminListUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: profiles, error: pErr }, { data: roles, error: rErr }, { data: enrols, error: eErr }, { data: orders, error: oErr }] =
+      await Promise.all([
+        supabaseAdmin.from("profiles").select("id, email, name, avatar_url, created_at").order("created_at", { ascending: false }).limit(500),
+        supabaseAdmin.from("user_roles").select("user_id, role"),
+        supabaseAdmin.from("enrollments").select("user_id"),
+        supabaseAdmin.from("orders").select("user_id, amount, status"),
+      ]);
+    if (pErr) throw new Error(pErr.message);
+    if (rErr) throw new Error(rErr.message);
+    if (eErr) throw new Error(eErr.message);
+    if (oErr) throw new Error(oErr.message);
+
+    const rolesByUser: Record<string, string[]> = {};
+    for (const r of roles ?? []) {
+      (rolesByUser[r.user_id] ??= []).push(r.role as string);
+    }
+    const enrolByUser: Record<string, number> = {};
+    for (const e of enrols ?? []) enrolByUser[e.user_id] = (enrolByUser[e.user_id] ?? 0) + 1;
+    const spendByUser: Record<string, { paid: number; orders: number; spent: number }> = {};
+    for (const o of orders ?? []) {
+      const s = (spendByUser[o.user_id] ??= { paid: 0, orders: 0, spent: 0 });
+      s.orders += 1;
+      if (o.status === "PAID") {
+        s.paid += 1;
+        s.spent += Number(o.amount ?? 0);
+      }
+    }
+    return (profiles ?? []).map((p) => ({
+      ...p,
+      roles: rolesByUser[p.id] ?? ["STUDENT"],
+      enrollments: enrolByUser[p.id] ?? 0,
+      orders: spendByUser[p.id]?.orders ?? 0,
+      paidOrders: spendByUser[p.id]?.paid ?? 0,
+      totalSpent: spendByUser[p.id]?.spent ?? 0,
+    }));
   });
 
 export const adminSaveCourse = createServerFn({ method: "POST" })
@@ -144,6 +301,7 @@ export const adminSaveCourse = createServerFn({ method: "POST" })
         level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
         is_published: z.boolean(),
         category_id: z.string().uuid().nullable().optional(),
+        instructor_profile_id: z.string().uuid().nullable().optional(),
         what_you_learn: z.array(z.string().max(500)).max(50).nullable().optional(),
         gift_resources: z.string().max(2000).nullable().optional(),
         intro_video_url: z.string().max(500).nullable().optional(),
@@ -273,18 +431,219 @@ export const adminDeleteLesson = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const adminListReviews = createServerFn({ method: "GET" })
+export const adminReorderModules = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d) =>
+    z
+      .object({
+        course_id: z.string().uuid(),
+        order: z.array(z.object({ id: z.string().uuid(), order: z.number().int().min(0) })).max(500),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    await Promise.all(
+      data.order.map((r) =>
+        supabaseAdmin.from("modules").update({ order: r.order }).eq("id", r.id).eq("course_id", data.course_id),
+      ),
+    );
+    return { ok: true };
+  });
+
+export const adminReorderLessons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        updates: z
+          .array(
+            z.object({
+              id: z.string().uuid(),
+              module_id: z.string().uuid(),
+              order: z.number().int().min(0),
+            }),
+          )
+          .max(2000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await Promise.all(
+      data.updates.map((u) =>
+        supabaseAdmin
+          .from("lessons")
+          .update({ module_id: u.module_id, order: u.order })
+          .eq("id", u.id),
+      ),
+    );
+    return { ok: true };
+  });
+
+function parseDurationToSec(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const s = String(v).trim();
+  if (/^\d+$/.test(s)) return Number(s);
+  const m = s.match(/^(\d+):([0-5]?\d)$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  const h = s.match(/^(\d+):([0-5]?\d):([0-5]?\d)$/);
+  if (h) return Number(h[1]) * 3600 + Number(h[2]) * 60 + Number(h[3]);
+  return NaN;
+}
+
+function isValidUrl(u: string): boolean {
+  try {
+    const url = new URL(u);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parseBool(v: unknown): boolean {
+  const s = String(v ?? "").trim().toLowerCase();
+  return s === "true" || s === "1" || s === "yes" || s === "y";
+}
+
+export const adminBulkImportLessons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        module_id: z.string().uuid(),
+        rows: z
+          .array(
+            z.object({
+              title: z.string().optional(),
+              videoUrl: z.string().optional(),
+              content: z.string().optional(),
+              duration: z.union([z.string(), z.number()]).optional(),
+              freePreview: z.union([z.string(), z.boolean()]).optional(),
+            }),
+          )
+          .max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: existing } = await supabaseAdmin
+      .from("lessons")
+      .select("order")
+      .eq("module_id", data.module_id)
+      .order("order", { ascending: false })
+      .limit(1);
+    let nextOrder = existing && existing[0] ? existing[0].order + 1 : 0;
+
+    const failures: { row: number; reason: string }[] = [];
+    const toInsert: any[] = [];
+
+    data.rows.forEach((r, i) => {
+      const rowNum = i + 1;
+      const title = (r.title ?? "").toString().trim();
+      if (!title) return failures.push({ row: rowNum, reason: "missing title" });
+
+      const videoUrl = (r.videoUrl ?? "").toString().trim();
+      if (videoUrl && !isValidUrl(videoUrl))
+        return failures.push({ row: rowNum, reason: "invalid video URL" });
+
+      const durationSec =
+        r.duration === undefined || r.duration === "" ? null : parseDurationToSec(r.duration);
+      if (durationSec !== null && (Number.isNaN(durationSec) || durationSec < 0))
+        return failures.push({ row: rowNum, reason: "invalid duration (use seconds or mm:ss)" });
+
+      toInsert.push({
+        module_id: data.module_id,
+        title: title.slice(0, 200),
+        type: "VIDEO",
+        content_url: videoUrl || null,
+        description: (r.content ?? "").toString().slice(0, 5000) || null,
+        duration_sec: durationSec,
+        is_free_preview: parseBool(r.freePreview),
+        order: nextOrder++,
+      });
+    });
+
+    let created = 0;
+    if (toInsert.length) {
+      const { error, data: ins } = await supabaseAdmin.from("lessons").insert(toInsert).select("id");
+      if (error) {
+        return { created: 0, failed: data.rows.length, failures: [{ row: 0, reason: error.message }] };
+      }
+      created = ins?.length ?? toInsert.length;
+    }
+
+    return { created, failed: failures.length, failures };
+  });
+
+export const adminListReviews = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+        courseId: z.string().uuid().optional().nullable(),
+      })
+      .optional()
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const page = data?.page ?? 1;
+    const pageSize = data?.pageSize ?? 20;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let q = supabaseAdmin
       .from("reviews")
-      .select("id, rating, comment, is_hidden, created_at, courses(title), profiles!reviews_user_id_fkey(name, email)")
+      .select("id, user_id, course_id, rating, comment, is_hidden, created_at, courses(title)", {
+        count: "exact",
+      })
       .order("created_at", { ascending: false })
-      .limit(200);
+      .range(from, to);
+    if (data?.courseId) q = q.eq("course_id", data.courseId);
+
+    const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    return data ?? [];
+
+    const userIds = Array.from(
+      new Set((rows ?? []).map((r: any) => r.user_id).filter(Boolean)),
+    ) as string[];
+    let profilesById: Record<string, { name: string | null; email: string | null }> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", userIds);
+      profilesById = Object.fromEntries(
+        (profs ?? []).map((p: any) => [p.id, { name: p.name, email: p.email }]),
+      );
+    }
+
+    // Course filter options (id + title) — capped and alphabetical.
+    const { data: courses } = await supabaseAdmin
+      .from("courses")
+      .select("id, title")
+      .order("title", { ascending: true })
+      .limit(500);
+
+    return {
+      rows: (rows ?? []).map((r: any) => ({
+        ...r,
+        profiles: profilesById[r.user_id] ?? null,
+      })),
+      total: count ?? 0,
+      page,
+      pageSize,
+      courses: courses ?? [],
+    };
   });
 
 export const adminToggleReview = createServerFn({ method: "POST" })
@@ -297,6 +656,7 @@ export const adminToggleReview = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const isCurrentUserAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -332,13 +692,25 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+        "id, user_id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title)",
       )
       .order("created_at", { ascending: false })
       .limit(10000);
     if (error) throw new Error(error.message);
 
     const rows = data ?? [];
+    const userIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean))) as string[];
+    let profilesById: Record<string, { name: string | null; email: string | null }> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", userIds);
+      profilesById = Object.fromEntries(
+        (profs ?? []).map((p: any) => [p.id, { name: p.name, email: p.email }]),
+      );
+    }
+
     const header = [
       "id",
       "created_at",
@@ -357,6 +729,7 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
     ];
     const lines = [header.join(",")];
     for (const r of rows as any[]) {
+      const prof = r.user_id ? profilesById[r.user_id] : null;
       lines.push(
         [
           r.id,
@@ -367,8 +740,8 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
           r.coupon_code ?? "",
           r.currency,
           r.courses?.title ?? "",
-          r.profiles?.name ?? "",
-          r.profiles?.email ?? "",
+          prof?.name ?? "",
+          prof?.email ?? "",
           r.payment_method ?? "",
           r.transaction_id ?? "",
           r.sender_number ?? "",
@@ -378,5 +751,131 @@ export const adminExportOrdersCsv = createServerFn({ method: "GET" })
           .join(","),
       );
     }
-    return { csv: lines.join("\n"), filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
+    return { csv: "\uFEFF" + lines.join("\r\n") + "\r\n", filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
+  });
+
+export const adminOverviewCharts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000);
+    since.setHours(0, 0, 0, 0);
+    const { data: orders } = await supabaseAdmin
+      .from("orders")
+      .select("amount, status, created_at")
+      .gte("created_at", since.toISOString())
+      .limit(5000);
+    const rows = orders ?? [];
+
+    const days: { date: string; revenue: number; orders: number }[] = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(since.getTime() + i * 86400000);
+      const key = d.toISOString().slice(0, 10);
+      days.push({ date: key, revenue: 0, orders: 0 });
+    }
+    const dayIdx = new Map(days.map((d, i) => [d.date, i]));
+    const statusCounts: Record<string, number> = {};
+    for (const r of rows as any[]) {
+      statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1;
+      const key = new Date(r.created_at).toISOString().slice(0, 10);
+      const i = dayIdx.get(key);
+      if (i !== undefined) {
+        days[i].orders += 1;
+        if (r.status === "PAID") days[i].revenue += Number(r.amount ?? 0);
+      }
+    }
+    const statusBreakdown = Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+    return { days, statusBreakdown };
+  });
+
+
+// ============ INSTRUCTORS ============
+
+const instructorInput = z.object({
+  id: z.string().uuid().optional(),
+  slug: z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  name: z.string().min(1).max(120),
+  headline: z.string().max(200).nullable().optional(),
+  bio: z.string().max(5000).nullable().optional(),
+  avatar_url: z.string().max(500).nullable().optional(),
+  cover_url: z.string().max(500).nullable().optional(),
+  expertise: z.array(z.string().max(80)).max(30).default([]),
+  years_experience: z.number().int().min(0).max(80).nullable().optional(),
+  website_url: z.string().max(500).nullable().optional(),
+  twitter_url: z.string().max(500).nullable().optional(),
+  linkedin_url: z.string().max(500).nullable().optional(),
+  github_url: z.string().max(500).nullable().optional(),
+  youtube_url: z.string().max(500).nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+export const adminListInstructors = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("instructors")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const ids = (data ?? []).map((i: any) => i.id);
+    let counts: Record<string, number> = {};
+    if (ids.length) {
+      const { data: crs } = await supabaseAdmin
+        .from("courses")
+        .select("id,instructor_profile_id")
+        .in("instructor_profile_id", ids);
+      counts = (crs ?? []).reduce((m: Record<string, number>, c: any) => {
+        m[c.instructor_profile_id] = (m[c.instructor_profile_id] ?? 0) + 1;
+        return m;
+      }, {});
+    }
+    return (data ?? []).map((i: any) => ({ ...i, course_count: counts[i.id] ?? 0 }));
+  });
+
+export const adminSaveInstructor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => instructorInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.id) {
+      const { id, ...upd } = data;
+      const { error } = await supabaseAdmin.from("instructors").update(upd).eq("id", id);
+      if (error) throw new Error(error.message);
+      return { id };
+    }
+    const { data: row, error } = await supabaseAdmin
+      .from("instructors")
+      .insert(data)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const adminDeleteInstructor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("instructors").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListInstructorOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("instructors")
+      .select("id,name,avatar_url,headline,is_published")
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });

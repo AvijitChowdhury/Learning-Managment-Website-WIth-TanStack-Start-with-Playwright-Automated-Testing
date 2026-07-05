@@ -100,6 +100,7 @@ export type Database = {
           gift_resources: string | null
           id: string
           instructor_id: string | null
+          instructor_profile_id: string | null
           intro_video_url: string | null
           is_published: boolean
           language: string
@@ -122,6 +123,7 @@ export type Database = {
           gift_resources?: string | null
           id?: string
           instructor_id?: string | null
+          instructor_profile_id?: string | null
           intro_video_url?: string | null
           is_published?: boolean
           language?: string
@@ -144,6 +146,7 @@ export type Database = {
           gift_resources?: string | null
           id?: string
           instructor_id?: string | null
+          instructor_profile_id?: string | null
           intro_video_url?: string | null
           is_published?: boolean
           language?: string
@@ -171,6 +174,13 @@ export type Database = {
             columns: ["instructor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_instructor_profile_id_fkey"
+            columns: ["instructor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "instructors"
             referencedColumns: ["id"]
           },
         ]
@@ -216,6 +226,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      instructors: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          cover_url: string | null
+          created_at: string
+          expertise: string[]
+          github_url: string | null
+          headline: string | null
+          id: string
+          is_published: boolean
+          linkedin_url: string | null
+          name: string
+          slug: string
+          twitter_url: string | null
+          updated_at: string
+          website_url: string | null
+          years_experience: number | null
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          cover_url?: string | null
+          created_at?: string
+          expertise?: string[]
+          github_url?: string | null
+          headline?: string | null
+          id?: string
+          is_published?: boolean
+          linkedin_url?: string | null
+          name: string
+          slug: string
+          twitter_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          years_experience?: number | null
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          cover_url?: string | null
+          created_at?: string
+          expertise?: string[]
+          github_url?: string | null
+          headline?: string | null
+          id?: string
+          is_published?: boolean
+          linkedin_url?: string | null
+          name?: string
+          slug?: string
+          twitter_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          years_experience?: number | null
+          youtube_url?: string | null
+        }
+        Relationships: []
       }
       lesson_progress: {
         Row: {

@@ -30,7 +30,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     const { data: course, error } = await sb
       .from("courses")
       .select(
-        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,updated_at,category_id,instructor_id,what_you_learn,gift_resources,intro_video_url,total_duration",
+        "id,title,slug,subtitle,description,thumbnail_url,price,discount_price,level,language,published_at,updated_at,category_id,instructor_id,instructor_profile_id,what_you_learn,gift_resources,intro_video_url,total_duration",
       )
       .eq("slug", data.slug)
       .eq("is_published", true)
@@ -74,7 +74,14 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
         .eq("is_hidden", false)
         .order("created_at", { ascending: false })
         .limit(50),
-      course.instructor_id
+      course.instructor_profile_id
+        ? sb
+            .from("instructors")
+            .select("id,slug,name,headline,bio,avatar_url,cover_url,expertise,years_experience,website_url,twitter_url,linkedin_url,github_url,youtube_url")
+            .eq("id", course.instructor_profile_id)
+            .eq("is_published", true)
+            .maybeSingle()
+        : course.instructor_id
         ? sb
             .from("profiles")
             .select("id,name,avatar_url")

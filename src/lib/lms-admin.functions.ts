@@ -71,6 +71,36 @@ export const listCoupons = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const couponAnalytics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase
+      .from("orders")
+      .select("coupon_code, amount, discount_amount, status")
+      .eq("status", "PAID")
+      .not("coupon_code", "is", null);
+    if (error) throw new Error(error.message);
+    const byCode: Record<string, { redeemed: number; revenue: number; discount: number }> = {};
+    let totalRedeemed = 0;
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    for (const o of data ?? []) {
+      const code = (o.coupon_code || "").toUpperCase();
+      if (!code) continue;
+      const rev = Number(o.amount ?? 0);
+      const disc = Number(o.discount_amount ?? 0);
+      const b = (byCode[code] ??= { redeemed: 0, revenue: 0, discount: 0 });
+      b.redeemed += 1;
+      b.revenue += rev;
+      b.discount += disc;
+      totalRedeemed += 1;
+      totalRevenue += rev;
+      totalDiscount += disc;
+    }
+    return { byCode, totals: { redeemed: totalRedeemed, revenue: totalRevenue, discount: totalDiscount } };
+  });
+
 const upsertCouponInput = z.object({
   id: z.string().uuid().optional(),
   code: z.string().trim().min(2).max(40).regex(/^[A-Z0-9_-]+$/i, "code must be alphanumeric"),

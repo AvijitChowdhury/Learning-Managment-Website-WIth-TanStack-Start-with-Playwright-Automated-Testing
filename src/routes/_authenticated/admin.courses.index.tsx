@@ -1,10 +1,83 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { adminListCourses, adminSaveCourse, adminListCategories } from "@/lib/admin.functions";
+import { useMemo, useRef, useState } from "react";
+import { z } from "zod";
+import { adminListCourses, adminSaveCourse, adminListCategories, adminDeleteCourse, adminListInstructorOptions } from "@/lib/admin.functions";
 import { fmtBDT } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const httpUrl = z
+  .string({ message: "লিংক দিন" })
+  .trim()
+  .min(1, "লিংক দিন")
+  .refine((v) => /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
+const optionalHttpUrl = z
+  .string()
+  .trim()
+  .optional()
+  .refine((v) => !v || /^https?:\/\/.+/i.test(v), "সঠিক লিংক দিন (https:// দিয়ে শুরু)");
+
+const courseSchema = z.object({
+  title: z
+    .string({ message: "শিরোনাম লিখুন" })
+    .trim()
+    .min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(120, "শিরোনাম সর্বোচ্চ ১২০ অক্ষর"),
+  slug: z
+    .string({ message: "স্লাগ লিখুন" })
+    .trim()
+    .min(3, "স্লাগ কমপক্ষে ৩ অক্ষরের হতে হবে")
+    .max(80, "স্লাগ সর্বোচ্চ ৮০ অক্ষর")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)"),
+  subtitle: z.string().trim().max(160, "সাবটাইটেল সর্বোচ্চ ১৬০ অক্ষর").optional().or(z.literal("")),
+  thumbnail_url: httpUrl,
+  price: z.coerce
+    .number({ message: "মূল্য একটি সংখ্যা হতে হবে" })
+    .int("পূর্ণসংখ্যা লিখুন")
+    .min(0, "মূল্য ঋণাত্মক হতে পারবে না")
+    .max(1_000_000, "মূল্য অনেক বড়"),
+  discount_price: z
+    .union([
+      z.coerce.number().int("পূর্ণসংখ্যা লিখুন").min(0, "ঋণাত্মক হতে পারবে না").max(1_000_000, "অনেক বড়"),
+      z.literal("").transform(() => null),
+      z.null(),
+    ])
+    .optional(),
+  intro_video_url: optionalHttpUrl.or(z.literal("")),
+  total_duration: z.string().trim().max(40, "সর্বোচ্চ ৪০ অক্ষর").optional().or(z.literal("")),
+  description: z.string().trim().max(4000, "সর্বোচ্চ ৪০০০ অক্ষর").optional().or(z.literal("")),
+  what_you_learn: z.string().trim().max(2000, "সর্বোচ্চ ২০০০ অক্ষর").optional().or(z.literal("")),
+  gift_resources: z.string().trim().max(1000, "সর্বোচ্চ ১০০০ অক্ষর").optional().or(z.literal("")),
+});
+
+type FieldDef = {
+  key: string;
+  label: string;
+  tip: string;
+  placeholder?: string;
+  required?: boolean;
+  type?: "text" | "number" | "url";
+};
+
+const TEXT_FIELDS: FieldDef[] = [
+  { key: "title", label: "শিরোনাম", tip: "সংক্ষিপ্ত ও স্পষ্ট নাম, ৩–১২০ অক্ষর।", required: true, placeholder: "উদা: পাইথন হাতেখড়ি" },
+  { key: "slug", label: "স্লাগ", tip: "শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন (-)। URL-এ ব্যবহার হবে।", required: true, placeholder: "python-hatekhori" },
+  { key: "subtitle", label: "সাবটাইটেল", tip: "এক লাইনে কোর্সের প্রতিশ্রুতি। সর্বোচ্চ ১৬০ অক্ষর।", placeholder: "শূন্য থেকে শুরু করে প্রজেক্ট পর্যন্ত" },
+  
+  { key: "price", label: "মূল্য (BDT)", tip: "পূর্ণসংখ্যা টাকায়। ফ্রি কোর্সের জন্য 0।", required: true, type: "number", placeholder: "999" },
+  { key: "discount_price", label: "ডিসকাউন্ট মূল্য", tip: "ঐচ্ছিক। থাকলে মূল দামের কম হতে হবে।", type: "number", placeholder: "699" },
+  { key: "intro_video_url", label: "ইন্ট্রো ভিডিও URL", tip: "ঐচ্ছিক। YouTube/Vimeo/MP4 লিংক (https://)।", type: "url", placeholder: "https://youtu.be/…" },
+  { key: "total_duration", label: "মোট সময়", tip: "যেভাবে শিক্ষার্থীদের দেখাতে চান। উদা: ১২ ঘণ্টা।", placeholder: "১২ ঘণ্টা" },
+];
+
+const AREA_FIELDS: FieldDef[] = [
+  { key: "description", label: "কোর্স বিবরণ", tip: "কোর্সে কী থাকবে, কারা করবেন, প্রয়োজনীয়তা — ২–৩ প্যারা।" },
+  { key: "what_you_learn", label: "কী শিখবেন", tip: "প্রতি লাইনে একটি পয়েন্ট লিখুন (৫–৮টি সেরা)।" },
+  { key: "gift_resources", label: "উপহার রিসোর্স", tip: "ঐচ্ছিক। পিডিএফ, টেমপ্লেট, চিটশিট ইত্যাদির তালিকা।" },
+];
+
 
 export const Route = createFileRoute("/_authenticated/admin/courses/")({
   component: AdminCourses,
@@ -14,10 +87,16 @@ function AdminCourses() {
   const list = useServerFn(adminListCourses);
   const cats = useServerFn(adminListCategories);
   const save = useServerFn(adminSaveCourse);
+  const del = useServerFn(adminDeleteCourse);
+  const instrs = useServerFn(adminListInstructorOptions);
   const qc = useQueryClient();
+
   const { data: courses } = useQuery({ queryKey: ["admin-courses"], queryFn: () => list() });
   const { data: categories } = useQuery({ queryKey: ["admin-categories"], queryFn: () => cats() });
+  const { data: instructors } = useQuery({ queryKey: ["admin-instructor-options"], queryFn: () => instrs() });
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<any>({
     title: "",
     slug: "",
@@ -28,12 +107,27 @@ function AdminCourses() {
     subtitle: "",
     thumbnail_url: "",
     category_id: null,
+    instructor_profile_id: null,
     description: "",
     what_you_learn: "",
     gift_resources: "",
     intro_video_url: "",
     total_duration: "",
   });
+
+  function friendlySaveError(e: any): string {
+    const raw = String(e?.message ?? e ?? "").toLowerCase();
+    if (!raw) return "সংরক্ষণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+    if (raw.includes("duplicate") || raw.includes("unique") || raw.includes("courses_slug"))
+      return "এই স্লাগ ইতিমধ্যে ব্যবহৃত হয়েছে। অন্য একটি স্লাগ দিন।";
+    if (raw.includes("unauthorized") || raw.includes("forbidden") || raw.includes("permission") || raw.includes("rls"))
+      return "এই কাজের অনুমতি নেই। আবার লগইন করে চেষ্টা করুন।";
+    if (raw.includes("network") || raw.includes("fetch") || raw.includes("timeout") || raw.includes("failed to fetch"))
+      return "নেটওয়ার্ক সমস্যা। ইন্টারনেট চেক করে আবার চেষ্টা করুন।";
+    if (raw.includes("foreign key") || raw.includes("violates"))
+      return "নির্বাচিত ক্যাটাগরি/ইন্সট্রাক্টর সঠিক নয়। আবার বেছে নিন।";
+    return "সংরক্ষণ ব্যর্থ হয়েছে। ফিল্ডগুলো পুনরায় দেখুন।";
+  }
 
   const mut = useMutation({
     mutationFn: (v: any) => save({ data: v }),
@@ -43,12 +137,95 @@ function AdminCourses() {
       setOpen(false);
       setForm({
         title: "", slug: "", price: 0, discount_price: null, level: "BEGINNER",
-        is_published: false, subtitle: "", thumbnail_url: "", category_id: null,
+        is_published: false, subtitle: "", thumbnail_url: "", category_id: null, instructor_profile_id: null,
         description: "", what_you_learn: "", gift_resources: "", intro_video_url: "", total_duration: "",
       });
     },
-    onError: (e: any) => toast.error(e?.message ?? "ব্যর্থ"),
+    onError: (e: any) => toast.error(friendlySaveError(e)),
   });
+
+  const delMut = useMutation({
+    mutationFn: (id: string) => del({ data: { id } }),
+    onSuccess: () => {
+      toast.success("কোর্স ডিলিট হয়েছে");
+      qc.invalidateQueries({ queryKey: ["admin-courses"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "ডিলিট ব্যর্থ"),
+  });
+
+  function confirmDelete(c: any) {
+    toast(`"${c.title}" ডিলিট করবেন?`, {
+      description: "পুরো কোর্স, মডিউল, পাঠ, এনরোলমেন্ট ও রিভিউ মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না।",
+      duration: 10000,
+      action: {
+        label: "হ্যাঁ, ডিলিট",
+        onClick: () => delMut.mutate(c.id),
+      },
+      cancel: { label: "বাতিল", onClick: () => {} },
+    });
+  }
+
+  async function handleThumbUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("শুধু ইমেজ ফাইল আপলোড করুন");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("ফাইলের সর্বোচ্চ সাইজ ৫MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("course-thumbnails")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("course-thumbnails")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("URL তৈরি ব্যর্থ");
+      setForm((f: any) => ({ ...f, thumbnail_url: signed.signedUrl }));
+      toast.success("থাম্বনেইল আপলোড হয়েছে");
+    } catch (e: any) {
+      toast.error(e?.message ?? "আপলোড ব্যর্থ");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+
+
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const parsed = useMemo(() => {
+    const candidate = {
+      ...form,
+      price: form.price === "" ? undefined : form.price,
+      discount_price: form.discount_price === "" || form.discount_price == null ? null : form.discount_price,
+    };
+    const errors: Record<string, string> = {};
+    const result = courseSchema.safeParse(candidate);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const first = issue.path[0];
+        if (typeof first === "string" && !errors[first]) {
+          errors[first] = issue.message || "সঠিকভাবে পূরণ করুন";
+        }
+      }
+    }
+    const p = Number(form.price);
+    const d = form.discount_price === "" || form.discount_price == null ? null : Number(form.discount_price);
+    if (d != null && !Number.isNaN(d) && !Number.isNaN(p) && d >= p) {
+      errors.discount_price = "ডিসকাউন্ট মূল্য মূল দামের কম হতে হবে";
+    }
+    return { valid: Object.keys(errors).length === 0, errors };
+  }, [form]);
+
+  const shouldShow = (key: string) => (submitAttempted || touched[key]) && !!parsed.errors[key];
 
   return (
     <div className="space-y-4">
@@ -66,6 +243,15 @@ function AdminCourses() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            setSubmitAttempted(true);
+            if (!parsed.valid) {
+              const first = Object.keys(parsed.errors)[0];
+              toast.error(parsed.errors[first] ?? "কিছু ফিল্ড ঠিক করতে হবে");
+              const el = document.querySelector<HTMLElement>(`[data-field="${first}"]`);
+              el?.focus();
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+              return;
+            }
             const wyl = (form.what_you_learn ?? "")
               .split("\n")
               .map((s: string) => s.trim())
@@ -75,45 +261,127 @@ function AdminCourses() {
               price: Number(form.price),
               discount_price: form.discount_price ? Number(form.discount_price) : null,
               category_id: form.category_id || null,
+              instructor_profile_id: form.instructor_profile_id || null,
               what_you_learn: wyl.length ? wyl : null,
             });
           }}
-          className="rounded-2xl border border-border bg-code-gray p-6 grid gap-3 md:grid-cols-2"
+          className="rounded-2xl border border-border bg-code-gray p-6 grid gap-4 md:grid-cols-2"
         >
-          {[
-            ["title", "শিরোনাম"],
-            ["slug", "স্লাগ"],
-            ["subtitle", "সাবটাইটেল"],
-            ["thumbnail_url", "থাম্বনেইল URL"],
-            ["price", "মূল্য (BDT)"],
-            ["discount_price", "ডিসকাউন্ট মূল্য"],
-            ["intro_video_url", "ইন্ট্রো ভিডিও URL"],
-            ["total_duration", "মোট সময় (উদা: ১২ ঘণ্টা)"],
-          ].map(([k, l]) => (
-            <label key={k} className="block">
-              <span className="font-mono text-xs text-terminal/60">{l}</span>
-              <input
-                value={form[k as string] ?? ""}
-                onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
-                className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"
-              />
-            </label>
-          ))}
-          {[
-            ["description", "কোর্স বিবরণ"],
-            ["what_you_learn", "কী শিখবেন (প্রতি লাইনে একটি)"],
-            ["gift_resources", "উপহার রিসোর্স"],
-          ].map(([k, l]) => (
-            <label key={k} className="block md:col-span-2">
-              <span className="font-mono text-xs text-terminal/60">{l}</span>
+          <div className="md:col-span-2 rounded-lg border border-lime/30 bg-lime/5 px-4 py-3 font-body text-xs text-terminal/80">
+            <span className="font-mono text-lime">টিপ:</span> তারকা (*) চিহ্নিত ফিল্ড আবশ্যক। কোনো ফিল্ডে সমস্যা থাকলে নিচে লাল রঙে সমস্যাটি দেখানো হবে — সেটি ঠিক করে আবার সংরক্ষণ করুন।
+          </div>
+
+
+          <div className="md:col-span-2 rounded-lg border border-border bg-ink/40 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-terminal/60">
+                থাম্বনেইল<span className="text-lime"> *</span>
+              </span>
+              <span className="font-mono text-[11px] text-terminal/50">16:9 · সর্বোচ্চ ৫MB</span>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-[160px_1fr]">
+              <div className="relative aspect-video overflow-hidden rounded-md border border-border bg-ink">
+                {form.thumbnail_url ? (
+                  <img src={form.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center font-mono text-[10px] text-terminal/40">
+                    কোনো ইমেজ নেই
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="rounded-md border border-lime/40 bg-lime/10 px-3 py-2 font-mono text-xs text-lime hover:bg-lime/20 disabled:opacity-40"
+                  >
+                    {uploading ? "আপলোড হচ্ছে…" : "ইমেজ আপলোড"}
+                  </button>
+                  {form.thumbnail_url && (
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, thumbnail_url: "" })}
+                      className="rounded-md border border-border px-3 py-2 font-mono text-xs text-terminal/70 hover:border-red-400 hover:text-red-300"
+                    >
+                      মুছুন
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleThumbUpload(file);
+                    }}
+                  />
+                </div>
+                <div className="font-mono text-[11px] text-terminal/50">অথবা সরাসরি ইমেজের লিংক দিন:</div>
+                <input
+                  type="url"
+                  data-field="thumbnail_url"
+                  placeholder="https://…/thumb.jpg"
+                  value={form.thumbnail_url ?? ""}
+                  onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, thumbnail_url: true }))}
+                  className={`w-full rounded-md border bg-ink px-3 py-2 text-terminal font-body focus:outline-none ${
+                    shouldShow("thumbnail_url") ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
+                  }`}
+                />
+                {shouldShow("thumbnail_url") && (
+                  <p className="font-mono text-[11px] text-red-300">{parsed.errors.thumbnail_url}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+
+
+          {TEXT_FIELDS.map((f) => {
+            const showErr = shouldShow(f.key);
+            return (
+              <label key={f.key} className="block">
+                <span className="font-mono text-xs text-terminal/60">
+                  {f.label}
+                  {f.required && <span className="text-lime"> *</span>}
+                </span>
+                <input
+                  type={f.type === "number" ? "number" : f.type === "url" ? "url" : "text"}
+                  inputMode={f.type === "number" ? "numeric" : undefined}
+                  data-field={f.key}
+                  placeholder={f.placeholder}
+                  value={form[f.key] ?? ""}
+                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  onBlur={() => setTouched((t) => ({ ...t, [f.key]: true }))}
+                  className={`mt-1 w-full rounded-md border bg-ink px-3 py-2 text-terminal focus:outline-none font-body ${
+                    showErr ? "border-red-400/60 focus:border-red-400" : "border-border focus:border-lime"
+                  }`}
+                />
+                {showErr ? (
+                  <span className="mt-1 block font-mono text-[11px] text-red-300">{parsed.errors[f.key]}</span>
+                ) : (
+                  <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
+                )}
+              </label>
+            );
+          })}
+
+          {AREA_FIELDS.map((f) => (
+            <label key={f.key} className="block md:col-span-2">
+              <span className="font-mono text-xs text-terminal/60">{f.label}</span>
               <textarea
                 rows={3}
-                value={form[k as string] ?? ""}
-                onChange={(e) => setForm({ ...form, [k as string]: e.target.value })}
+                value={form[f.key] ?? ""}
+                onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                 className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal focus:border-lime focus:outline-none font-body"
               />
+              <span className="mt-1 block font-mono text-[11px] text-terminal/50">{f.tip}</span>
             </label>
           ))}
+
           <label className="block">
             <span className="font-mono text-xs text-terminal/60">লেভেল</span>
             <select
@@ -125,7 +393,9 @@ function AdminCourses() {
               <option value="INTERMEDIATE">INTERMEDIATE</option>
               <option value="ADVANCED">ADVANCED</option>
             </select>
+            <span className="mt-1 block font-mono text-[11px] text-terminal/50">শিক্ষার্থীর প্রত্যাশিত পর্যায়।</span>
           </label>
+
           <label className="block">
             <span className="font-mono text-xs text-terminal/60">ক্যাটাগরি</span>
             <select
@@ -138,17 +408,53 @@ function AdminCourses() {
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+            <span className="mt-1 block font-mono text-[11px] text-terminal/50">কোর্সটি কোন বিষয়ে পড়ে সেটি বেছে নিন।</span>
           </label>
-          <label className="flex items-center gap-2 font-mono text-xs text-terminal md:col-span-2">
+
+          <label className="block md:col-span-2">
+            <span className="font-mono text-xs text-terminal/60">ইন্সট্রাক্টর</span>
+            <select
+              value={form.instructor_profile_id ?? ""}
+              onChange={(e) => setForm({ ...form, instructor_profile_id: e.target.value || null })}
+              className="mt-1 w-full rounded-md border border-border bg-ink px-3 py-2 text-terminal font-mono"
+            >
+              <option value="">— নেই —</option>
+              {(instructors ?? []).map((i: any) => (
+                <option key={i.id} value={i.id}>
+                  {i.name}
+                  {i.headline ? ` — ${i.headline}` : ""}
+                  {!i.is_published ? " (ড্রাফট)" : ""}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1 block font-mono text-[11px] text-terminal/50">
+              কোর্সের সাথে দেখাতে চাওয়া ইন্সট্রাক্টর প্রোফাইল বেছে নিন। প্রোফাইল যোগ করতে{" "}
+              <Link to="/admin/instructors" className="text-lime hover:underline">
+                ইন্সট্রাক্টর সেকশন
+              </Link>{" "}
+              দেখুন।
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2 font-mono text-xs text-terminal md:col-span-2">
             <input
               type="checkbox"
+              className="mt-0.5"
               checked={form.is_published}
               onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
             />
-            পাবলিশ করুন
+            <span>
+              পাবলিশ করুন
+              <span className="block text-terminal/50">চেক করলে কোর্সটি সাথে সাথে সবার জন্য দৃশ্যমান হবে। খসড়া রাখতে চাইলে আনচেক রাখুন।</span>
+            </span>
           </label>
-          <button className="md:col-span-2 rounded-md bg-lime px-5 py-3 font-mono text-sm font-bold text-ink">
-            সংরক্ষণ করুন
+
+          <button
+            type="submit"
+            disabled={mut.isPending}
+            className="md:col-span-2 rounded-md bg-lime px-5 py-3 font-mono text-sm font-bold text-ink disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {mut.isPending ? "সংরক্ষণ হচ্ছে…" : "সংরক্ষণ করুন"}
           </button>
         </form>
       )}
@@ -176,6 +482,14 @@ function AdminCourses() {
             >
               এডিট
             </Link>
+            <button
+              onClick={() => confirmDelete(c)}
+              disabled={delMut.isPending}
+              className="rounded-md border border-red-400/40 px-3 py-1 font-mono text-xs text-red-300 hover:border-red-400 hover:bg-red-500/10 disabled:opacity-50"
+            >
+              ডিলিট
+            </button>
+
           </div>
         ))}
       </div>
