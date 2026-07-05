@@ -103,18 +103,41 @@ function HomePage() {
   const { data } = useSuspenseQuery(coursesQO);
   const featured = data.courses.slice(0, 6);
 
-  // Cinematic: mouse spotlight on hero
+  // Cinematic: mouse spotlight on hero (rAF-throttled + spring-smoothed)
   const heroRef = useRef<HTMLElement>(null);
-  const mx = useMotionValue(50);
-  const my = useMotionValue(50);
+  const mxRaw = useMotionValue(50);
+  const myRaw = useMotionValue(50);
+  const mx = useSpring(mxRaw, { stiffness: 120, damping: 20, mass: 0.4 });
+  const my = useSpring(myRaw, { stiffness: 120, damping: 20, mass: 0.4 });
   const spotlight = useMotionTemplate`radial-gradient(600px circle at ${mx}% ${my}%, rgba(200,255,77,0.10), transparent 60%)`;
+  const rafRef = useRef<number | null>(null);
+  const pending = useRef<{ x: number; y: number } | null>(null);
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    pending.current = {
+      x: ((e.clientX - r.left) / r.width) * 100,
+      y: ((e.clientY - r.top) / r.height) * 100,
+    };
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (!pending.current) return;
+      mxRaw.set(pending.current.x);
+      myRaw.set(pending.current.y);
+      pending.current = null;
+    });
+  };
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
 
-  // Cinematic: parallax on hero content driven by page scroll
+  // Cinematic: parallax on hero content driven by page scroll (spring-smoothed)
   const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 600], [0, -80]);
-  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0.35]);
-  const terminalY = useTransform(scrollY, [0, 600], [0, -40]);
-  const terminalRotate = useTransform(scrollY, [0, 600], [0, -2]);
+  const scrollSmooth = useSpring(scrollY, { stiffness: 140, damping: 26, mass: 0.35 });
+  const heroY = useTransform(scrollSmooth, [0, 600], [0, -80]);
+  const heroOpacity = useTransform(scrollSmooth, [0, 500], [1, 0.35]);
+  const terminalY = useTransform(scrollSmooth, [0, 600], [0, -40]);
+  const terminalRotate = useTransform(scrollSmooth, [0, 600], [0, -2]);
 
   const tags = [
     { label: "পাইথন", Icon: Code2, color: "#3B82F6" },
@@ -136,11 +159,7 @@ function HomePage() {
       {/* Hero */}
       <section
         ref={heroRef}
-        onMouseMove={(e) => {
-          const r = e.currentTarget.getBoundingClientRect();
-          mx.set(((e.clientX - r.left) / r.width) * 100);
-          my.set(((e.clientY - r.top) / r.height) * 100);
-        }}
+        onMouseMove={handleMouseMove}
         className="relative overflow-hidden border-b border-border"
       >
         <div className="absolute inset-0 terminal-grid opacity-40" aria-hidden />
