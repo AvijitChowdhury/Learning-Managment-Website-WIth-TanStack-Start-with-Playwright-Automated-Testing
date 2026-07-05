@@ -461,6 +461,17 @@ function SortableLesson({
       {missingVideo && (
         <p className="font-mono text-[10px] text-amber-400">⚠ Missing video URL</p>
       )}
+      {videoInvalid && embed && !embed.ok && (
+        <p
+          role="alert"
+          className="font-mono text-[10px] leading-relaxed text-red-300"
+        >
+          ⚠ {embed.reason}
+          <span className="mt-0.5 block text-terminal/50">
+            উদাহরণ: https://youtu.be/xxxx · https://vimeo.com/123 · https://cdn.site.com/video.mp4
+          </span>
+        </p>
+      )}
 
       {videoOk && <VideoPreview url={local.content_url!} />}
 
