@@ -273,6 +273,18 @@ python tests/e2e/build_pdf_report.py
 
 The PDF ([`e2e-test-report.pdf`](/mnt/documents/e2e-test-report.pdf)) contains the run summary, environment snapshot, and per-suite pass/fail table with durations — suitable for attaching to a PR or a stakeholder update. Regenerate it any time after a run without re-executing the suite.
 
+#### Allure report preview
+
+Static snapshots of the generated Allure HTML report (from `tests/e2e/allure-report-screenshots/`):
+
+| Overview | Suites | Graphs |
+| --- | --- | --- |
+| ![Allure overview](tests/e2e/allure-report-screenshots/overview.png) | ![Allure suites](tests/e2e/allure-report-screenshots/suites.png) | ![Allure graphs](tests/e2e/allure-report-screenshots/graphs.png) |
+
+| Timeline | Behaviors | Packages | Categories |
+| --- | --- | --- | --- |
+| ![Allure timeline](tests/e2e/allure-report-screenshots/timeline.png) | ![Allure behaviors](tests/e2e/allure-report-screenshots/behaviors.png) | ![Allure packages](tests/e2e/allure-report-screenshots/packages.png) | ![Allure categories](tests/e2e/allure-report-screenshots/categories.png) |
+
 
 
 ---
