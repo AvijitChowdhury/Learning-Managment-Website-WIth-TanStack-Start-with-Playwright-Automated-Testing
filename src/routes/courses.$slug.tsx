@@ -463,8 +463,84 @@ function CourseDetail() {
           )}
         </div>
 
-        {/* right rail spacer for large screens (sticky card already in hero) */}
-        <div className="hidden lg:block" />
+        {/* Sticky enrollment / info rail beside curriculum */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 space-y-4">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-lift">
+              <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                রেজিস্ট্রেশন
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-brand">{formatBDT(price)}</span>
+                {course.discount_price && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatBDT(course.price)}
+                  </span>
+                )}
+              </div>
+              <Link
+                to="/checkout/$courseId"
+                params={{ courseId: course.id }}
+                className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+              >
+                {bn.courses.buy}
+              </Link>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {formatBnNumber(modules.length)} {bn.courses.modules} ·{" "}
+                  {formatBnNumber(totalLessons)} {bn.courses.lessons}
+                </li>
+                {totalSeconds > 0 && (
+                  <li className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {totalHours > 0 && `${formatBnNumber(totalHours)} ${bn.courses.hours} `}
+                    {totalMinutes > 0 && `${formatBnNumber(totalMinutes)} ${bn.courses.minutes}`}
+                  </li>
+                )}
+                <li>✓ আজীবন অ্যাক্সেস</li>
+                <li>✓ মোবাইল ও ল্যাপটপে</li>
+              </ul>
+            </div>
+
+            {reviewCount > 0 && (
+              <a
+                href="#reviews"
+                className="block rounded-2xl border border-border bg-card p-5 hover:border-indigo/50 transition"
+              >
+                <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                  রিভিউ
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{rating.toFixed(1)}</span>
+                  <span className="text-amber-400 text-sm">
+                    {"★".repeat(Math.round(rating))}
+                    <span className="text-muted-foreground">
+                      {"★".repeat(5 - Math.round(rating))}
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatBnNumber(reviewCount)} জন শিক্ষার্থীর মতামত
+                </p>
+              </a>
+            )}
+
+            {faq.length > 0 && (
+              <a
+                href="#faq"
+                className="block rounded-2xl border border-border bg-card p-5 hover:border-indigo/50 transition"
+              >
+                <div className="text-xs font-mono uppercase tracking-widest text-indigo-soft">
+                  সাধারণ জিজ্ঞাসা
+                </div>
+                <p className="mt-2 text-sm text-foreground">
+                  {formatBnNumber(faq.length)}টি প্রশ্নের উত্তর
+                </p>
+              </a>
+            )}
+          </div>
+        </aside>
       </section>
 
       {/* RELATED */}
