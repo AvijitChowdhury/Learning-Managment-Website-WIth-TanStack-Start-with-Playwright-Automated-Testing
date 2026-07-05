@@ -78,12 +78,23 @@ export const adminListOrders = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, amount, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+        "id, user_id, amount, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title)",
       )
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    const orders = data ?? [];
+    const userIds = Array.from(new Set(orders.map((o) => o.user_id).filter(Boolean))) as string[];
+    let profilesById: Record<string, { email: string | null; name: string | null }> = {};
+    if (userIds.length) {
+      const { data: profs, error: pErr } = await supabaseAdmin
+        .from("profiles")
+        .select("id, email, name")
+        .in("id", userIds);
+      if (pErr) throw new Error(pErr.message);
+      profilesById = Object.fromEntries((profs ?? []).map((p) => [p.id, { email: p.email, name: p.name }]));
+    }
+    return orders.map((o) => ({ ...o, profiles: o.user_id ? profilesById[o.user_id] ?? null : null }));
   });
 
 export const adminSetOrderStatus = createServerFn({ method: "POST" })
