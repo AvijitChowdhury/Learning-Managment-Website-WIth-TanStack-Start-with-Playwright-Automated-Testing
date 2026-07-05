@@ -656,13 +656,28 @@ function CourseDetail() {
                   </span>
                 )}
               </div>
-              <Link
-                to="/checkout/$courseId"
-                params={{ courseId: course.id }}
-                className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
-              >
-                {bn.courses.buy}
-              </Link>
+              {isAdmin ? (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg border border-lime/40 bg-lime/10 px-3 py-2 text-center font-mono text-[11px] text-lime">
+                    ⚡ অ্যাডমিন মোড
+                  </div>
+                  <Link
+                    to="/admin/courses/$id/edit"
+                    params={{ id: course.id }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-lime px-4 py-2.5 text-center font-mono text-sm font-bold text-ink hover:bg-lime/90"
+                  >
+                    <Settings className="h-4 w-4" /> কোর্স এডিট করুন
+                  </Link>
+                </div>
+              ) : (
+                <Link
+                  to="/checkout/$courseId"
+                  params={{ courseId: course.id }}
+                  className="mt-4 block w-full rounded-lg bg-brand-gradient px-4 py-2.5 text-center font-medium text-brand-foreground shadow-soft hover:opacity-95"
+                >
+                  {bn.courses.buy}
+                </Link>
+              )}
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
