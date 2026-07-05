@@ -298,3 +298,67 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const { data } = await supabaseAdmin.from("categories").select("id, name, slug").order("name");
     return data ?? [];
   });
+
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export const adminExportOrdersCsv = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "id, amount, discount_amount, coupon_code, currency, status, payment_method, transaction_id, sender_number, payment_ref, created_at, courses(title), profiles!orders_user_id_fkey(email, name)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(10000);
+    if (error) throw new Error(error.message);
+
+    const rows = data ?? [];
+    const header = [
+      "id",
+      "created_at",
+      "status",
+      "amount",
+      "discount",
+      "coupon",
+      "currency",
+      "course",
+      "student_name",
+      "student_email",
+      "payment_method",
+      "transaction_id",
+      "sender_number",
+      "invoice_ref",
+    ];
+    const lines = [header.join(",")];
+    for (const r of rows as any[]) {
+      lines.push(
+        [
+          r.id,
+          r.created_at,
+          r.status,
+          r.amount,
+          r.discount_amount ?? 0,
+          r.coupon_code ?? "",
+          r.currency,
+          r.courses?.title ?? "",
+          r.profiles?.name ?? "",
+          r.profiles?.email ?? "",
+          r.payment_method ?? "",
+          r.transaction_id ?? "",
+          r.sender_number ?? "",
+          r.payment_ref ?? "",
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    }
+    return { csv: lines.join("\n"), filename: `orders-${new Date().toISOString().slice(0, 10)}.csv` };
+  });
