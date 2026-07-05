@@ -242,6 +242,7 @@ function HomePage() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
             whileHover={{ y: -6 }}
+            style={{ y: terminalY, rotate: terminalRotate }}
             className="rounded-xl border border-border bg-code-gray shadow-2xl overflow-hidden"
           >
             <div className="flex items-center gap-2 border-b border-border px-4 py-3">
