@@ -12,6 +12,18 @@ import {
   AnimatedText,
   fadeUp,
 } from "@/components/motion-primitives";
+import {
+  Code2,
+  Palette,
+  Languages,
+  Sheet,
+  Search,
+  Megaphone,
+  Briefcase,
+  Sparkles,
+  Atom,
+  LayoutDashboard,
+} from "lucide-react";
 
 const coursesQO = queryOptions({
   queryKey: ["home", "courses"],
