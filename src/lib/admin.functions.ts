@@ -425,17 +425,39 @@ export const adminBulkImportLessons = createServerFn({ method: "POST" })
 
 export const adminListReviews = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d) =>
+    z
+      .object({
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+        courseId: z.string().uuid().optional().nullable(),
+      })
+      .optional()
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const page = data?.page ?? 1;
+    const pageSize = data?.pageSize ?? 20;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let q = supabaseAdmin
       .from("reviews")
-      .select("id, user_id, rating, comment, is_hidden, created_at, courses(title)")
+      .select("id, user_id, course_id, rating, comment, is_hidden, created_at, courses(title)", {
+        count: "exact",
+      })
       .order("created_at", { ascending: false })
-      .limit(200);
+      .range(from, to);
+    if (data?.courseId) q = q.eq("course_id", data.courseId);
+
+    const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    const rows = data ?? [];
-    const userIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean))) as string[];
+
+    const userIds = Array.from(
+      new Set((rows ?? []).map((r: any) => r.user_id).filter(Boolean)),
+    ) as string[];
     let profilesById: Record<string, { name: string | null; email: string | null }> = {};
     if (userIds.length) {
       const { data: profs } = await supabaseAdmin
@@ -446,7 +468,24 @@ export const adminListReviews = createServerFn({ method: "GET" })
         (profs ?? []).map((p: any) => [p.id, { name: p.name, email: p.email }]),
       );
     }
-    return rows.map((r: any) => ({ ...r, profiles: profilesById[r.user_id] ?? null }));
+
+    // Course filter options (id + title) — capped and alphabetical.
+    const { data: courses } = await supabaseAdmin
+      .from("courses")
+      .select("id, title")
+      .order("title", { ascending: true })
+      .limit(500);
+
+    return {
+      rows: (rows ?? []).map((r: any) => ({
+        ...r,
+        profiles: profilesById[r.user_id] ?? null,
+      })),
+      total: count ?? 0,
+      page,
+      pageSize,
+      courses: courses ?? [],
+    };
   });
 
 export const adminToggleReview = createServerFn({ method: "POST" })
