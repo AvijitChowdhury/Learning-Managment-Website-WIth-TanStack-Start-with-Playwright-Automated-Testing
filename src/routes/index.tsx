@@ -33,13 +33,22 @@ const coursesQO = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "শিখো — বাংলায় শেখার নতুন ঠিকানা" },
+      { title: "প্রোগ্রামিং শিখো — বাংলায় প্রোগ্রামিং, ডিজাইন ও ক্যারিয়ার কোর্স" },
       {
         name: "description",
         content:
-          "বাংলায় ভিডিও কোর্স, নিরাপদ পেমেন্ট (bKash, Nagad, Rocket, কার্ড), আজীবন অ্যাক্সেস।",
+          "বাংলায় প্রোগ্রামিং, ডিজাইন, IELTS ও ক্যারিয়ার স্কিলের ভিডিও কোর্স। bKash, Nagad, Rocket ও কার্ডে নিরাপদ পেমেন্ট, আজীবন অ্যাক্সেস ও সার্টিফিকেট।",
       },
+      { property: "og:title", content: "প্রোগ্রামিং শিখো — বাংলায় প্রোগ্রামিং, ডিজাইন ও ক্যারিয়ার কোর্স" },
+      {
+        property: "og:description",
+        content:
+          "বাংলায় প্রোগ্রামিং, ডিজাইন, IELTS ও ক্যারিয়ার স্কিলের ভিডিও কোর্স। নিরাপদ পেমেন্ট ও আজীবন অ্যাক্সেস।",
+      },
+      { property: "og:url", content: "https://lmsavi.lovable.app/" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://lmsavi.lovable.app/" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(coursesQO),
   component: HomePage,
