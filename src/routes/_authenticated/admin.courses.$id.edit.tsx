@@ -434,9 +434,10 @@ function SortableLesson({
         <input
           value={local.content_url ?? ""}
           onChange={(e) => set({ content_url: e.target.value })}
-          placeholder="Video URL (YouTube বা direct .mp4)"
+          placeholder="Video URL (YouTube, Vimeo বা direct .mp4/.webm)"
+          aria-invalid={videoInvalid || undefined}
           className={`rounded border px-2 py-1 font-mono text-xs text-terminal ${
-            local.content_url && !videoOk
+            videoInvalid
               ? "border-red-400/60 bg-red-500/5"
               : "border-border bg-code-gray"
           }`}
