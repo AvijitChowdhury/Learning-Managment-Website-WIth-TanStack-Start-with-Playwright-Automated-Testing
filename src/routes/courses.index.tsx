@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { Search, Sparkles, ArrowRight, BadgeCheck } from "lucide-react";
 import { listPublishedCourses } from "@/lib/courses.functions";
 import { bn } from "@/lib/i18n/bn";
-import { formatBDT } from "@/lib/format";
+import { formatBDT, formatBnNumber } from "@/lib/format";
+import fallbackThumb from "@/assets/course-thumbnail-fallback.jpg";
 
 const coursesQO = queryOptions({
   queryKey: ["catalog", "courses"],
