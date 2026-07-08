@@ -58,6 +58,90 @@ Live: [lmsavi.lovable.app](https://lmsavi.lovable.app)
 
 ---
 
+## Screenshots
+
+All screenshots below are captured by the automated E2E suite (`tests/e2e/run.py`) — each one is proof the corresponding feature is exercised and passing on every run.
+
+### Public site
+
+| Landing | Course catalog | Course detail |
+| --- | --- | --- |
+| ![Landing page](tests/e2e/screenshots/01_landing.png) | ![Courses list](tests/e2e/screenshots/02_courses_list.png) | ![Course detail](tests/e2e/screenshots/03_course_detail.png) |
+
+| Free demo class | Checkout — cancelled | Checkout — error |
+| --- | --- | --- |
+| ![Free class](tests/e2e/screenshots/04_free_class.png) | ![Checkout cancelled](tests/e2e/screenshots/32_checkout_cancelled.png) | ![Checkout error](tests/e2e/screenshots/05_checkout_error.png) |
+
+| `sitemap.xml` | 404 page | Auth redirect |
+| --- | --- | --- |
+| ![Sitemap](tests/e2e/screenshots/30_sitemap.png) | ![404](tests/e2e/screenshots/31_not_found.png) | ![Auth redirect](tests/e2e/screenshots/33_auth_redirect.png) |
+
+### Student dashboard
+
+| Dashboard | Profile | My orders | Support forum |
+| --- | --- | --- | --- |
+| ![Dashboard](tests/e2e/screenshots/06_dashboard.png) | ![Profile](tests/e2e/screenshots/34_profile.png) | ![Orders](tests/e2e/screenshots/35_orders.png) | ![Support](tests/e2e/screenshots/07_support.png) |
+
+### Admin CMS
+
+| Overview | KPI cards | Categories |
+| --- | --- | --- |
+| ![Admin overview](tests/e2e/screenshots/10_admin_overview.png) | ![Overview cards](tests/e2e/screenshots/17_admin_overview_cards.png) | ![Categories](tests/e2e/screenshots/13_admin_categories.png) |
+
+| Courses list | Course editor | Coupons |
+| --- | --- | --- |
+| ![Courses](tests/e2e/screenshots/15_admin_courses.png) | ![Course editor](tests/e2e/screenshots/16_admin_course_editor.png) | ![Coupons](tests/e2e/screenshots/14_admin_coupons.png) |
+
+| Orders — all | Orders — paid | Reviews |
+| --- | --- | --- |
+| ![Orders](tests/e2e/screenshots/11_admin_orders.png) | ![Orders paid](tests/e2e/screenshots/12_admin_orders_paid.png) | ![Reviews](tests/e2e/screenshots/20_admin_reviews.png) |
+
+| Instructors | Instructor created | Users |
+| --- | --- | --- |
+| ![Instructors](tests/e2e/screenshots/18_admin_instructors.png) | ![Instructor created](tests/e2e/screenshots/19_admin_instructor_created.png) | ![Users](tests/e2e/screenshots/21_admin_users.png) |
+
+### Responsive
+
+| Mobile (390px) | Tablet (820px) | Desktop (1440px) |
+| --- | --- | --- |
+| ![Mobile landing](tests/e2e/screenshots/36_mobile_landing.png) | ![Tablet courses](tests/e2e/screenshots/37_tablet_courses.png) | ![Desktop landing](tests/e2e/screenshots/38_desktop_landing.png) |
+
+---
+
+## Feature verification
+
+Every feature below has a matching Playwright test in `tests/e2e/tests/` and a screenshot above. The full suite ships **54 tests / 54 passing** on the last recorded run — see `tests/e2e/allure-report/` for the interactive report and [`/mnt/documents/e2e-test-report.pdf`](/mnt/documents/e2e-test-report.pdf) for the PDF summary.
+
+| Area | Feature | Verified by | Evidence |
+| --- | --- | --- | --- |
+| Public | Landing page renders, primary CTAs present | `test_public.landing` | `01_landing.png` |
+| Public | Course catalog lists published courses | `test_public.courses_list` | `02_courses_list.png` |
+| Public | Course detail (hero, curriculum, reviews) | `test_public.course_detail` | `03_course_detail.png` |
+| Public | Free demo class lead capture | `test_public.free_class` | `04_free_class.png` |
+| Public | Checkout error / cancelled screens | `test_public.checkout_error`, `test_navigation.checkout_cancelled` | `05_checkout_error.png`, `32_checkout_cancelled.png` |
+| SEO | `sitemap.xml`, `robots.txt`, meta / OG / canonical, `noindex` on gated routes | `test_seo.*` | `30_sitemap.png` |
+| Navigation | 404 handling, browser back/forward, auth redirect | `test_navigation.*`, `test_auth_flow.*` | `31_not_found.png`, `33_auth_redirect.png` |
+| Student | Dashboard — enrolled courses & recent orders | `test_dashboard.dashboard` | `06_dashboard.png` |
+| Student | Profile page | `test_auth_flow.profile` | `34_profile.png` |
+| Student | My orders list | `test_auth_flow.orders` | `35_orders.png` |
+| Student | Support forum threads | `test_dashboard.support` | `07_support.png` |
+| Admin | Overview KPIs + workflow queue | `test_admin.overview`, `test_admin.overview_cards` | `10_admin_overview.png`, `17_admin_overview_cards.png` |
+| Admin | Categories — create / rename / delete | `test_admin.categories` | `13_admin_categories.png` |
+| Admin | Courses list + full CRUD | `test_admin.courses` | `15_admin_courses.png` |
+| Admin | Course editor (modules + lessons) | `test_admin.course_editor` | `16_admin_course_editor.png` |
+| Admin | Coupons — create / toggle / delete, date + usage limits | `test_admin.coupons` | `14_admin_coupons.png` |
+| Admin | Orders — All / Incomplete / Paid tabs, CSV export | `test_admin.orders`, `test_admin.orders_paid` | `11_admin_orders.png`, `12_admin_orders_paid.png` |
+| Admin | Reviews moderation | `test_admin.reviews` | `20_admin_reviews.png` |
+| Admin | Instructors create + list | `test_admin.instructors`, `test_admin.instructor_created` | `18_admin_instructors.png`, `19_admin_instructor_created.png` |
+| Admin | Users search + role filter | `test_admin.users` | `21_admin_users.png` |
+| Quality | Accessibility (alt text, button names, `html[lang]`, focus order) | `test_a11y.*` | Allure |
+| Quality | Performance budgets, no 5xx, console hygiene, DOM budget | `test_performance.*` | Allure |
+| i18n | Bengali content + `৳` currency across pages | `test_i18n.*` | Allure |
+| Responsive | Mobile / tablet / desktop overflow audit | `test_responsive.*` | `36–38_*.png` |
+
+---
+
+
 ## Tech Stack
 
 | Layer | Technology |
