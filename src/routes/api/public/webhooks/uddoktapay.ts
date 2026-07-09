@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyAndFulfill } from "@/lib/payments.functions";
 
-export const Route = createFileRoute("/api/public/webhooks/uddoktapay")({
+export const Route = createFileRoute("/api/public/webhooks/uddoktapay")(({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         const key = request.headers.get("rt-uddoktapay-api-key");
         if (!key || key !== (process.env.UDDOKTAPAY_API_KEY ?? "")) {
           return new Response("unauthorized", { status: 401 });
@@ -28,4 +28,4 @@ export const Route = createFileRoute("/api/public/webhooks/uddoktapay")({
       },
     },
   },
-});
+}) as any);
