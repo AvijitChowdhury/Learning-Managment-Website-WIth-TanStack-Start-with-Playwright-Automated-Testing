@@ -1,0 +1,45 @@
+flowchart TB
+    Dev([Developer / CI]) -->|python3 run.py| Runner[run.py<br/>orchestrator]
+
+    Runner --> Auth[fixtures.py<br/>restore_supabase_session]
+    Auth -->|E2E_EMAIL + E2E_PASSWORD| Login[/POST /auth<br/>Supabase grant_type=password/]
+    Login -->|access_token| Storage[(localStorage<br/>sb-*-auth-token)]
+
+    Runner --> Browser[Playwright Chromium<br/>1280x1800 headless]
+    Storage --> Browser
+
+    Browser --> App[(Vite dev server<br/>http://localhost:8080)]
+
+    Runner --> Suites{Suite Registry<br/>ALL_TESTS}
+    Suites --> S1[test_public]
+    Suites --> S2[test_dashboard]
+    Suites --> S3[test_admin]
+    Suites --> S4[test_seo]
+    Suites --> S5[test_navigation]
+    Suites --> S6[test_a11y]
+    Suites --> S7[test_performance]
+    Suites --> S8[test_i18n]
+    Suites --> S9[test_auth_flow]
+    Suites --> S10[test_responsive]
+
+    S1 & S2 & S3 & S4 & S5 & S6 & S7 & S8 & S9 & S10 -->|goto + assert| Browser
+
+    Browser -->|page.screenshot| Shots[/screenshots/<br/>*.png/]
+
+    Runner -->|per test| Emit[Allure emitter<br/>_write_allure_result]
+    Emit --> Results[/allure-results/<br/>*-result.json<br/>*-attachment.png/]
+    Runner --> Env[environment.properties<br/>categories.json<br/>executor.json]
+    Env --> Results
+
+    Results -->|allure generate| Report[allure-report/<br/>HTML dashboard]
+    Results -->|build_pdf_report.py| PDF[/mnt/documents/<br/>e2e-test-report.pdf]
+
+    Report --> View([QA / Stakeholders])
+    PDF --> View
+
+    classDef store fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef proc fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef out fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class Storage,Results,Shots,PDF store
+    class Runner,Auth,Emit,Browser proc
+    class Report,View out
