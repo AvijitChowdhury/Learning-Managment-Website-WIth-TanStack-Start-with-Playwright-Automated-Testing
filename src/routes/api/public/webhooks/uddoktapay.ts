@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyAndFulfill } from "@/lib/payments.functions";
 
-export const Route = createFileRoute("/api/public/webhooks/uddoktapay")({
+export const Route = createFileRoute("/api/public/webhooks/uddoktapay")(({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
@@ -28,4 +28,4 @@ export const Route = createFileRoute("/api/public/webhooks/uddoktapay")({
       },
     },
   },
-});
+}) as any);
