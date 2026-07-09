@@ -1,0 +1,61 @@
+{
+  "uuid": "61d94bc9-b075-4981-8ddc-db0f3bc686da",
+  "historyId": "nav.checkout_cancelled",
+  "name": "nav.checkout_cancelled",
+  "fullName": "tests.e2e.nav.checkout_cancelled",
+  "description": "renders",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620246252,
+  "stop": 1783620246476,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "checkout_cancelled"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "nav.checkout_cancelled screenshot",
+      "source": "bdcdd46d-d172-4baa-af47-5ab8aa1f544c-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "uuid": "e61a4933-b6f0-4f89-a5bb-7d7702e925ec",
+  "historyId": "nav.history",
+  "name": "nav.history",
+  "fullName": "tests.e2e.nav.history",
+  "description": "back/forward ok",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620244835,
+  "stop": 1783620246251,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "history"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

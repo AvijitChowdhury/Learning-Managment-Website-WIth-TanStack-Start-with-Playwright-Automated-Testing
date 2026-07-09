@@ -1,0 +1,61 @@
+{
+  "uuid": "fca2856e-daf3-4b29-8556-3143bd0f69d9",
+  "historyId": "admin.course_editor",
+  "name": "admin.course_editor",
+  "fullName": "tests.e2e.admin.course_editor",
+  "description": "1 inputs",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620215586,
+  "stop": 1783620220088,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "course_editor"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.course_editor screenshot",
+      "source": "917de123-fefb-4bbf-9661-b90066d10dd2-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

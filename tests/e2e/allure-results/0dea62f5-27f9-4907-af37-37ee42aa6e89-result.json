@@ -1,0 +1,55 @@
+{
+  "uuid": "0dea62f5-27f9-4907-af37-37ee42aa6e89",
+  "historyId": "perf.dom_size",
+  "name": "perf.dom_size",
+  "fullName": "tests.e2e.perf.dom_size",
+  "description": "326 nodes",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620257659,
+  "stop": 1783620259565,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "perf"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Performance"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Performance"
+    },
+    {
+      "name": "story",
+      "value": "dom_size"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

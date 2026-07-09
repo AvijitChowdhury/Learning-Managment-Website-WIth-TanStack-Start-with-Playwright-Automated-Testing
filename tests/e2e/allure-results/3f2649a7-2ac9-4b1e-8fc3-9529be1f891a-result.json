@@ -1,0 +1,55 @@
+{
+  "uuid": "3f2649a7-2ac9-4b1e-8fc3-9529be1f891a",
+  "historyId": "admin.reviews_page",
+  "name": "admin.reviews_page",
+  "fullName": "tests.e2e.admin.reviews_page",
+  "description": "reviews page renders",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620230838,
+  "stop": 1783620235082,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "reviews_page"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

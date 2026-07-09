@@ -1,0 +1,55 @@
+{
+  "uuid": "e5ded7b8-9c16-4ce6-817a-bb8561374804",
+  "historyId": "seo.canonical_link",
+  "name": "seo.canonical_link",
+  "fullName": "tests.e2e.seo.canonical_link",
+  "description": "https://lmsavi.lovable.app/",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620241905,
+  "stop": 1783620242546,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "seo"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "story",
+      "value": "canonical_link"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

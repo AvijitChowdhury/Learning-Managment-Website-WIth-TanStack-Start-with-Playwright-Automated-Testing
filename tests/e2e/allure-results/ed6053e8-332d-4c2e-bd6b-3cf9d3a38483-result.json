@@ -1,0 +1,61 @@
+{
+  "uuid": "ed6053e8-332d-4c2e-bd6b-3cf9d3a38483",
+  "historyId": "dashboard.overview",
+  "name": "dashboard.overview",
+  "fullName": "tests.e2e.dashboard.overview",
+  "description": "http://localhost:8080/admin",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620186966,
+  "stop": 1783620190150,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "dashboard"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "subSuite",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "epic",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "feature",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "story",
+      "value": "overview"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "dashboard.overview screenshot",
+      "source": "1e8d8ea1-e8d8-4583-9d9e-b89e182abd44-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}
