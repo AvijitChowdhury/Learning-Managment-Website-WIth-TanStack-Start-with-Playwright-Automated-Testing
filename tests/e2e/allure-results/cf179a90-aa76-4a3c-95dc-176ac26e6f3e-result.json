@@ -1,0 +1,61 @@
+{
+  "uuid": "cf179a90-aa76-4a3c-95dc-176ac26e6f3e",
+  "historyId": "auth.dashboard_profile",
+  "name": "auth.dashboard_profile",
+  "fullName": "tests.e2e.auth.dashboard_profile",
+  "description": "3 inputs",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620264523,
+  "stop": 1783620266426,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "auth"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Authentication"
+    },
+    {
+      "name": "subSuite",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "epic",
+      "value": "Authentication"
+    },
+    {
+      "name": "feature",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "story",
+      "value": "dashboard_profile"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "auth.dashboard_profile screenshot",
+      "source": "9c432ede-8cf3-4a28-bc8b-d3915458f77b-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "uuid": "17aee9be-b4e3-4924-8b2b-1ee39ff41586",
+  "historyId": "perf.landing_time",
+  "name": "perf.landing_time",
+  "fullName": "tests.e2e.perf.landing_time",
+  "description": "601 ms",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620252661,
+  "stop": 1783620253263,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "perf"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Performance"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Performance"
+    },
+    {
+      "name": "story",
+      "value": "landing_time"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

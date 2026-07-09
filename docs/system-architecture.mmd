@@ -1,0 +1,55 @@
+flowchart TB
+    subgraph Client["Browser (React 19 SPA + SSR hydrate)"]
+        UI[TanStack Router<br/>UI components<br/>shadcn/ui + Tailwind v4]
+        Query[TanStack Query<br/>cache + suspense]
+        SBClient[Supabase JS client<br/>publishable key + user JWT]
+    end
+
+    subgraph Edge["Cloudflare Worker (TanStack Start SSR)"]
+        Root[__root.tsx<br/>SSR shell + head]
+        Routes[File-based routes<br/>src/routes/**]
+        Guard[_authenticated gate<br/>redirect to /auth]
+        ServerFn[createServerFn<br/>typed RPC + Zod]
+        API[/api/public/*<br/>webhooks + public APIs/]
+        Mw[requireSupabaseAuth<br/>bearer middleware]
+    end
+
+    subgraph Data["Supabase (managed Postgres + Auth + Storage)"]
+        Auth[Auth<br/>email + Google OAuth]
+        DB[(PostgreSQL<br/>RLS policies<br/>SECURITY DEFINER<br/>has_role, handle_new_user)]
+        Buckets[(Storage buckets<br/>course-videos<br/>course-thumbnails)]
+    end
+
+    subgraph External["External services"]
+        Uddokta[UddoktaPay<br/>hosted checkout]
+        AI[Lovable AI Gateway<br/>optional inference]
+    end
+
+    UI --> Query
+    Query -->|useServerFn| ServerFn
+    UI -->|Link / navigate| Routes
+    SBClient -->|sign-in / session| Auth
+    SBClient -->|realtime + reads| DB
+
+    Root --> Routes
+    Routes --> Guard
+    Guard --> ServerFn
+    ServerFn --> Mw
+    Mw -->|verify JWT| Auth
+    ServerFn -->|RLS as user| DB
+    ServerFn -->|signed URLs| Buckets
+    ServerFn -->|createCharge| Uddokta
+
+    Uddokta -->|webhook| API
+    API -->|service role<br/>verified payload| DB
+    API -.->|escalate access| AI
+
+    classDef client fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef edge fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef data fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef ext fill:#fce7f3,stroke:#db2777,color:#831843
+
+    class UI,Query,SBClient client
+    class Root,Routes,Guard,ServerFn,API,Mw edge
+    class Auth,DB,Buckets data
+    class Uddokta,AI ext

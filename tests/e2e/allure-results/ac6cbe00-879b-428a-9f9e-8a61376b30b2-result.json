@@ -1,0 +1,55 @@
+{
+  "uuid": "ac6cbe00-879b-428a-9f9e-8a61376b30b2",
+  "historyId": "seo.landing_meta",
+  "name": "seo.landing_meta",
+  "fullName": "tests.e2e.seo.landing_meta",
+  "description": "title='প্রোগ্রামিং শিখো — বাংলায় প্রোগ্রামিং, '",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620240458,
+  "stop": 1783620241143,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "seo"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "story",
+      "value": "landing_meta"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}
