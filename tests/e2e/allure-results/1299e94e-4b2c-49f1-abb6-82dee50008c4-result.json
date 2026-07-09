@@ -1,0 +1,55 @@
+{
+  "uuid": "1299e94e-4b2c-49f1-abb6-82dee50008c4",
+  "historyId": "perf.no_console_errors",
+  "name": "perf.no_console_errors",
+  "fullName": "tests.e2e.perf.no_console_errors",
+  "description": "0 filtered errors",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619976486,
+  "stop": 1783619978381,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "perf"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Performance"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Performance"
+    },
+    {
+      "name": "story",
+      "value": "no_console_errors"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

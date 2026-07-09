@@ -1,0 +1,55 @@
+{
+  "uuid": "115010fd-5134-4a68-9874-8a5fbb53c576",
+  "historyId": "perf.courses_time",
+  "name": "perf.courses_time",
+  "fullName": "tests.e2e.perf.courses_time",
+  "description": "597 ms",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619973975,
+  "stop": 1783619974573,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "perf"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Performance"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Performance"
+    },
+    {
+      "name": "story",
+      "value": "courses_time"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

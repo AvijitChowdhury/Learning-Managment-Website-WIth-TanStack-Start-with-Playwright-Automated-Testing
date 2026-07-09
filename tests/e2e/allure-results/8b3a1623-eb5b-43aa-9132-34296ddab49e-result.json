@@ -1,0 +1,55 @@
+{
+  "uuid": "8b3a1623-eb5b-43aa-9132-34296ddab49e",
+  "historyId": "nav.root_outlet",
+  "name": "nav.root_outlet",
+  "fullName": "tests.e2e.nav.root_outlet",
+  "description": "38055 chars",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619964071,
+  "stop": 1783619964761,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "root_outlet"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

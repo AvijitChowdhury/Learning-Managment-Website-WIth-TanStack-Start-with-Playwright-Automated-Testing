@@ -1,0 +1,61 @@
+{
+  "uuid": "22bf28f4-fe7f-4745-a968-399c03758469",
+  "historyId": "responsive.desktop_landing",
+  "name": "responsive.desktop_landing",
+  "fullName": "tests.e2e.responsive.desktop_landing",
+  "description": "h1='বাংলায়\\xa0শিখুন,\\xa0নিজের\\xa0গতিতে।\\nএখন শিখছি \\xa0'",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619998781,
+  "stop": 1783619999791,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "responsive"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "story",
+      "value": "desktop_landing"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "responsive.desktop_landing screenshot",
+      "source": "ca0ceca7-73be-409e-b9c9-23f5d26d440d-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

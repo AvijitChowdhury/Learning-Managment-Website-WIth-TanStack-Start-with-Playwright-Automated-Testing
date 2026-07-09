@@ -1,0 +1,55 @@
+{
+  "uuid": "d8340b86-bde2-476f-8873-4a98676c100f",
+  "historyId": "seo.landing_og_tags",
+  "name": "seo.landing_og_tags",
+  "fullName": "tests.e2e.seo.landing_og_tags",
+  "description": "og ok",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619961189,
+  "stop": 1783619961847,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "seo"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "story",
+      "value": "landing_og_tags"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

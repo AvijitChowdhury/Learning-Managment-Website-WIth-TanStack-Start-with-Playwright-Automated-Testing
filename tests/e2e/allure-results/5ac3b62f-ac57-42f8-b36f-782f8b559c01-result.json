@@ -1,0 +1,64 @@
+{
+  "uuid": "5ac3b62f-ac57-42f8-b36f-782f8b559c01",
+  "historyId": "dashboard.overview",
+  "name": "dashboard.overview",
+  "fullName": "tests.e2e.dashboard.overview",
+  "description": "AssertionError: unexpected redirect to /auth — session missing?",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: unexpected redirect to /auth — session missing?",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_dashboard.py\", line 11, in dashboard\n    assert \"/auth\" not in page.url, \"unexpected redirect to /auth — session missing?\"\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: unexpected redirect to /auth — session missing?\n"
+  },
+  "stage": "finished",
+  "start": 1783619827714,
+  "stop": 1783619828651,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "dashboard"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "subSuite",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "epic",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "feature",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "story",
+      "value": "overview"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "dashboard.overview screenshot",
+      "source": "f088a5e3-900f-4951-a48f-da91ca798dbe-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

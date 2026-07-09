@@ -1,0 +1,55 @@
+{
+  "uuid": "fcf52fba-bf85-47ca-b8d0-9f1201714ef9",
+  "historyId": "nav.hash_route",
+  "name": "nav.hash_route",
+  "fullName": "tests.e2e.nav.hash_route",
+  "description": "hash accepted",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619966821,
+  "stop": 1783619967475,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "hash_route"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

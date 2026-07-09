@@ -1,0 +1,61 @@
+{
+  "uuid": "bf27bc76-0757-4bf7-8c4a-1068f2bef970",
+  "historyId": "nav.not_found",
+  "name": "nav.not_found",
+  "fullName": "tests.e2e.nav.not_found",
+  "description": "renders",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619963880,
+  "stop": 1783619964070,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "nav"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Routing & Navigation"
+    },
+    {
+      "name": "story",
+      "value": "not_found"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "nav.not_found screenshot",
+      "source": "0d92fa0b-7240-4842-b8c8-3e769856b24f-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

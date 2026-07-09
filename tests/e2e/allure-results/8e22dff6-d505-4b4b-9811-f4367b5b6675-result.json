@@ -1,0 +1,55 @@
+{
+  "uuid": "8e22dff6-d505-4b4b-9811-f4367b5b6675",
+  "historyId": "seo.unique_titles",
+  "name": "seo.unique_titles",
+  "fullName": "tests.e2e.seo.unique_titles",
+  "description": "'প্রোগ্রামিং শিখো — ব' vs 'সব কোর্স — প্রোগ্রাম'",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619962587,
+  "stop": 1783619963878,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "seo"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "story",
+      "value": "unique_titles"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

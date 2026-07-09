@@ -1,0 +1,61 @@
+{
+  "uuid": "b6cf510b-1625-48e0-b755-7b84b257cf94",
+  "historyId": "responsive.tablet_courses",
+  "name": "responsive.tablet_courses",
+  "fullName": "tests.e2e.responsive.tablet_courses",
+  "description": "no overflow",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619996696,
+  "stop": 1783619998779,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "responsive"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "story",
+      "value": "tablet_courses"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "responsive.tablet_courses screenshot",
+      "source": "08f1392c-84d5-471a-a973-dbf4ff225809-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

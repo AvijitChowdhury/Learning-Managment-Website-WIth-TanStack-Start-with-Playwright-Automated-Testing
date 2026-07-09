@@ -1,0 +1,64 @@
+{
+  "uuid": "f409be2a-5ffa-4c89-bd01-f900a6f7e6f8",
+  "historyId": "admin.course_editor",
+  "name": "admin.course_editor",
+  "fullName": "tests.e2e.admin.course_editor",
+  "description": "AssertionError: no course to edit",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: no course to edit",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 92, in admin_course_editor\n    assert edit, \"no course to edit\"\n           ^^^^\nAssertionError: no course to edit\n"
+  },
+  "stage": "finished",
+  "start": 1783619899389,
+  "stop": 1783619914516,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "course_editor"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.course_editor screenshot",
+      "source": "224f0288-3c03-411e-bd29-0201179d66c9-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

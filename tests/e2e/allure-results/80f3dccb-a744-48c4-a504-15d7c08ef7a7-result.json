@@ -1,0 +1,55 @@
+{
+  "uuid": "80f3dccb-a744-48c4-a504-15d7c08ef7a7",
+  "historyId": "a11y.keyboard_focus",
+  "name": "a11y.keyboard_focus",
+  "fullName": "tests.e2e.a11y.keyboard_focus",
+  "description": "tab→A",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619972551,
+  "stop": 1783619973305,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "a11y"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Accessibility"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Accessibility"
+    },
+    {
+      "name": "story",
+      "value": "keyboard_focus"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

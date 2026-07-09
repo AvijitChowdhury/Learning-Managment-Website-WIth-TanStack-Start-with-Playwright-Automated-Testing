@@ -1,0 +1,64 @@
+{
+  "uuid": "8b94ae53-8520-486a-836b-8b61ae99b15a",
+  "historyId": "dashboard.support",
+  "name": "dashboard.support",
+  "fullName": "tests.e2e.dashboard.support",
+  "description": "AssertionError: ",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: ",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_dashboard.py\", line 19, in support_forum\n    assert \"/auth\" not in page.url\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "stage": "finished",
+  "start": 1783619828655,
+  "stop": 1783619829571,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "dashboard"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "subSuite",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "epic",
+      "value": "Student Dashboard"
+    },
+    {
+      "name": "feature",
+      "value": "Learning Surface"
+    },
+    {
+      "name": "story",
+      "value": "support"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "dashboard.support screenshot",
+      "source": "0983c79a-17ab-48bc-be06-f7bb90d62db9-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "uuid": "52eee881-bcbd-4b9a-8e74-af25cffdde83",
+  "historyId": "seo.auth_noindex",
+  "name": "seo.auth_noindex",
+  "fullName": "tests.e2e.seo.auth_noindex",
+  "description": "noindex ok",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619962483,
+  "stop": 1783619962586,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "seo"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "SEO & Metadata"
+    },
+    {
+      "name": "story",
+      "value": "auth_noindex"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

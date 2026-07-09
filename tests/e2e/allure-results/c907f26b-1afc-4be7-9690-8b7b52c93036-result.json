@@ -1,0 +1,61 @@
+{
+  "uuid": "c907f26b-1afc-4be7-9690-8b7b52c93036",
+  "historyId": "public.landing",
+  "name": "public.landing",
+  "fullName": "tests.e2e.public.landing",
+  "description": "hero + 3 CTAs present",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619813838,
+  "stop": 1783619817993,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "story",
+      "value": "landing"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "public.landing screenshot",
+      "source": "17e6b9a9-95f6-403e-8c1d-5a59ad68d196-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

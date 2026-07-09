@@ -1,0 +1,61 @@
+{
+  "uuid": "8f5c6b79-513e-4569-af28-776f3f3919ac",
+  "historyId": "responsive.mobile_landing",
+  "name": "responsive.mobile_landing",
+  "fullName": "tests.e2e.responsive.mobile_landing",
+  "description": "390<=390",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619994779,
+  "stop": 1783619996694,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "responsive"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Responsive Layout"
+    },
+    {
+      "name": "story",
+      "value": "mobile_landing"
+    },
+    {
+      "name": "severity",
+      "value": "minor"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "responsive.mobile_landing screenshot",
+      "source": "07a2d65b-d46a-40e2-b815-036f63b52ace-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

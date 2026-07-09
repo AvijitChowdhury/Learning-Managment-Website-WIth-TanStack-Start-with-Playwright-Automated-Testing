@@ -1,0 +1,55 @@
+{
+  "uuid": "060cb8ba-8232-4d13-af8c-2c8b6171bd67",
+  "historyId": "i18n.auth_bn",
+  "name": "i18n.auth_bn",
+  "fullName": "tests.e2e.i18n.auth_bn",
+  "description": "auth localized",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619984657,
+  "stop": 1783619984763,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "i18n"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "story",
+      "value": "auth_bn"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

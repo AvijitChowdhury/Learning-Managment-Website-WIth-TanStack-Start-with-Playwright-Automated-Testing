@@ -1,0 +1,58 @@
+{
+  "uuid": "bc2420ce-8bfd-415e-8feb-4e1cde6f39fe",
+  "historyId": "admin.users_search",
+  "name": "admin.users_search",
+  "fullName": "tests.e2e.admin.users_search",
+  "description": "TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"table\") to be visible\n",
+  "status": "failed",
+  "statusDetails": {
+    "message": "TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"table\") to be visible\n",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 181, in admin_users_search_and_filter\n    await page.wait_for_selector(\"table\", timeout=10000)\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/async_api/_generated.py\", line 8181, in wait_for_selector\n    await self._impl_obj.wait_for_selector(\n        selector=selector, timeout=timeout, state=state, strict=strict\n    )\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_page.py\", line 422, in wait_for_selector\n    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 369, in wait_for_selector\n    await self._channel.send(\n        \"waitForSelector\", self._timeout, locals_to_params(locals())\n    )\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"table\") to be visible\n\n"
+  },
+  "stage": "finished",
+  "start": 1783619948663,
+  "stop": 1783619959476,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "users_search"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

@@ -1,0 +1,64 @@
+{
+  "uuid": "6e2f9180-04e0-4b7b-b1a8-cc2b05ef762a",
+  "historyId": "admin.instructors_page",
+  "name": "admin.instructors_page",
+  "fullName": "tests.e2e.admin.instructors_page",
+  "description": "AssertionError: instructors heading missing",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: instructors heading missing",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 129, in admin_instructors_page\n    await page.get_by_text(\"ইন্সট্রাক্টর\", exact=False).count() > 0\nAssertionError: instructors heading missing\n"
+  },
+  "stage": "finished",
+  "start": 1783619914518,
+  "stop": 1783619915463,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "instructors_page"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.instructors_page screenshot",
+      "source": "a6a3af4c-197e-49d0-9f20-9d41a344295a-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "uuid": "3d95da8d-6237-4eb5-abf0-4bde3f752a49",
+  "historyId": "admin.overview_cards",
+  "name": "admin.overview_cards",
+  "fullName": "tests.e2e.admin.overview_cards",
+  "description": "AssertionError: missing dashboard sections: ['সামগ্রিক', 'আজকের কার্যক্রম', 'রিভিনিউ', 'টপ কোর্স']",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: missing dashboard sections: ['সামগ্রিক', 'আজকের কার্যক্রম', 'রিভিনিউ', 'টপ কোর্স']",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 116, in admin_overview_cards\n    assert not missing, f\"missing dashboard sections: {missing}\"\n           ^^^^^^^^^^^\nAssertionError: missing dashboard sections: ['সামগ্রিক', 'আজকের কার্যক্রম', 'রিভিনিউ', 'টপ কোর্স']\n"
+  },
+  "stage": "finished",
+  "start": 1783619830962,
+  "stop": 1783619831877,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "overview_cards"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.overview_cards screenshot",
+      "source": "1adae940-6f52-4e10-829a-1193503a78e2-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

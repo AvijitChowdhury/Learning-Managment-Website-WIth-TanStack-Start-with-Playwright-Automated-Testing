@@ -1,0 +1,64 @@
+{
+  "uuid": "b713d1c0-75cc-403f-896a-9b59d43a8e6c",
+  "historyId": "auth.dashboard_orders",
+  "name": "auth.dashboard_orders",
+  "fullName": "tests.e2e.auth.dashboard_orders",
+  "description": "AssertionError: ",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: ",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_auth_flow.py\", line 33, in dashboard_orders_page\n    assert \"/auth\" not in page.url\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "stage": "finished",
+  "start": 1783619993903,
+  "stop": 1783619994777,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "auth"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Authentication"
+    },
+    {
+      "name": "subSuite",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "epic",
+      "value": "Authentication"
+    },
+    {
+      "name": "feature",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "story",
+      "value": "dashboard_orders"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "auth.dashboard_orders screenshot",
+      "source": "73dce07f-42c2-45cd-a520-8b29ef32b503-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

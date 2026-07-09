@@ -1,0 +1,64 @@
+{
+  "uuid": "57f8f127-9373-4b94-bcfb-c0ce7f7693ad",
+  "historyId": "admin.overview",
+  "name": "admin.overview",
+  "fullName": "tests.e2e.admin.overview",
+  "description": "AssertionError: not admin?",
+  "status": "failed",
+  "statusDetails": {
+    "message": "AssertionError: not admin?",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 12, in admin_overview\n    assert \"/auth\" not in page.url, \"not admin?\"\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: not admin?\n"
+  },
+  "stage": "finished",
+  "start": 1783619829574,
+  "stop": 1783619830958,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "overview"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.overview screenshot",
+      "source": "1c1eec8a-353f-49dd-bc89-5f8c655e3f77-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "uuid": "cf69f0ba-aae5-409d-bb5e-822496664cfc",
+  "historyId": "auth.redirect_when_signed_in",
+  "name": "auth.redirect_when_signed_in",
+  "fullName": "tests.e2e.auth.redirect_when_signed_in",
+  "description": "TimeoutError: Timeout 4000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/admin**\" until 'load'\n============================================================",
+  "status": "failed",
+  "statusDetails": {
+    "message": "TimeoutError: Timeout 4000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/admin**\" until 'load'\n============================================================",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/tests/test_auth_flow.py\", line 11, in logged_in_redirects_from_auth\n    await page.wait_for_url(\"**/dashboard**\", timeout=4000)\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/async_api/_generated.py\", line 9133, in wait_for_url\n    await self._impl_obj.wait_for_url(\n        url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout\n    )\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_page.py\", line 583, in wait_for_url\n    return await self._main_frame.wait_for_url(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 263, in wait_for_url\n    async with self.expect_navigation(\n               ~~~~~~~~~~~~~~~~~~~~~~^\n        url=url, waitUntil=waitUntil, timeout=timeout\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ):\n    ^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_event_context_manager.py\", line 33, in __aexit__\n    await self._future\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 239, in continuation\n    event = await waiter.result()\n            ^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Timeout 4000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/dashboard**\" until 'load'\n  navigated to \"http://localhost:8080/auth\"\n============================================================\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_auth_flow.py\", line 13, in logged_in_redirects_from_auth\n    await page.wait_for_url(\"**/admin**\", timeout=4000)\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/async_api/_generated.py\", line 9133, in wait_for_url\n    await self._impl_obj.wait_for_url(\n        url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout\n    )\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_page.py\", line 583, in wait_for_url\n    return await self._main_frame.wait_for_url(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 263, in wait_for_url\n    async with self.expect_navigation(\n               ~~~~~~~~~~~~~~~~~~~~~~^\n        url=url, waitUntil=waitUntil, timeout=timeout\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ):\n    ^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_event_context_manager.py\", line 33, in __aexit__\n    await self._future\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 239, in continuation\n    event = await waiter.result()\n            ^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Timeout 4000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/admin**\" until 'load'\n============================================================\n"
+  },
+  "stage": "finished",
+  "start": 1783619984764,
+  "stop": 1783619992857,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "auth"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Authentication"
+    },
+    {
+      "name": "subSuite",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "epic",
+      "value": "Authentication"
+    },
+    {
+      "name": "feature",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "story",
+      "value": "redirect_when_signed_in"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "auth.redirect_when_signed_in screenshot",
+      "source": "39ee056c-7732-4ddb-ae3a-31f228c9840e-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

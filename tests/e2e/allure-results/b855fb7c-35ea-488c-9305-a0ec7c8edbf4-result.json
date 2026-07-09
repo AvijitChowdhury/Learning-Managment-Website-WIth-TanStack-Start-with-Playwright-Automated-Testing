@@ -1,0 +1,61 @@
+{
+  "uuid": "b855fb7c-35ea-488c-9305-a0ec7c8edbf4",
+  "historyId": "public.checkout_error",
+  "name": "public.checkout_error",
+  "fullName": "tests.e2e.public.checkout_error",
+  "description": "renders",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619827466,
+  "stop": 1783619827713,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "story",
+      "value": "checkout_error"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "public.checkout_error screenshot",
+      "source": "ab5a3c7c-d0cb-4e3a-8bbd-e912a5529ea0-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

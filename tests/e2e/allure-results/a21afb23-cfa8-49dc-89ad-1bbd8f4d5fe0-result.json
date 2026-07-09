@@ -1,0 +1,58 @@
+{
+  "uuid": "a21afb23-cfa8-49dc-89ad-1bbd8f4d5fe0",
+  "historyId": "admin.orders_tabs",
+  "name": "admin.orders_tabs",
+  "fullName": "tests.e2e.admin.orders_tabs",
+  "description": "TimeoutError: Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('সব')\").first\n",
+  "status": "failed",
+  "statusDetails": {
+    "message": "TimeoutError: Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('সব')\").first\n",
+    "trace": "Traceback (most recent call last):\n  File \"/dev-server/tests/e2e/run.py\", line 210, in main\n    detail = await fn(ctx.page) or \"\"\n             ^^^^^^^^^^^^^^^^^^\n  File \"/dev-server/tests/e2e/tests/test_admin.py\", line 31, in admin_orders_tabs\n    await page.locator(f\"button:has-text('{label}')\").first.click(timeout=3000)\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/async_api/_generated.py\", line 15527, in click\n    await self._impl_obj.click(\n    ...<9 lines>...\n    )\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_frame.py\", line 549, in click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/nix/store/lvdrkmk2shc2qwqd9gl77bph8v3pb214-sandbox-python-env/lib/python3.13/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('সব')\").first\n\n"
+  },
+  "stage": "finished",
+  "start": 1783619832790,
+  "stop": 1783619836510,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "orders_tabs"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

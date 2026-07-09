@@ -1,0 +1,55 @@
+{
+  "uuid": "6bbe6df6-3425-4240-977a-111c8394be22",
+  "historyId": "a11y.viewport_meta",
+  "name": "a11y.viewport_meta",
+  "fullName": "tests.e2e.a11y.viewport_meta",
+  "description": "width=device-width, initial-scale=1",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783619971437,
+  "stop": 1783619972549,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "a11y"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Quality"
+    },
+    {
+      "name": "subSuite",
+      "value": "Accessibility"
+    },
+    {
+      "name": "epic",
+      "value": "Quality"
+    },
+    {
+      "name": "feature",
+      "value": "Accessibility"
+    },
+    {
+      "name": "story",
+      "value": "viewport_meta"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}
