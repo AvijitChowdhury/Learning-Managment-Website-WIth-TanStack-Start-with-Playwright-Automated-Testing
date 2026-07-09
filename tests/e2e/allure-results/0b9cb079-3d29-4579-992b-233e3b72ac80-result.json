@@ -1,0 +1,55 @@
+{
+  "uuid": "0b9cb079-3d29-4579-992b-233e3b72ac80",
+  "historyId": "i18n.landing_bn",
+  "name": "i18n.landing_bn",
+  "fullName": "tests.e2e.i18n.landing_bn",
+  "description": "bn ok",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620259566,
+  "stop": 1783620260234,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "i18n"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Localization (bn-BD)"
+    },
+    {
+      "name": "story",
+      "value": "landing_bn"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

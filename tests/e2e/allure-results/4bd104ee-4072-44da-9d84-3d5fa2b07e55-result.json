@@ -1,0 +1,61 @@
+{
+  "uuid": "4bd104ee-4072-44da-9d84-3d5fa2b07e55",
+  "historyId": "public.course_detail",
+  "name": "public.course_detail",
+  "fullName": "tests.e2e.public.course_detail",
+  "description": "len=57560",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620182938,
+  "stop": 1783620186451,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "public"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Public Site"
+    },
+    {
+      "name": "subSuite",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "epic",
+      "value": "Public Site"
+    },
+    {
+      "name": "feature",
+      "value": "Marketing & Catalog"
+    },
+    {
+      "name": "story",
+      "value": "course_detail"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "public.course_detail screenshot",
+      "source": "0e293194-62a6-4220-8f38-282af382f275-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

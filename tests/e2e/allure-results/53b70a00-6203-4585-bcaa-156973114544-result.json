@@ -1,0 +1,55 @@
+{
+  "uuid": "53b70a00-6203-4585-bcaa-156973114544",
+  "historyId": "admin.users_search",
+  "name": "admin.users_search",
+  "fullName": "tests.e2e.admin.users_search",
+  "description": "rows: all=2, admin=1, filtered=1",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620235083,
+  "stop": 1783620239803,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "users_search"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": []
+}

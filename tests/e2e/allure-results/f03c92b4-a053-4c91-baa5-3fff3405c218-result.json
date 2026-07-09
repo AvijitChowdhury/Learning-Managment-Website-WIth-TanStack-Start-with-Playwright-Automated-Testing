@@ -1,0 +1,61 @@
+{
+  "uuid": "f03c92b4-a053-4c91-baa5-3fff3405c218",
+  "historyId": "auth.redirect_when_signed_in",
+  "name": "auth.redirect_when_signed_in",
+  "fullName": "tests.e2e.auth.redirect_when_signed_in",
+  "description": "http://localhost:8080/dashboard",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620264140,
+  "stop": 1783620264522,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "auth"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Authentication"
+    },
+    {
+      "name": "subSuite",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "epic",
+      "value": "Authentication"
+    },
+    {
+      "name": "feature",
+      "value": "Session & Redirects"
+    },
+    {
+      "name": "story",
+      "value": "redirect_when_signed_in"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "auth.redirect_when_signed_in screenshot",
+      "source": "60b795d9-c3ea-4285-af94-49c4e082788b-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

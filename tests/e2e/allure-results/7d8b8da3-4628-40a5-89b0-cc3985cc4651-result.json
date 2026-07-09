@@ -1,0 +1,61 @@
+{
+  "uuid": "7d8b8da3-4628-40a5-89b0-cc3985cc4651",
+  "historyId": "admin.instructor_create",
+  "name": "admin.instructor_create",
+  "fullName": "tests.e2e.admin.instructor_create",
+  "description": "created E2E Instructor d2fb",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "start": 1783620222777,
+  "stop": 1783620230836,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "admin"
+    },
+    {
+      "name": "parentSuite",
+      "value": "Admin Console"
+    },
+    {
+      "name": "subSuite",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "epic",
+      "value": "Admin Console"
+    },
+    {
+      "name": "feature",
+      "value": "Content & Ops"
+    },
+    {
+      "name": "story",
+      "value": "instructor_create"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "framework",
+      "value": "playwright-python"
+    },
+    {
+      "name": "language",
+      "value": "python"
+    },
+    {
+      "name": "host",
+      "value": "sandbox"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "admin.instructor_create screenshot",
+      "source": "39026c08-8113-4d40-abb9-6c07af55d088-attachment.png",
+      "type": "image/png"
+    }
+  ]
+}

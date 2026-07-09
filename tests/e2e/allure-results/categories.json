@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Auth / session failures",
+    "matchedStatuses": [
+      "failed"
+    ],
+    "messageRegex": ".*(/auth|Unauthorized|session|token).*"
+  },
+  {
+    "name": "Missing UI selectors",
+    "matchedStatuses": [
+      "failed"
+    ],
+    "messageRegex": ".*(Timeout|not visible|selector|wait_for).*"
+  },
+  {
+    "name": "Assertion failures",
+    "matchedStatuses": [
+      "failed"
+    ],
+    "messageRegex": ".*AssertionError.*"
+  },
+  {
+    "name": "Network / 5xx",
+    "matchedStatuses": [
+      "failed",
+      "broken"
+    ],
+    "messageRegex": ".*(5\\d\\d|ECONN|fetch).*"
+  }
+]
