@@ -160,33 +160,64 @@ Every feature below has a matching Playwright test in `tests/e2e/tests/` and a s
 
 ## Architecture
 
-```text
-┌────────────────────┐   HTTPS    ┌──────────────────────────────┐
-│   Browser (React)  │ ─────────► │  Edge Worker (TanStack SSR)  │
-│  TanStack Router   │            │  ─ Route handlers            │
-│  TanStack Query    │  RPC       │  ─ createServerFn endpoints  │
-└─────────┬──────────┘            │  ─ Webhook / public API      │
-          │                       └──────────────┬───────────────┘
-          │ Bearer token                         │ RLS (user JWT)
-          │                                      │ or service role
-          ▼                                      ▼
-┌────────────────────┐            ┌──────────────────────────────┐
-│    Auth (JWT)      │            │        PostgreSQL            │
-│  email + Google    │            │  RLS policies + SECURITY     │
-│  session storage   │            │  DEFINER role helpers        │
-└────────────────────┘            └──────────────┬───────────────┘
-                                                 │
-                                                 ▼
-                                       ┌──────────────────┐
-                                       │   UddoktaPay     │
-                                       │  hosted checkout │
-                                       └──────────────────┘
+### System diagram
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser (React 19 SPA + SSR hydrate)"]
+        UI[TanStack Router<br/>UI components<br/>shadcn/ui + Tailwind v4]
+        Query[TanStack Query<br/>cache + suspense]
+        SBClient[Supabase JS client<br/>publishable key + user JWT]
+    end
+
+    subgraph Edge["Cloudflare Worker (TanStack Start SSR)"]
+        Root[__root.tsx<br/>SSR shell + head]
+        Routes[File-based routes<br/>src/routes/**]
+        Guard[_authenticated gate<br/>redirect to /auth]
+        ServerFn[createServerFn<br/>typed RPC + Zod]
+        API[/api/public/*<br/>webhooks + public APIs/]
+        Mw[requireSupabaseAuth<br/>bearer middleware]
+    end
+
+    subgraph Data["Managed Postgres + Auth + Storage"]
+        Auth[Auth<br/>email + Google OAuth]
+        DB[(PostgreSQL<br/>RLS policies<br/>SECURITY DEFINER helpers)]
+        Buckets[(Storage buckets<br/>course-videos<br/>course-thumbnails)]
+    end
+
+    subgraph External["External services"]
+        Uddokta[UddoktaPay<br/>hosted checkout]
+    end
+
+    UI --> Query
+    Query -->|useServerFn| ServerFn
+    UI -->|Link / navigate| Routes
+    SBClient -->|sign-in / session| Auth
+    SBClient -->|realtime + reads| DB
+
+    Root --> Routes
+    Routes --> Guard
+    Guard --> ServerFn
+    ServerFn --> Mw
+    Mw -->|verify JWT| Auth
+    ServerFn -->|RLS as user| DB
+    ServerFn -->|signed URLs| Buckets
+    ServerFn -->|createCharge| Uddokta
+
+    Uddokta -->|webhook| API
+    API -->|service role<br/>verified payload| DB
 ```
+
+Source: [`docs/system-architecture.mmd`](./docs/system-architecture.mmd)
+
+### Principles
 
 - **SSR-first**: initial HTML is rendered on the edge for SEO and time-to-content; TanStack Query hydrates on the client.
 - **Typed RPC**: client → server calls go through `createServerFn` with Zod input validators — no hand-rolled `fetch('/api/...')`.
-- **Two Postgres clients**: an anon-key client that enforces RLS as the signed-in user, and a service-role client used only inside role-checked admin server functions.
-- **Auth-gated subtree**: everything under `_authenticated/` is behind a route-level layout guard; the admin CMS additionally re-checks role server-side on every mutation.
+- **Two Postgres clients**: an anon-key client that enforces RLS as the signed-in user, and a service-role client used only inside role-checked admin server functions and verified webhooks.
+- **Auth-gated subtree**: everything under `_authenticated/` is behind a route-level layout guard; the admin CMS additionally re-checks role server-side on every mutation via `has_role(auth.uid(), 'ADMIN')`.
+- **Public API prefix**: webhooks and third-party callbacks live under `/api/public/*` and verify signatures/secrets in the handler.
+
 
 ---
 
